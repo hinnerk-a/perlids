@@ -76,7 +76,6 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-require("IDS.pm");
 use CGI;
 use CGI::IDS;
 use CGI::Pretty;
@@ -113,7 +112,7 @@ eval {
 	print $query->h2('Put your vectors here:');
 	print $query->start_form(
 							-method=>'post',
-							-action=>'example.pl');
+							-action=>'demo.pl');
 	print $query->textarea(	-name => 'vector',
 							-rows => 10,
 							-columns => 50,
@@ -135,7 +134,7 @@ eval {
 					(	
 						'IMPACT: </td><td>'.			$attack->{impact},
 						'TIME: </td><td>'.				$attack->{time_ms} . 'ms',
-						'FILTERS MATCHED: </td><td>'.	join("<br />", map {"$_: " . $ids->get_rule_description(rule_id => $_)} @{$attack->{matched_filters}}),
+						'FILTERS MATCHED: </td><td>'.	join("<br />", map {"#$_: " . $ids->get_rule_description(rule_id => $_)} @{$attack->{matched_filters}}),
 						'TAGS MATCHED: </td><td>'.		join(",", @{$attack->{matched_tags}}),
 						# 'KEY: </td><td>'.				$query->escapeHTML($query->escapeHTML($attack->{key})),
 						# 'KEY CONV: </td><td>'.			$query->escapeHTML($query->escapeHTML($attack->{key_converted})),
@@ -190,12 +189,12 @@ print $query->end_html;
 
 sub check_request {
 	my %args = @_;
-	return undef unless ($args{request} && $args{filter_file});
+	return undef unless ($args{request});
 	my $request = $args{request};
 
 	# create global ids object on first call
 	if (!defined($ids)) {
-		$ids = new IDS(
+		$ids = new CGI::IDS(
 			filters_file	=> $args{filter_file},
 			whitelist_file	=> $args{whitelist_file},
 			scan_keys		=> 0,

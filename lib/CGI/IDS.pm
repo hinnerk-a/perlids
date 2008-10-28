@@ -204,11 +204,13 @@ sub new {
 	my ($package, %args) = @_;
 
 	# defaults
-	$args{scan_keys}		= $args{scan_keys} ? 1 : 0;
+	$args{scan_keys}			= $args{scan_keys} ? 1 : 0;
+	my $filters_file_default	= __FILE__;
+	$filters_file_default 		=~ s/IDS.pm/IDS.xml/;
 
 	# self member variables
 	my $self = {
-		filters_file		=> $args{filters_file} || 'lib/CGI/IDS.xml',
+		filters_file		=> $args{filters_file} || $filters_file_default,
 		whitelist_file		=> $args{whitelist_file},
 		scan_keys			=> $args{scan_keys},
 		impact				=> 0,
