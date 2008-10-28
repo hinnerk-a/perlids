@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1135
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1140
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,7 +41,7 @@ PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
 =head1 VERSION
 
-Version 1.00 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1135
+Version 1.00 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1140
 
 =cut
 
@@ -1104,7 +1104,7 @@ sub _convert_from_control_chars {
 	$value = urldecode(preg_replace(qr/(?:%E(?:2|3)%8(?:0|1)%(?:A|8|9)\w|%EF%BB%BF|%EF%BF%BD)|(?:&#(?:65|8)\d{3};?)/i, '',
 			$urlencoded));
 
-	$value = preg_replace(qr/(?:&[#x]*(200|820|[jlmnrwz]+)\w?;?)/i, '',
+	$value = preg_replace(qr/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i, '',
 			$value);
 
 	$value = preg_replace(qr/(?:&#(?:65|8)\d{3};?)|(?:&#(?:56|7)3\d{2};?)|(?:&#x(?:fe|20)\w{2};?)|(?:&#x(?:d[c-f])\w{2};?)/i, '',
@@ -1298,6 +1298,7 @@ sub _convert_concatenations {
 		qr/(?:\s*new\s+\w+\s*[+"])/,
 		qr/(?:(?:^|\s+)(?:do|else)\s+)/, 
 		qr/(?:\{\s*new\s+\w+\s*\})/,
+		qr/(?:(this|self).)/,
 	);
 
 	# strip out concatenations
