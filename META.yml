@@ -10,12 +10,12 @@ build_requires:
   Encode::Unicode: 2.05
   FindBin: 0
   HTML::Entities: 0
-  JSON::XS: 2.2222
+  JSON::XS: 2.2
   MIME::Base64: 0
   Test::More: 0
   Time::HiRes: 0
   XML::Simple: 0
-generated_by: Module::Build version 0.2808
+generated_by: Module::Build version 0.3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
@@ -24,4 +24,4 @@ provides:
     file: lib/CGI/IDS.pm
     version: 1.00
 resources:
-  license: http://opensource.org/licenses/artistic-license.php
+  license: http://opensource.org/licenses/lgpl-license.php

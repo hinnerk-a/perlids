@@ -3,7 +3,7 @@ PerlIDS (CGI::IDS)
 Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
 Version 1.00 - based on and tested against the filter tests of 
-PHPIDS http://php-ids.org rev. 1135
+PHPIDS http://php-ids.org rev. 1142
 
 INSTALLATION
 
@@ -52,4 +52,3 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with PerlIDS.  If not, see <http://www.gnu.org/licenses/>.
-

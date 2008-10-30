@@ -31,14 +31,19 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 2;
 use FindBin qw($Bin);
+use Test::More;
 
 #------------------------- Tests -----------------------------------------------
 # Ensure a recent version of Test::Pod
 my $min_tp = 1.22;
 eval "use Test::Pod $min_tp";
-plan skip_all => "Test::Pod $min_tp required for testing POD" if $@;
 
-pod_file_ok( "$Bin/../lib/CGI/IDS.pm", "lib/CGI/IDS.pm is a valid POD file" );
-pod_file_ok( "$Bin/../examples/demo.pl", "examples/demo.pl is a valid POD file" );
+if ($@) {
+	plan skip_all => "Test::Pod $min_tp required for testing POD";
+}
+else {
+	plan tests => 2;
+	pod_file_ok( "$Bin/../lib/CGI/IDS.pm", "lib/CGI/IDS.pm is a valid POD file" );
+	pod_file_ok( "$Bin/../examples/demo.pl", "examples/demo.pl is a valid POD file" );
+}
