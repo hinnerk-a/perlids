@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1140
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1142
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,7 +41,7 @@ PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
 =head1 VERSION
 
-Version 1.00 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1140
+Version 1.00 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1142
 
 =cut
 
@@ -1337,6 +1337,9 @@ sub _convert_from_proprietary_encodings {
 
 	# Xajax error reportings
 	$value = preg_replace(qr/<!\[CDATA\[(\W+)\]\]>/im, '$1', $value);
+
+	# strip false alert triggering apostrophes
+	$value = preg_replace(qr/(\w)\"(s)/m, '$1$2', $value);
 
 	# strip quotes within typical search patterns
 	$value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);

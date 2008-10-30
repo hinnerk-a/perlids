@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1140
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1142
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -811,6 +811,7 @@ my %testForFalseAlerts = (
    17 => '{HMAC-SHA1}{48de2031}{8AgxrQ==}',
    18 => 'exchange of experience in (project) management and leadership • always interested in starting up business and teams • people with a passion • new and lost international contacts',
    19 => 'Highly mobile (Project locations: Europe & Asia), You are a team player',
+   20 => '"Philippine Women\'s University (Honours)"',
 );
 
 #------------------------- Tests -----------------------------------------------
