@@ -170,7 +170,7 @@
     </filter>
     <filter>
         <id>17</id>
-        <rule><![CDATA[([^*:\s\w,.\/?+-]\s*)?(?<![a-z]\s)(?<![a-z\/_@>-])(\s*return\s*)?(?:hash|name|href|source|pathname|close|constructor|port|protocol|replace|back|forward|document|window|self|parent|frames|_?content|date|cookie|innerhtml|innertext|outerhtml|print|moveby|resizeto|createstylesheet)(?(1)[^\w%"]|(?:\s*[^@\/\s\w%",.+-]))]]></rule>
+        <rule><![CDATA[([^*:\s\w,.\/?+-]\s*)?(?<![a-z]\s)(?<![a-z\/_@>-])(\s*return\s*)?(?:hash|name|href|source|pathname|close|constructor|port|protocol|replace|back|forward|document|window|self|parent|frames|_?content|date|cookie|innerhtml|innertext|csstext|outerhtml|print|moveby|resizeto|createstylesheet)(?(1)[^\w%"]|(?:\s*[^@\/\s\w%",.+-]))]]></rule>
         <description>Detects JavaScript object properties and methods</description>
         <tags>
             <tag>xss</tag>
@@ -358,13 +358,13 @@
     </filter>
     <filter>
         <id>34</id>
-        <rule><![CDATA[(?:\<\/\w+\s\w+)]]></rule>
-        <description>Detects attributes in closing tags (IE-only issue)</description>
+        <rule><![CDATA[(?:\<\/\w+\s\w+)|(?:@(?:cc_on|set)[\s@,"=])]]></rule>
+        <description>Detects attributes in closing tags and conditional compilation tokens</description>
         <tags>
             <tag>xss</tag>
             <tag>csrf</tag>
         </tags>
-        <impact>3</impact>
+        <impact>4</impact>
     </filter>
     <filter>
         <id>35</id>

@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1142
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1147
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -32,7 +32,7 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 58;
+use Test::More tests => 59;
 
 use CGI::IDS;
 
@@ -303,14 +303,21 @@ my %testConcatenatedXSSList2 = (
 );
 
 my %testXMLPredicateXSSList = (
-        1 => "a=<r>loca<v>e</v>tion.has<v>va</v>h.subs<v>l</v>tr(1)</r>
+        0 => "a=<r>loca<v>e</v>tion.has<v>va</v>h.subs<v>l</v>tr(1)</r>
                         {b=0e0[a.v.text()
                         ]}http='';b(b(http+a.text()
                         ))
                         ",
-        2 => 'y=<a>alert</a>;content[y](123)',
-        3 => "s1=<s>evalalerta(1)a</s>; s2=<s></s>+''; s3=s1+s2; e1=/s1/?s3[0]:s1; e2=/s1/?s3[1]:s1; e3=/s1/?s3[2]:s1; e4=/s1/?s3[3]:s1; e=/s1/?.0[e1+e2+e3+e4]:s1; a1=/s1/?s3[4]:s1; a2=/s1/?s3[5]:s1; a3=/s1/?s3[6]:s1; a4=/s1/?s3[7]:s1; a5=/s1/?s3[8]:s1; a6=/s1/?s3[10]:s1; a7=/s1/?s3[11]:s1; a8=/s1/?s3[12]:s1; a=a1+a2+a3+a4+a5+a6+a7+a8;e(a)",
-        4 => "location=<text>javascr{new Array}ipt:aler{new Array}t(1)</text>",
+        1 => 'y=<a>alert</a>;content[y](123)',
+        2 => "s1=<s>evalalerta(1)a</s>; s2=<s></s>+''; s3=s1+s2; e1=/s1/?s3[0]:s1; e2=/s1/?s3[1]:s1; e3=/s1/?s3[2]:s1; e4=/s1/?s3[3]:s1; e=/s1/?.0[e1+e2+e3+e4]:s1; a1=/s1/?s3[4]:s1; a2=/s1/?s3[5]:s1; a3=/s1/?s3[6]:s1; a4=/s1/?s3[7]:s1; a5=/s1/?s3[8]:s1; a6=/s1/?s3[10]:s1; a7=/s1/?s3[11]:s1; a8=/s1/?s3[12]:s1; a=a1+a2+a3+a4+a5+a6+a7+a8;e(a)",
+        3 => "location=<text>javascr{new Array}ipt:aler{new Array}t(1)</text>",
+);
+
+my %testConditionalCompilationXSSList = (
+	1 => "/*\@cc_on\@set\@x=88\@set\@ss=83\@set\@s=83\@*/\@cc_on alert(String.fromCharCode(\@x,\@s,\@ss))",
+	2 => "\@cc_on eval(\@cc_on name)",
+	3 => "\@if(\@_mc680x0)\@else alert(\@_jscript_version)\@end",
+	4 => "\"\"\@cc_on,x=\@cc_on'something'\@cc_on",
 );
 
 my %testXSSList = (
@@ -358,6 +365,7 @@ my %testXSSList = (
 	25  => "onabort=onblur=onchange=onclick=ondblclick=onerror=onfocus=onkeydown=onkeypress=onkeyup=onload=onmousedown=onmousemove=onmouseout=onmouseover=onmouseup=onreset=onresize=onselect=onsubmit=onunload=alert",
 	26  => 'onload=1&&alert',
 	27  => "document.createStyleSheet('http://businessinfo.co.uk/labs/xss/xss.css')",
+	28  => 'document.body.style.cssText=name',
 );
 
 my %testSelfContainedXSSList = (
@@ -890,63 +898,64 @@ isa_ok ($ids, 'CGI::IDS');
 print testmessage("test get_attacks()");
 ok (!$ids->get_attacks(), 'No attack found if no detection run');
 $ids->detect_attacks(request => \%testSimpleScan);
-isa_ok ($ids->get_attacks(),										'ARRAY',	'The return value of get_attacks()');
+isa_ok ($ids->get_attacks(),												'ARRAY',	'The return value of get_attacks()');
 
 my $attacks = $ids->get_attacks();
 ok ($attacks, 'Attacks returned in get_attacks()');
-is ($attacks->[0]->{impact},										8,			'Correct impact returned by get_attacks()');
+is ($attacks->[0]->{impact},												8,			'Correct impact returned by get_attacks()');
 
 # test key scanning
 print testmessage("test key scanning");
-is ($ids->detect_attacks(request => \%testScanKeys),				16,			"testScanKeys default (off)");
+is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys default (off)");
 
 $ids->set_scan_keys(scan_keys => 1);
-is ($ids->detect_attacks(request => \%testScanKeys),				32,			"testScanKeys set on");
+is ($ids->detect_attacks(request => \%testScanKeys),						32,			"testScanKeys set on");
 
 $ids->set_scan_keys(scan_keys => 0);
-is ($ids->detect_attacks(request => \%testScanKeys),				16,			"testScanKeys set off");
+is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys set off");
 
 $ids->set_scan_keys(scan_keys => 1);
 $ids->set_scan_keys();
-is ($ids->detect_attacks(request => \%testScanKeys),				16,			"testScanKeys set from 1 to default (off)");
+is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys set from 1 to default (off)");
 
 # test whitelist
 print testmessage("test whitelist");
-is ($ids->detect_attacks(request => \%testWhitelistScan),			8,			"testWhitelistScan");
-is ($ids->detect_attacks(request => \%testWhitelistScan2),			8,			"testWhitelistScan2");
-is ($ids->detect_attacks(request => \%testWhitelistScan3),			8,			"testWhitelistScan3");
-is ($ids->detect_attacks(request => \%testWhitelistScan4),			16,			"testWhitelistScan4");
-is ($ids->detect_attacks(request => \%testWhitelistScan5),			8,			"testWhitelistScan5");
-is ($ids->detect_attacks(request => \%testWhitelistSkip),			0,			"testWhitelistSkip");
-is ($ids->detect_attacks(request => \%testWhitelistSkip2),			8,			"testWhitelistSkip2");
-is ($ids->detect_attacks(request => \%testWhitelistSkip3),			8,			"testWhitelistSkip3");
+is ($ids->detect_attacks(request => \%testWhitelistScan),					8,			"testWhitelistScan");
+is ($ids->detect_attacks(request => \%testWhitelistScan2),					8,			"testWhitelistScan2");
+is ($ids->detect_attacks(request => \%testWhitelistScan3),					8,			"testWhitelistScan3");
+is ($ids->detect_attacks(request => \%testWhitelistScan4),					16,			"testWhitelistScan4");
+is ($ids->detect_attacks(request => \%testWhitelistScan5),					8,			"testWhitelistScan5");
+is ($ids->detect_attacks(request => \%testWhitelistSkip),					0,			"testWhitelistSkip");
+is ($ids->detect_attacks(request => \%testWhitelistSkip2),					8,			"testWhitelistSkip2");
+is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhitelistSkip3");
 
 # test converters and filters
 print testmessage("test converters and filters");
-is ($ids->detect_attacks(request => \%testAttributeBreakerList),	43,			"testAttributeBreakerList");
-is ($ids->detect_attacks(request => \%testCommentList),				9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),		1070,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),	743,		"testConcatenatedXSSList2");
-is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),		100,		"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),					466,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),	486,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),				480,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),				571,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),				554,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),				768,		"testSQLIList4");
-is ($ids->detect_attacks(request => \%testSQLIList5),				844,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),				172,		"testSQLIList6");
-is ($ids->detect_attacks(request => \%testDTList),					121,		"testDTList");
-is ($ids->detect_attacks(request => \%testURIList),					122,		"testURIList");
-is ($ids->detect_attacks(request => \%testRFEList),					488,		"testRFEList");
-is ($ids->detect_attacks(request => \%testUTF7List),				73,			"testUTF7List");
-is ($ids->detect_attacks(request => \%testBase64CCConverter),		95,			"testBase64CCConverter");
-is ($ids->detect_attacks(request => \%testDecimalCCConverter),		67,			"testDecimalCCConverter");
-is ($ids->detect_attacks(request => \%testOctalCCConverter),		48,			"testOctalCCConverter");
-is ($ids->detect_attacks(request => \%testHexCCConverter),			120,		"testHexCCConverter");
-is ($ids->detect_attacks(request => \%testLDAPInjectionList),		20,			"testLDAPInjectionList");
-is ($ids->detect_attacks(request => \%testJSONScanning),			32,			"testJSONScanning");
-is ($ids->detect_attacks(request => \%testForFalseAlerts),			0,			"testForFalseAlerts");
+is ($ids->detect_attacks(request => \%testAttributeBreakerList),			43,			"testAttributeBreakerList");
+is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1070,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			743,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				100,		"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	63,			"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),							471,		"testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			486,		"testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testSQLIList),						480,		"testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),						571,		"testSQLIList2");
+is ($ids->detect_attacks(request => \%testSQLIList3),						554,		"testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList4),						768,		"testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList5),						844,		"testSQLIList5");
+is ($ids->detect_attacks(request => \%testSQLIList6),						172,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testDTList),							121,		"testDTList");
+is ($ids->detect_attacks(request => \%testURIList),							122,		"testURIList");
+is ($ids->detect_attacks(request => \%testRFEList),							488,		"testRFEList");
+is ($ids->detect_attacks(request => \%testUTF7List),						73,			"testUTF7List");
+is ($ids->detect_attacks(request => \%testBase64CCConverter),				95,			"testBase64CCConverter");
+is ($ids->detect_attacks(request => \%testDecimalCCConverter),				67,			"testDecimalCCConverter");
+is ($ids->detect_attacks(request => \%testOctalCCConverter),				48,			"testOctalCCConverter");
+is ($ids->detect_attacks(request => \%testHexCCConverter),					120,		"testHexCCConverter");
+is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
+is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
+is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");
 
 sub testmessage {
 	(my $message) = @_;
