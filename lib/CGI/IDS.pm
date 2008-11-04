@@ -37,15 +37,15 @@ package CGI::IDS;
 
 =head1 NAME
 
-PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
+CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
 =head1 VERSION
 
-Version 1.00 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1147
+Version 1.01 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1147
 
 =cut
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 =head1 SYNOPSIS
 
@@ -56,6 +56,8 @@ our $VERSION = '1.00';
 
  # instantiate the IDS object;
  # do not scan keys, values only; don't scan PHP code injection filters (IDs 58,59,60);
+ # All arguments are optional, 'my $ids = new CGI::IDS();' is also working correctly, 
+ # loading the entire shipped filter set and not scanning the keys.
  my $ids = new CGI::IDS(
      filters_file    => '/home/hinnerk/ids/default_filter.xml',
      whitelist_file  => '/home/hinnerk/ids/param_whitelist.xml',
@@ -82,11 +84,16 @@ our $VERSION = '1.00';
  $impact = $ids->detect_attacks( request => $query->Vars );
 
  # NOTES
- # You might want to build your own 'user impact counter' that increases during multiple bad requests by one single user.
+ # You might want to build your own 'session impact counter' that increases during multiple suspicious requests by one single user, session or IP address.
 
 =head1 DESCRIPTION
 
 PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<https://php-ids.org/>.
+
+The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
+
+Each matching regular expression has it's own impact value that increases the tested string's total attack impact.
+Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
 
 =head1 METHODS
 
@@ -167,6 +174,9 @@ my $harmless = qr/[^\w\s\/@!?,]+/ms;
 #   Constructor
 # DESCRIPTION
 #   Creates an IDS object.
+#   The filter set and whitelist will stay loaded during the lifetime of the object.
+#   You may call detect_attacks() multiple times, the attack array ( get_attacks() ) 
+#   will be emptied at the start of each run of detect_attacks().
 # INPUT
 #   HASH
 #     filters_file    STRING  The path to the filters XML file (defaults to shipped IDS.xml)
@@ -187,7 +197,12 @@ my $harmless = qr/[^\w\s\/@!?,]+/ms;
 
 =head2 new()
 
-Constructor. Can optionally take a hash of settings, at least I<filters_file> is required.
+Constructor. Can optionally take a hash of settings. If I<filters_file> is not given, 
+the shipped filter set will be loaded, I<scan_keys> defaults to 0.
+
+The filter set and whitelist will stay loaded during the lifetime of the object.
+You may call C<detect_attacks()> multiple times, the attack array (C<get_attacks()>) 
+will be emptied at the start of each run of C<detect_attacks()>.
 
 For example, the following is a valid constructor:
 
@@ -197,6 +212,8 @@ For example, the following is a valid constructor:
      scan_keys       => 0,
      disable_filters => [58,59,60],
  );
+
+The Constructor dies (croaks) if no filter rule could be loaded.
 
 =cut
 
@@ -237,7 +254,8 @@ sub new {
 # NAME
 #   detect_attacks
 # DESCRIPTION
-#   Parses a hashref (e.g. $in_ref) for detection of possible attacks
+#   Parses a hashref (e.g. $in_ref) for detection of possible attacks.
+#   The attack array is emptied at the start of each run.
 # INPUT
 #   +request	hashref to be parsed
 # OUTPUT
@@ -249,7 +267,8 @@ sub new {
 =head2 detect_attacks()
 
  DESCRIPTION
-   Parses a hashref (e.g. $in_ref) for detection of possible attacks
+   Parses a hashref (e.g. $in_ref) for detection of possible attacks.
+   The attack array is emptied at the start of each run.
  INPUT
    +request   hashref to be parsed
  OUTPUT
@@ -480,7 +499,8 @@ sub set_scan_keys {
 # NAME
 #   get_attacks
 # DESCRIPTION
-#   Get an key/value/impact array of all detected attacks
+#   Get an key/value/impact array of all detected attacks.
+#   The array is emptied at the start of each run of detect_attacks().
 # INPUT
 #   none
 # OUTPUT
@@ -498,7 +518,8 @@ sub set_scan_keys {
 =head2 get_attacks()
 
  DESCRIPTION
-   Get an key/value/impact array of all detected attacks
+   Get an key/value/impact array of all detected attacks.
+   The array is emptied at the start of each run of C<detect_attacks()>.
  INPUT
    none
  OUTPUT
@@ -2077,7 +2098,7 @@ Not filtered due to matching rules and conditions for this key.
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-cgi-ids at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=PerlIDS>.  I will be notified, and then you'll
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CGI-IDS>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 =head1 SUPPORT
@@ -2093,19 +2114,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=PerlIDS>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-IDS>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/PerlIDS>
+L<http://annocpan.org/dist/CGI-IDS>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/PerlIDS>
+L<http://cpanratings.perl.org/d/CGI-IDS>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/PerlIDS>
+L<http://search.cpan.org/dist/CGI-IDS>
 
 =back
 

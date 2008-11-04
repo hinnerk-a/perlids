@@ -825,7 +825,7 @@ my %testForFalseAlerts = (
 #------------------------- Tests -----------------------------------------------
 
 # test module loading
-BEGIN { use_ok('CGI::IDS') } diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
+BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
 BEGIN { use_ok('XML::Simple', qw(:strict)) }
 BEGIN { use_ok('HTML::Entities') }
 BEGIN { use_ok('MIME::Base64') }

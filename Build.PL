@@ -4,7 +4,7 @@ use Module::Build;
 
 my $builder = Module::Build->new(
     module_name         => 'CGI::IDS',
-    license             => 'lgpl',
+    license             => 'lgpl3',
     dist_author         => 'Hinnerk Altenburg <hinnerk@cpan.org>',
     dist_version_from   => 'lib/CGI/IDS.pm',
     build_requires => {
