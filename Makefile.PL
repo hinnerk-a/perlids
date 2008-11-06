@@ -8,6 +8,7 @@ WriteMakefile
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/CGI/IDS.pm',
           'PREREQ_PM' => {
+                           'XML::SAX' => 0,
                            'FindBin' => 0,
                            'XML::Simple' => 0,
                            'Time::HiRes' => 0,

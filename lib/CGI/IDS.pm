@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1147
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1149
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.01 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1147
+Version 1.0101 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1149
 
 =cut
 
-our $VERSION = '1.01';
+our $VERSION = '1.0101';
 
 =head1 SYNOPSIS
 
@@ -88,7 +88,7 @@ our $VERSION = '1.01';
 
 =head1 DESCRIPTION
 
-PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<https://php-ids.org/>.
+PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/>.
 
 The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
 
@@ -775,7 +775,7 @@ sub _json_to_string {
 	my ($value) = @_;
 	my $json_ds;
 	eval {
-		$json_ds = decode_json($value);
+		$json_ds = JSON::XS::decode_json($value);
 	};
 	if (!$@) {
 		$value = _datastructure_to_string($json_ds)."\n";
@@ -1090,7 +1090,7 @@ sub _convert_entities {
 	my $converted = '';
 	if (preg_match(qr/&#x?[\w]+/ms, $value)) {
 		$converted	= preg_replace(qr/(&#x?[\w]{2}\d?);?/ms, '$1;', $value);
-		$converted	= decode_entities($converted);
+		$converted	= HTML::Entities::decode_entities($converted);
 		$value		.= "\n" . str_replace(';;', ';', $converted);
 	}
 
@@ -1169,7 +1169,7 @@ sub _convert_from_nested_base64 {
 				}
 			}
 
-			$value = str_replace($item_original, decode_base64($item), $value);
+			$value = str_replace($item_original, MIME::Base64::decode_base64($item), $value);
 		}
 	}
 
@@ -2136,9 +2136,9 @@ Thanks to:
 
 =over 4
 
-=item * Mario Heiderich (L<https://php-ids.org/>)
+=item * Mario Heiderich (L<http://php-ids.org/>)
 
-=item * Christian Matthies (L<https://php-ids.org/>)
+=item * Christian Matthies (L<http://php-ids.org/>)
 
 =item * Ingo Bax (L<http://www.epublica.de/>)
 
@@ -2150,7 +2150,7 @@ Hinnerk Altenburg, C<< <hinnerk at cpan.org> >>
 
 =head1 SEE ALSO
 
-L<https://php-ids.org/>
+L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 

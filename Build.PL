@@ -11,6 +11,7 @@ my $builder = Module::Build->new(
         'Test::More'      => 0,
         'JSON::XS'        => 2.2,
         'XML::Simple'     => 0,
+        'XML::SAX'        => 0,
         'HTML::Entities'  => 0,
         'MIME::Base64'    => 0,
         'Encode::Unicode' => 2.05,

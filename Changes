@@ -1,5 +1,10 @@
 Revision history for PerlIDS
 
+1.0101  2008-11-06
+        Fixed XMLin() bug on Solaris, now requiring XML::SAX that is independent to external OS libraries.
+        Fixed links in documentation.
+        Updated filter set to PHPIDS rev. 1149
+
 1.01    2008-11-04
         Fixed README.
 
