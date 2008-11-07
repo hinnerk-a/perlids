@@ -1,5 +1,10 @@
 Revision history for PerlIDS
 
+1.0102  2008-11-07
+        Removed XML::SAX from requirements, it didn't help with the Solaris bug.
+        Improved documentation.
+        Added Test::Pod::Coverage
+
 1.0101  2008-11-06
         Fixed XMLin() bug on Solaris, now requiring XML::SAX that is independent to external OS libraries.
         Fixed links in documentation.

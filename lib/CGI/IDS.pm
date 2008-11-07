@@ -41,11 +41,20 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0101 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1149
+Version 1.0102 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1149
 
 =cut
 
-our $VERSION = '1.0101';
+our $VERSION = '1.0102';
+
+=head1 DESCRIPTION
+
+PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/>. It parses any hashref for possible attacks, so it does not depend on CGI.pm.
+
+The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
+
+Each matching regular expression has it's own impact value that increases the tested string's total attack impact.
+Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
 
 =head1 SYNOPSIS
 
@@ -83,17 +92,9 @@ our $VERSION = '1.0101';
  $ids->set_scan_keys(scan_keys => 1);
  $impact = $ids->detect_attacks( request => $query->Vars );
 
- # NOTES
- # You might want to build your own 'session impact counter' that increases during multiple suspicious requests by one single user, session or IP address.
+See examples/demo.pl in CGI::IDS module package for a running demo.
 
-=head1 DESCRIPTION
-
-PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/>.
-
-The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
-
-Each matching regular expression has it's own impact value that increases the tested string's total attack impact.
-Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
+You might want to build your own 'session impact counter' that increases during multiple suspicious requests by one single user, session or IP address.
 
 =head1 METHODS
 
@@ -254,27 +255,27 @@ sub new {
 # NAME
 #   detect_attacks
 # DESCRIPTION
-#   Parses a hashref (e.g. $in_ref) for detection of possible attacks.
+#   Parses a hashref (e.g. $query->Vars) for detection of possible attacks.
 #   The attack array is emptied at the start of each run.
 # INPUT
 #   +request	hashref to be parsed
 # OUTPUT
 #   Impact if filter matched, 0 otherwise
 # SYNOPSIS
-#   $ids->detect_attacks(request => \%in_ref);
+#   $ids->detect_attacks(request => $query->Vars);
 #****
 
 =head2 detect_attacks()
 
  DESCRIPTION
-   Parses a hashref (e.g. $in_ref) for detection of possible attacks.
+   Parses a hashref (e.g. $query->Vars) for detection of possible attacks.
    The attack array is emptied at the start of each run.
  INPUT
    +request   hashref to be parsed
  OUTPUT
    Impact if filter matched, 0 otherwise
  SYNOPSIS
-   $ids->detect_attacks(request => \%in_ref);
+   $ids->detect_attacks(request => $query->Vars);
 
 =cut
 

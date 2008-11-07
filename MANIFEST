@@ -13,6 +13,7 @@ META.yml
 README
 t/01-ids.t
 t/02-pod.t
+t/03-pod-coverage.t
 t/data/test_filter_bad_data.xml
 t/data/test_filter_bad_regex.xml
 t/data/test_filter_bad_xml.xml
