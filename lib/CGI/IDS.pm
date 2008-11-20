@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1149
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1152
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,20 +41,19 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0102 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1149
+Version 1.0103 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1152
 
 =cut
 
-our $VERSION = '1.0102';
+our $VERSION = '1.0103';
 
 =head1 DESCRIPTION
 
 PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/>. It parses any hashref for possible attacks, so it does not depend on CGI.pm.
 
-The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
+The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions and a generic attack detector to find obfuscated attacks. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
 
-Each matching regular expression has it's own impact value that increases the tested string's total attack impact.
-Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
+Each matching regular expression has it’s own impact value that increases the tested string’s total attack impact. Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
 
 =head1 SYNOPSIS
 
@@ -166,7 +165,7 @@ my @CONVERTERS = qw/
 #------------------------- Globals ---------------------------------------------
 
 # harmless string definition
-my $harmless = qr/[^\w\s\/@!?,]+/ms;
+my $not_harmless = qr/[^\w\s\/@!?,]+/;
 
 #------------------------- Subs ------------------------------------------------
 
@@ -337,7 +336,7 @@ sub detect_attacks {
 			utf8::upgrade($request_value);
 
 			# scan only if value is not-harmless
-			if ( $request_value =~ $harmless) {
+			if ( $request_value =~ $not_harmless) {
 				my $attacks = {};
 
 				if (!$self->{whitelist}{$key}) {
@@ -406,7 +405,7 @@ sub detect_attacks {
 		# scan key only if desired
 		if ($self->{scan_keys}) {
 			# scan only if value is not-harmless
-			if ( $key =~ $harmless ) {
+			if ( $key =~ $not_harmless ) {
 				# apply filters to key
 				my $attacks				= $self->_apply_filters($key);
 				$filter_impact			+= $attacks->{impact};
@@ -1575,9 +1574,9 @@ sub preg_match_all {
 # DESCRIPTION
 #   Equivalent to PHP's preg_replace, but with three arguments only
 # INPUT
-#   pattern      the pattern(s) to match
+#   + pattern      the pattern(s) to match
 #   replacement  the replacement(s)
-#   string       the string(s)
+#   + string       the string(s)
 # OUTPUT
 #   string       the string(s) with all replacements done
 # SYNOPSIS
@@ -1588,6 +1587,12 @@ sub preg_match_all {
 
 sub preg_replace {
 	(my $patterns, my $replacements, my $strings) = @_;
+
+	# check input
+	if (!defined($strings) || !$strings || 
+		!defined($patterns) || !$patterns ) {
+		return '';
+	}
 
 	my $return_string = '';
 	if (ref($strings) ne 'ARRAY') {
@@ -1625,6 +1630,7 @@ sub preg_replace {
 				$repl = $replacements;
 			}
 		}
+		$repl =~ s/\\/\\\\/g;
 		$repl =~ s/\"/\\"/g;
 		$repl =~ s/\@/\\@/g;
 		$repl = qq{"$repl"};
@@ -1741,7 +1747,7 @@ sub urldecode {
 
 sub urlencode {
 	(my $theURL) = @_;
-	$theURL =~ s/([\W])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
+	$theURL =~ s/([\W])/sprintf("%%%02X",ord($1))/eg;
 	return $theURL;
 }
 

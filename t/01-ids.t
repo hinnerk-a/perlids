@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1149
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1152
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE

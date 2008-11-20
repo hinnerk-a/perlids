@@ -1,5 +1,10 @@
 Revision history for PerlIDS
 
+1.0103  2008-11-07
+        Updated to PHPIDS rev. 1152
+        Fixed args handling and backslash escaping in sub preg_replace()
+        Shortened substitution in sub urlencode()
+
 1.0102  2008-11-07
         Removed XML::SAX from requirements, it didn't help with the Solaris bug.
         Improved documentation.
