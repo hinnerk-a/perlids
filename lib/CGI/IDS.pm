@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1152
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1158
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0103 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1152
+Version 1.0104 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1158
 
 =cut
 
-our $VERSION = '1.0103';
+our $VERSION = '1.0104';
 
 =head1 DESCRIPTION
 

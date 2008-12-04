@@ -1,5 +1,8 @@
 Revision history for PerlIDS
 
+1.0104  2008-12-02
+        Updated filter set to PHPIDS rev. 1158
+
 1.0103  2008-11-07
         Updated to PHPIDS rev. 1152
         Fixed args handling and backslash escaping in sub preg_replace()

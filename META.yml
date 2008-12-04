@@ -1,6 +1,6 @@
 ---
 name: CGI-IDS
-version: 1.0103
+version: 1.0104
 author:
   - 'Hinnerk Altenburg <hinnerk@cpan.org>'
 abstract: 'PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)'
@@ -20,7 +20,7 @@ build_requires:
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0103
+    version: 1.0104
 generated_by: Module::Build version 0.3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
