@@ -10,13 +10,13 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1158
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1215
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
 #   2008-06-03
 # COPYRIGHT
-#   Copyright (C) 2008 Hinnerk Altenburg
+#   Copyright (C) 2008, 2009 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0104 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1158
+Version 1.0105 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1215
 
 =cut
 
-our $VERSION = '1.0104';
+our $VERSION = '1.0105';
 
 =head1 DESCRIPTION
 
@@ -53,29 +53,30 @@ PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<htt
 
 The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions and a generic attack detector to find obfuscated attacks. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
 
-Each matching regular expression has it’s own impact value that increases the tested string’s total attack impact. Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
+Each matching regular expression has it's own impact value that increases the tested string's total attack impact. Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
 
 =head1 SYNOPSIS
 
  use CGI;
  use CGI::IDS;
 
- $query = new CGI;
+ $cgi = new CGI;
 
  # instantiate the IDS object;
  # do not scan keys, values only; don't scan PHP code injection filters (IDs 58,59,60);
  # All arguments are optional, 'my $ids = new CGI::IDS();' is also working correctly, 
  # loading the entire shipped filter set and not scanning the keys.
+ # See new() for all possible arguments.
  my $ids = new CGI::IDS(
-     filters_file    => '/home/hinnerk/ids/default_filter.xml',
      whitelist_file  => '/home/hinnerk/ids/param_whitelist.xml',
-     scan_keys       => 0,
      disable_filters => [58,59,60],
  );
 
  # start detection
- my $impact = $ids->detect_attacks( request => $query->Vars );
- if ($impact > 10) {
+ my %params = $cgi->Vars;
+ my $impact = $ids->detect_attacks( request => \%params );
+
+ if ($impact > 0) {
      my_log( $ids->get_attacks() );
  }
  if ($impact > 30) {
@@ -89,9 +90,9 @@ Each matching regular expression has it’s own impact value that increases the 
 
  # now with scanning the hash keys
  $ids->set_scan_keys(scan_keys => 1);
- $impact = $ids->detect_attacks( request => $query->Vars );
+ $impact = $ids->detect_attacks( request => \%params );
 
-See examples/demo.pl in CGI::IDS module package for a running demo.
+See F<examples/demo.pl> in CGI::IDS module package for a running demo.
 
 You might want to build your own 'session impact counter' that increases during multiple suspicious requests by one single user, session or IP address.
 
@@ -1318,9 +1319,9 @@ sub _convert_concatenations {
 		qr/(?:"[|&;]+\s*[^|&\n]*[|&]+\s*"?)/s,
 		qr/(?:";\s*\w+\W+\w*\s*[|&]*")/s,
 		qr/(?:"\s*"\s*\.)/s,
-		qr/(?:\s*new\s+\w+\s*[+"])/,
+		qr/(?:\s*new\s+\w+\s*[+",])/,
 		qr/(?:(?:^|\s+)(?:do|else)\s+)/, 
-		qr/(?:\{\s*new\s+\w+\s*\})/,
+		qr/(?:[{(]\s*new\s+\w+\s*[)}])/,
 		qr/(?:(this|self).)/,
 	);
 
@@ -1369,7 +1370,7 @@ sub _convert_from_proprietary_encodings {
 	$value = preg_replace(qr/{[\w-]{8,9}\}(?:\{[\w=]{8}\}){2}/, '', $value);
 
 	# convert Content to null to avoid false alerts
-	$value = preg_replace(qr/Content/, '', $value);
+	$value = preg_replace(qr/Content|\Wdo\s/, '', $value);
 
 	# strip emoticons
 	$value = preg_replace(qr/(?:[:;]-[()\/PD]+)|(?:\s;[()PD]+)|(?::[()PD]+)|-\.-|\^\^/m, '', $value);
@@ -1378,10 +1379,13 @@ sub _convert_from_proprietary_encodings {
 	$value = preg_replace(qr/([.+~=*_\-])\1{2,}/m, '$1', $value);
 
 	# remove parenthesis inside sentences
-	$value = preg_replace(qr/(\w\s)\(([&\w]+)\)(\s\w|$)/, '$1$2$3', $value); #/
+	$value = preg_replace(qr/(\w\s)\(([&\w]+)\)(\s\w|$)/, '$1$2$3', $value);
 
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
+	
+	# normalize JS backspace linebreaks
+	$value = preg_replace(qr/^\/|\/$|,\/|\/,/, '', $value);
 
 	return $value;
 }
@@ -1412,7 +1416,7 @@ sub _run_centrifuge {
 
 		my $stripped_length = strlen(preg_replace(qr/[\d\s\p{L}.:,%\/><-]+/m,
 			'', $tmp_value));
-		my $overall_length  = strlen(preg_replace(qr/([\d\s\p{L}]{4,})+/m, 'aaa',
+		my $overall_length  = strlen(preg_replace(qr/([\d\s\p{L}:,]{3,})+/m, 'aaa',
 			preg_replace(qr/\s{2,}/ms, '', $tmp_value)));
 
 		if ($stripped_length != 0 &&
@@ -2161,7 +2165,7 @@ L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008 Hinnerk Altenburg
+Copyright (C) 2008, 2009 Hinnerk Altenburg
 
 This file is part of PerlIDS.
 

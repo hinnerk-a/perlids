@@ -8,7 +8,7 @@
 # CREATION DATE
 #   2008-09-12
 # COPYRIGHT
-#   Copyright (C) 2008 Hinnerk Altenburg
+#   Copyright (C) 2008, 2009 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #

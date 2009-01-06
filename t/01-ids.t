@@ -3,13 +3,13 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1158
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1215
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
 #   2008-07-01
 # COPYRIGHT
-#   Copyright (C) 2008 Hinnerk Altenburg
+#   Copyright (C) 2008, 2009 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -300,6 +300,30 @@ my %testConcatenatedXSSList2 = (
                         default xml namespace=toolbar
                         default xml namespace=e(y)',
         28 => '-Infinity++in eval(1&&name)',
+        29 => 'new Array, new Array, new Array, new Array, new Array, new Array, new Array, new Array, new Array, new Array, new Array, new Array,
+                        x=(\'e\')
+                        x=(\'nam\')+(new Array)+x
+                        y=(\'val\')
+                        y=(\'e\')+(new Array)+y
+                        z=this
+                        z=z[y]
+                        z(z(x)+x)',
+        30 => 'undefined,undefined
+                        undefined,undefined
+                        undefined,undefined
+                        undefined,undefined
+                        x=(\'aler\
+                        t\')
+                        undefined,undefined
+                        undefined,undefined
+                        undefined,undefined
+                        undefined,undefined
+                        this [x]
+                        (1)
+                        undefined,undefined
+                        undefined,undefined
+                        undefined,undefined
+                        undefined,undefined',
 );
 
 my %testXMLPredicateXSSList = (
@@ -393,6 +417,10 @@ my %testSelfContainedXSSList = (
 	12	=> "if(0){} else eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array)
                         'foo bar foo bar foo'",
 	13	=> "switch('foo bar foo bar foo bar') {case eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array):}",
+	14	=> "xxx='javascr',xxx+=('ipt:eva'),xxx+=('l(n'),xxx+=('ame),y')
+	                        Cen:tri:fug:eBy:pas:sTe:xt:do location=(xxx)
+	                        while(0)
+	                        ",
 );
 
 my %testSQLIList = (
@@ -935,21 +963,21 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),			43,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1070,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			743,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1077,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			764,		"testConcatenatedXSSList2");
 is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				128,		"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	63,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							476,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			486,		"testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),							492,		"testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			497,		"testSelfContainedXSSList");
 is ($ids->detect_attacks(request => \%testSQLIList),						480,		"testSQLIList");
 is ($ids->detect_attacks(request => \%testSQLIList2),						571,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),						554,		"testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList3),						558,		"testSQLIList3");
 is ($ids->detect_attacks(request => \%testSQLIList4),						768,		"testSQLIList4");
 is ($ids->detect_attacks(request => \%testSQLIList5),						844,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						172,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testSQLIList6),						186,		"testSQLIList6");
 is ($ids->detect_attacks(request => \%testDTList),							121,		"testDTList");
 is ($ids->detect_attacks(request => \%testURIList),							122,		"testURIList");
-is ($ids->detect_attacks(request => \%testRFEList),							488,		"testRFEList");
+is ($ids->detect_attacks(request => \%testRFEList),							495,		"testRFEList");
 is ($ids->detect_attacks(request => \%testUTF7List),						73,			"testUTF7List");
 is ($ids->detect_attacks(request => \%testBase64CCConverter),				95,			"testBase64CCConverter");
 is ($ids->detect_attacks(request => \%testDecimalCCConverter),				67,			"testDecimalCCConverter");
