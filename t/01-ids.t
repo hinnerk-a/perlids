@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1215
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1219
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -324,6 +324,7 @@ my %testConcatenatedXSSList2 = (
                         undefined,undefined
                         undefined,undefined
                         undefined,undefined',
+        31 => 'location.assign(1?name+1:(x))',
 );
 
 my %testXMLPredicateXSSList = (
@@ -963,11 +964,11 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),			43,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1077,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			764,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1074,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			765,		"testConcatenatedXSSList2");
 is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				128,		"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	63,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							492,		"testXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),							489,		"testXSSList");
 is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			497,		"testSelfContainedXSSList");
 is ($ids->detect_attacks(request => \%testSQLIList),						480,		"testSQLIList");
 is ($ids->detect_attacks(request => \%testSQLIList2),						571,		"testSQLIList2");

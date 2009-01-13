@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1215
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1219
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0105 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1215
+Version 1.0106 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1219
 
 =cut
 
-our $VERSION = '1.0105';
+our $VERSION = '1.0106';
 
 =head1 DESCRIPTION
 
@@ -166,7 +166,7 @@ my @CONVERTERS = qw/
 #------------------------- Globals ---------------------------------------------
 
 # harmless string definition
-my $not_harmless = qr/[^\w\s\/@!?,]+/;
+my $not_harmless = qr/[^\w\s\/@!?,\.]+|(?:\.\/)/;
 
 #------------------------- Subs ------------------------------------------------
 
@@ -1378,12 +1378,9 @@ sub _convert_from_proprietary_encodings {
 	# normalize separation char repetition
 	$value = preg_replace(qr/([.+~=*_\-])\1{2,}/m, '$1', $value);
 
-	# remove parenthesis inside sentences
-	$value = preg_replace(qr/(\w\s)\(([&\w]+)\)(\s\w|$)/, '$1$2$3', $value);
-
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
-	
+
 	# normalize JS backspace linebreaks
 	$value = preg_replace(qr/^\/|\/$|,\/|\/,/, '', $value);
 
@@ -1409,15 +1406,34 @@ sub _run_centrifuge {
 	my $threshold = 3.49;
 
 	if (strlen($value) > 25) {
+		# strip padding
+		my $tmp_value = preg_replace(qr/\s{4}/m, '', $value);
+		$tmp_value = preg_replace(
+			qr/\s{4}|[\p{L}\d\+\-,]{40,}/m,
+			'aaa',
+			$tmp_value
+		);
+		
 		# Check for the attack char ratio
-		my $tmp_value = $value;
 		$tmp_value = preg_replace(qr/([*.!?+-])\1{1,}/m, '$1', $tmp_value);
 		$tmp_value = preg_replace(qr/"[\p{L}\d\s]+"/m, '', $tmp_value);
 
-		my $stripped_length = strlen(preg_replace(qr/[\d\s\p{L}.:,%\/><-]+/m,
-			'', $tmp_value));
-		my $overall_length  = strlen(preg_replace(qr/([\d\s\p{L}:,]{3,})+/m, 'aaa',
-			preg_replace(qr/\s{2,}/ms, '', $tmp_value)));
+		my $stripped_length = strlen(
+			preg_replace(qr/[\d\s\p{L}.:,%\/><-]+/m,
+			'',
+			$tmp_value)
+		);
+		my $overall_length  = strlen(
+			preg_replace(
+				qr/([\d\s\p{L}:,]{3,})+/m,
+				'aaa',
+				preg_replace(
+					qr/\s{2,}/ms,
+					'',
+					$tmp_value
+				)
+			)
+		);
 
 		if ($stripped_length != 0 &&
 			$overall_length/$stripped_length <= $threshold
