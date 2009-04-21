@@ -2,8 +2,8 @@ PerlIDS (CGI::IDS)
 
 Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
-Version 1.0109 - based on and tested against the filter tests of 
-PHPIDS http://php-ids.org rev. 1228
+Version 1.0115 - based on and tested against the filter tests of 
+PHPIDS http://php-ids.org rev. 1274
 
 INSTALLATION
 

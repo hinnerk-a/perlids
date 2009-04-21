@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1228
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1274
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0109 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1228
+Version 1.0115 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1274
 
 =cut
 
-our $VERSION = '1.0109';
+our $VERSION = '1.0115';
 
 =head1 DESCRIPTION
 
@@ -112,8 +112,6 @@ use Encode qw(decode);
 use Carp;
 use JSON::XS;
 use Time::HiRes;
-use utf8;
-use encoding 'utf8';
 use FindBin qw($Bin);
 
 #------------------------- Settings --------------------------------------------
@@ -129,7 +127,7 @@ use constant DEBUG_SORT_KEYS_NUM	=> (1 << 4); # sort request by keys numerically
 use constant DEBUG_SORT_KEYS_ALPHA	=> (1 << 5); # sort request by keys alphabetically
 use constant DEBUG_WHITELIST		=> (1 << 6); # dumps loaded whitelist hash
 
-# use constant DEBUG_MODE				=>	DEBUG_KEY_VALUES |
+#use constant DEBUG_MODE				=>	DEBUG_KEY_VALUES |
 #										DEBUG_IMPACTS |
 #										DEBUG_WHITELIST |
 #										DEBUG_ARRAY_INFO |
@@ -166,7 +164,7 @@ my @CONVERTERS = qw/
 #------------------------- Globals ---------------------------------------------
 
 # harmless string definition
-my $not_harmless = qr/[^\w\s\/@!?,\.]+|(?:\.\/)/;
+my $not_harmless = qr/[^\w\s\/@!?,\.]+|(?:\.\/)|(?:@@\w+)/;
 
 #------------------------- Subs ------------------------------------------------
 
@@ -1033,7 +1031,7 @@ sub _convert_from_sql_hex {
 
 	my @matches = ();
 	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-    if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d\s]*)+)/im, $value, \@matches)) {
+    if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d]*)+)/im, $value, \@matches)) {
 		foreach my $match ($matches[0]) {
             my $converted = '';
             foreach my $hex_index (str_split($match, 2)) {
@@ -1065,14 +1063,18 @@ sub _convert_from_sql_keywords {
 
 	my $pattern = qr/(?:IS\s+null)|(LIKE\s+null)|(?:(?:^|\W)IN[+\s]*\([\s\d"]+[^()]*\))/ims;
 	$value   = preg_replace($pattern, '"=0', $value);
-	$value   = preg_replace(qr/null,/ims, ',0', $value);
+	$value   = preg_replace(qr/null[,\s]/ims, ',0', $value);
 	$value   = preg_replace(qr/,null/ims, ',0', $value);
+	$value   = preg_replace(qr/(?:between|mod)/ims, 'or', $value);
+	$value   = preg_replace(qr/(?:and\s+\d+\.?\d*)/ims, '', $value);
+	$value   = preg_replace(qr/(?:\s+and\s+)/ims, ' or ', $value);
 	# \\N instead of PHP's \\\N
-	$pattern	= qr/[^\w,]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
+	$pattern	= qr/[^\w,\(]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
 	$value		= preg_replace($pattern, 0, $value);
 	$pattern	= qr/(?:NOT\s+BETWEEN)|(?:IS\s+NOT)|(?:NOT\s+IN)|(?:XOR|\WDIV\W|\WNOT\W|<>|RLIKE(?:\s+BINARY)?)|(?:REGEXP\s+BINARY)|(?:SOUNDS\s+LIKE)/ims;
 	$value		= preg_replace($pattern, '!', $value);
 	$value		= preg_replace(qr/"\s+\d/, '"', $value);
+	$value		= preg_replace(qr/\/(?:\d+|null)/, '', $value);
 
 	return $value;
 }
@@ -1092,8 +1094,11 @@ sub _convert_from_sql_keywords {
 
 sub _convert_entities {
 	my ($value) = @_;
-
 	my $converted = '';
+
+	# deal with double encoded payload 
+	$value = preg_replace(qr/&amp;/, '&', $value);
+
 	if (preg_match(qr/&#x?[\w]+/ms, $value)) {
 		$converted	= preg_replace(qr/(&#x?[\w]{2}\d?);?/ms, '$1;', $value);
 		$converted	= HTML::Entities::decode_entities($converted);
@@ -1327,7 +1332,8 @@ sub _convert_from_concatenated {
 		qr/(?:\s*new\s+\w+\s*[+",])/,
 		qr/(?:(?:^|\s+)(?:do|else)\s+)/, 
 		qr/(?:[{(]\s*new\s+\w+\s*[)}])/,
-		qr/(?:(this|self).)/,
+		qr/(?:(this|self)\.)/,
+		qr/(?:undefined)/,
 		qr/(?:in\s+)/,
 	);
 
@@ -1382,16 +1388,19 @@ sub _convert_from_proprietary_encodings {
 	$value = preg_replace(qr/Content|\Wdo\s/, '', $value);
 
 	# strip emoticons
-	$value = preg_replace(qr/(?:[:;]-[()\/PD]+)|(?:\s;[()PD]+)|(?::[()PD]+)|-\.-|\^\^/m, '', $value);
+	$value = preg_replace(qr/(?:\s[:;]-[)\/PD]+)|(?:\s;[)PD]+)|(?:\s:[)PD]+)|-\.-|\^\^/m, '', $value);
 
 	# normalize separation char repetition
 	$value = preg_replace(qr/([.+~=*_\-])\1{2,}/m, '$1', $value);
+
+	# normalize multiple single quotes
+	$value = preg_replace(qr/"{2,}/m, '"', $value);
 
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
 
 	# normalize JS backspace linebreaks
-	$value = preg_replace(qr/^\/|\/$|,\/|\/,/, '', $value);
+	$value = preg_replace(qr/^\/|\/$|,\/\n|\/,/, '', $value);
 
 	return $value;
 }
@@ -1418,7 +1427,7 @@ sub _run_centrifuge {
 		# strip padding
 		my $tmp_value = preg_replace(qr/\s{4}/m, '', $value);
 		$tmp_value = preg_replace(
-			qr/\s{4}|[\p{L}\d\+\-,]{8,}/m,
+			qr/\s{4}|[\p{L}\d\+\-,.%]{8,}/m,
 			'aaa',
 			$tmp_value
 		);
@@ -1428,7 +1437,7 @@ sub _run_centrifuge {
 		$tmp_value = preg_replace(qr/"[\p{L}\d\s]+"/m, '', $tmp_value);
 
 		my $stripped_length = strlen(
-			preg_replace(qr/[\d\s\p{L}.:,%\/><-]+/m,
+			preg_replace(qr/[\d\s\p{L}.:,%&\/><\-)]+/m,
 			'',
 			$tmp_value)
 		);

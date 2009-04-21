@@ -1,0 +1,12 @@
+Build
+_build*
+blib*
+Makefile
+Makefile.old
+MANIFEST.bak
+pm_to_blib*
+*.tar.gz
+.lwpcookies
+CGI-IDS-*
+cover_db
+tags
