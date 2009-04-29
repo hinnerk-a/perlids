@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1274
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1276
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0115 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1274
+Version 1.0116 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1276
 
 =cut
 
-our $VERSION = '1.0115';
+our $VERSION = '1.0116';
 
 =head1 DESCRIPTION
 
@@ -54,6 +54,8 @@ PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<htt
 The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions and a generic attack detector to find obfuscated attacks. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
 
 Each matching regular expression has it's own impact value that increases the tested string's total attack impact. Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
+
+Follow PerlIDS on twitter: L<https://twitter.com/perlids>
 
 =head1 SYNOPSIS
 
@@ -1031,18 +1033,21 @@ sub _convert_from_sql_hex {
 
 	my @matches = ();
 	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-    if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d]*)+)/im, $value, \@matches)) {
+	if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d]*)+)/im, $value, \@matches)) {
 		foreach my $match ($matches[0]) {
-            my $converted = '';
-            foreach my $hex_index (str_split($match, 2)) {
-                if(preg_match(qr/[a-f\d]{2,3}/i, $hex_index)) {
-                  $converted .= chr(hex($hex_index));
-                }
-            }
-            $value = str_replace($match, $converted, $value);
-        }
-    }
-    return $value;
+			my $converted = '';
+			foreach my $hex_index (str_split($match, 2)) {
+				if(preg_match(qr/[a-f\d]{2,3}/i, $hex_index)) {
+					$converted .= chr(hex($hex_index));
+				}
+			}
+			$value = str_replace($match, $converted, $value);
+		}
+	}
+	# take care of hex encoded ctrl chars
+	$value = preg_replace('/0x\d+/m', 1, $value);
+
+	return $value;
 }
 
 #****if* IDS/_convert_from_sql_keywords

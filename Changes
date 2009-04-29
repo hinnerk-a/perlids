@@ -1,5 +1,9 @@
 Revision history for PerlIDS
 
+1.0116  2009-04-29
+		Added twitter account
+        Updated filter set and converters to PHPIDS rev. 1276
+
 1.0115  2009-04-17
         Updated filter set and converters to PHPIDS rev. 1274
 
