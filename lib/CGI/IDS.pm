@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1276
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1277
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0116 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1276
+Version 1.0117 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1277
 
 =cut
 
-our $VERSION = '1.0116';
+our $VERSION = '1.0117';
 
 =head1 DESCRIPTION
 
@@ -1352,7 +1352,7 @@ sub _convert_from_concatenated {
 	$converted = preg_replace(qr/\)\s*\+/, ')', $converted);
 
 	# convert JS special numbers
-	$converted = preg_replace(qr/(?:\(*[.\d]e[+-]*[^a-z\W]+\)*)|(?:NaN|Infinity)\W/ms, 1, $converted);
+	$converted = preg_replace(qr/(?:\(*[.\d]e[+-]*[^a-z\W]+\)*)|(?:NaN|Infinity)\W/ims, 1, $converted);
 
 	if ($converted && ($compare ne $converted)) {
 		$value .= "\n" . $converted;
@@ -1401,11 +1401,15 @@ sub _convert_from_proprietary_encodings {
 	# normalize multiple single quotes
 	$value = preg_replace(qr/"{2,}/m, '"', $value);
 
+	#normalize quoted numerical values and asterisks
+	$value = preg_replace(qr/"(\d+)"/m, '$1', $value);
+
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
 
 	# normalize JS backspace linebreaks
-	$value = preg_replace(qr/^\/|\/$|,\/\n|\/,/, '', $value);
+	# PHP to Perl note: [\\] in Perl instead of [\\\] in PHP
+	$value = preg_replace(qr/^\/|\/$|,\/\n|\/,|[\\]+\s{4}/, '', $value);
 
 	return $value;
 }
@@ -2084,11 +2088,11 @@ Regular expression to match. Missing C<E<lt>ruleE<gt>> means I<key has to be pre
  # print reasons and key/value pairs to a logfile for analysis of your application parameters.
  print LOG "filtered_keys:\n"
  foreach my $entry (@{$ids->{filtered_keys}}) {
-     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$value."\n";
+     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->$value."\n";
  }
  print LOG "non_filtered_keys:\n"
  foreach my $entry (@{$ids->{non_filtered_keys}}) {
-     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$value."\n";
+     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->$value."\n";
  }
 
 C<$entry-E<gt>{reason}> returns following reasons for skipping and non-skipping a value:
