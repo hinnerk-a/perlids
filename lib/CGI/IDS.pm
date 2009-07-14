@@ -2088,11 +2088,11 @@ Regular expression to match. Missing C<E<lt>ruleE<gt>> means I<key has to be pre
  # print reasons and key/value pairs to a logfile for analysis of your application parameters.
  print LOG "filtered_keys:\n"
  foreach my $entry (@{$ids->{filtered_keys}}) {
-     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->$value."\n";
+     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->{value}."\n";
  }
  print LOG "non_filtered_keys:\n"
  foreach my $entry (@{$ids->{non_filtered_keys}}) {
-     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->$value."\n";
+     print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->{value}."\n";
  }
 
 C<$entry-E<gt>{reason}> returns following reasons for skipping and non-skipping a value:
