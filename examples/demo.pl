@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2008, 2009 Hinnerk Altenburg
+# Copyright (C) 2008-2010 Hinnerk Altenburg
 # 
 # This file is part of PerlIDS.
 # 
@@ -52,7 +52,7 @@ L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008, 2009 Hinnerk Altenburg
+Copyright (C) 2008-2010 Hinnerk Altenburg
 
 This file is part of PerlIDS.
 

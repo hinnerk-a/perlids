@@ -10,13 +10,13 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1277
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1371
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
 #   2008-06-03
 # COPYRIGHT
-#   Copyright (C) 2008, 2009 Hinnerk Altenburg
+#   Copyright (C) 2008-2010 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -41,7 +41,7 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0117 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1277
+Version 1.0117 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1371
 
 =cut
 
@@ -144,8 +144,9 @@ use constant DEBUG_MODE				=> 0;
 # converter functions, processed in this order
 my @CONVERTERS = qw/
 	stripslashes
+	_convert_from_repetition
 	_convert_from_commented
-	_convert_from_newlines
+	_convert_from_whitespace
 	_convert_from_js_charcode
 	_convert_js_regex_modifiers
 	_convert_entities
@@ -166,7 +167,7 @@ my @CONVERTERS = qw/
 #------------------------- Globals ---------------------------------------------
 
 # harmless string definition
-my $not_harmless = qr/[^\w\s\/@!?,\.]+|(?:\.\/)|(?:@@\w+)/;
+my $not_harmless = qr/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/;
 
 #------------------------- Subs ------------------------------------------------
 
@@ -813,6 +814,32 @@ sub _run_all_converters {
 	return $value;
 }
 
+#****if* IDS/_convert_from_repetition
+# NAME
+#   _convert_from_repetition
+# DESCRIPTION
+#   Make sure the value to normalize and monitor doesn't contain
+#   possibilities for a regex DoS.
+# INPUT
+#   value   the value to pre-sanitize
+# OUTPUT
+#   value   converted string
+# SYNOPSIS
+#   IDS::_convert_from_repetition($value);
+#****
+
+sub _convert_from_repetition {
+	my ($value) = @_;
+
+	# remove obvios repetition patterns
+	$value = preg_replace(
+		qr/(?:(.{2,})\1{32,})|(?:[+=|\-@\s]{128,})/,
+		'x',
+		$value
+	);
+	return $value;
+}
+
 #****if* IDS/_convert_from_commented
 # NAME
 #   _convert_from_commented
@@ -842,10 +869,6 @@ sub _convert_from_commented {
 		$value    .= "\n" . $converted;
 	}
 
-	# deal with x509 false alerts
-	$value = preg_replace(qr/(\w+)\/\/(\w+)/m, '$1/$2', $value);    
-	$value = preg_replace(qr/(\w+)\/\+(\w+)/m, '$1/$2', $value);
-
 	# make sure inline comments are detected and converted correctly
 	$value = preg_replace(qr/(<\w+)\/+(\w+=?)/m, '$1/$2', $value);
 	$value = preg_replace(qr/[^\\:]\/\/(.*)$/m, '/**/$1', $value);
@@ -853,9 +876,9 @@ sub _convert_from_commented {
 	return $value;
 }
 
-#****if* IDS/_convert_from_newlines
+#****if* IDS/_convert_from_whitespace
 # NAME
-#   _convert_from_newlines
+#   _convert_from_whitespace
 # DESCRIPTION
 #   Strip newlines
 # INPUT
@@ -863,15 +886,18 @@ sub _convert_from_commented {
 # OUTPUT
 #   value   converted string
 # SYNOPSIS
-#   IDS::_convert_from_newlines($value);
+#   IDS::_convert_from_whitespace($value);
 #****
 
-sub _convert_from_newlines {
+sub _convert_from_whitespace {
 	my ($value) = @_;
 
 	# check for inline linebreaks
 	my @search = ('\r', '\n', '\f', '\t', '\v');
 	$value  = str_replace(\@search, ';', $value);
+
+	# replace replacement characters regular spaces
+	$value = str_replace('�', ' ', $value);
 
 	# convert real linebreaks (\013 in Perl instead of \v in PHP et al.)
 	return preg_replace(qr/(?:\n|\r|\013)/m, '  ', $value);
@@ -988,7 +1014,7 @@ sub _convert_from_js_charcode {
 sub _convert_js_regex_modifiers {
 	my ($value) = @_;
 
-	$value = preg_replace(qr/\/[gim]/, '/', $value);
+	$value = preg_replace(qr/\/[gim]+/, '/', $value);
 	return $value;
 }
 
@@ -1012,6 +1038,8 @@ sub _convert_quotes {
 	my @pattern	= ('\'', '`', '´', '’', '‘');
 	$value		= str_replace(\@pattern, '"', $value);
 
+	# make sure harmless quoted strings don't generate false alerts
+	$value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);
 	return $value;
 }
 
@@ -1068,13 +1096,14 @@ sub _convert_from_sql_keywords {
 
 	my $pattern = qr/(?:IS\s+null)|(LIKE\s+null)|(?:(?:^|\W)IN[+\s]*\([\s\d"]+[^()]*\))/ims;
 	$value   = preg_replace($pattern, '"=0', $value);
-	$value   = preg_replace(qr/null[,\s]/ims, ',0', $value);
+	$value   = preg_replace(qr/\W+\s+like\s+\W+/, ' 1 like 1 ', $value);
+	$value   = preg_replace(qr/null[,"\s]/ims, ',0', $value);
 	$value   = preg_replace(qr/,null/ims, ',0', $value);
 	$value   = preg_replace(qr/(?:between|mod)/ims, 'or', $value);
 	$value   = preg_replace(qr/(?:and\s+\d+\.?\d*)/ims, '', $value);
 	$value   = preg_replace(qr/(?:\s+and\s+)/ims, ' or ', $value);
 	# \\N instead of PHP's \\\N
-	$pattern	= qr/[^\w,\(]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
+	$pattern	= qr/[^\w,\(]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|FIND_IN_SET|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
 	$value		= preg_replace($pattern, 0, $value);
 	$pattern	= qr/(?:NOT\s+BETWEEN)|(?:IS\s+NOT)|(?:NOT\s+IN)|(?:XOR|\WDIV\W|\WNOT\W|<>|RLIKE(?:\s+BINARY)?)|(?:REGEXP\s+BINARY)|(?:SOUNDS\s+LIKE)/ims;
 	$value		= preg_replace($pattern, '!', $value);
@@ -1130,21 +1159,31 @@ sub _convert_from_control_chars {
 	my ($value) = @_;
 
 	# critical ctrl values
-	my @search	= (chr(0), chr(1), chr(2),
-					chr(3), chr(4), chr(5),
-					chr(6), chr(7), chr(8),
-					chr(11), chr(12), chr(14),
-					chr(15), chr(16), chr(17),
-					chr(18), chr(19));
+	my @search	= (
+		chr(0), chr(1), chr(2), chr(3), chr(4), chr(5),
+		chr(6), chr(7), chr(8), chr(11), chr(12), chr(14),
+		chr(15), chr(16), chr(17), chr(18), chr(19),
+		chr(192), chr(193), chr(238), chr(255)
+	);
 	$value	= str_replace(\@search, '%00', $value);
-	my $urlencoded = urlencode($value);
 
 	# take care for malicious unicode characters
 	$value = urldecode(preg_replace(qr/(?:%E(?:2|3)%8(?:0|1)%(?:A|8|9)\w|%EF%BB%BF|%EF%BF%BD)|(?:&#(?:65|8)\d{3};?)/i, '',
-			$urlencoded));
+			urlencode($value)));
 
-	$value = preg_replace(qr/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i, '',
-			$value);
+	$value = urldecode(
+	    preg_replace(qr/(?:%F0%80%BE)/i, '>', urlencode($value)));
+	$value = urldecode(
+	    preg_replace(qr/(?:%F0%80%BC)/i, '<', urlencode($value)));
+	$value = urldecode(
+	    preg_replace(qr/(?:%F0%80%A2)/i, '"', urlencode($value)));
+	$value = urldecode(
+	    preg_replace(qr/(?:%F0%80%A7)/i, '\'', urlencode($value)));
+
+	$value = preg_replace(qr/(?:%ff1c)/, '<', $value);
+	$value = preg_replace(
+		qr/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i, '', $value
+	);
 
 	$value = preg_replace(qr/(?:&#(?:65|8)\d{3};?)|(?:&#(?:56|7)3\d{2};?)|(?:&#x(?:fe|20)\w{2};?)|(?:&#x(?:d[c-f])\w{2};?)/i, '',
 			$value);
@@ -1185,7 +1224,8 @@ sub _convert_from_nested_base64 {
 				}
 			}
 
-			$value = str_replace($item_original, MIME::Base64::decode_base64($item), $value);
+			my $base64_item = MIME::Base64::decode_base64($item);
+			$value = str_replace($item_original, $base64_item, $value);
 		}
 	}
 
@@ -1265,9 +1305,8 @@ sub _convert_from_js_unicode {
 
 	if ($matches[0]) {
 		foreach my $match ($matches[0]) {
-			$value = str_replace($match,
-				chr(hex(substr($match, 2, 4))),
-				$value);
+			my $chr = chr(hex(substr($match, 2, 4)));
+			$value = str_replace($match, $chr, $value);
 		}
 		$value .= "\n".'\u0001';
 	}
@@ -1396,13 +1435,16 @@ sub _convert_from_proprietary_encodings {
 	$value = preg_replace(qr/(?:\s[:;]-[)\/PD]+)|(?:\s;[)PD]+)|(?:\s:[)PD]+)|-\.-|\^\^/m, '', $value);
 
 	# normalize separation char repetition
-	$value = preg_replace(qr/([.+~=*_\-])\1{2,}/m, '$1', $value);
+	$value = preg_replace(qr/([.+~=*_\-;])\1{2,}/m, '$1', $value);
 
 	# normalize multiple single quotes
 	$value = preg_replace(qr/"{2,}/m, '"', $value);
 
-	#normalize quoted numerical values and asterisks
+	# normalize quoted numerical values and asterisks
 	$value = preg_replace(qr/"(\d+)"/m, '$1', $value);
+
+	# normalize pipe separated request parameters
+	$value = preg_replace(qr/\|(\w+=\w+)/m, '&$1', $value);
 
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
@@ -1434,9 +1476,9 @@ sub _run_centrifuge {
 
 	if (strlen($value) > 25) {
 		# strip padding
-		my $tmp_value = preg_replace(qr/\s{4}/m, '', $value);
+		my $tmp_value = preg_replace(qr/\s{4}|==$/m, '', $value);
 		$tmp_value = preg_replace(
-			qr/\s{4}|[\p{L}\d\+\-,.%]{8,}/m,
+			qr/\s{4}|[\p{L}\d\+\-=,.%()]{8,}/m,
 			'aaa',
 			$tmp_value
 		);
@@ -1446,13 +1488,13 @@ sub _run_centrifuge {
 		$tmp_value = preg_replace(qr/"[\p{L}\d\s]+"/m, '', $tmp_value);
 
 		my $stripped_length = strlen(
-			preg_replace(qr/[\d\s\p{L}.:,%&\/><\-)]+/m,
+			preg_replace(qr/[\d\s\p{L}\.:,%&\/><\-)!]+/m,
 			'',
 			$tmp_value)
 		);
 		my $overall_length  = strlen(
 			preg_replace(
-				qr/([\d\s\p{L}:,]{3,})+/m,
+				qr/([\d\s\p{L}:,\.]{3,})+/m,
 				'aaa',
 				preg_replace(
 					qr/\s{2,}/ms,
@@ -1471,7 +1513,7 @@ sub _run_centrifuge {
 
 	if (strlen($value) > 40) {
 		# Replace all non-special chars
-		my $converted =  preg_replace(qr/[\w\s\p{L},.!]/, '', $value);
+		my $converted =  preg_replace(qr/[\w\s\p{L},.:!]/, '', $value);
 
 		# Split string into an array, unify and sort
 		my @array = str_split($converted);
@@ -1872,7 +1914,7 @@ sub stripslashes {
 sub strip_tags {
 	(my $string) = @_;
 
-	while ($string =~ s/<(?:[^<>]*)>//gs) {};
+	while ($string =~ s/<[^>]*(?:>|$)//gs) {};
 
 	return $string;
 }
@@ -2208,7 +2250,7 @@ L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008, 2009 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
+Copyright (C) 2008-2010 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
 
 This file is part of PerlIDS.
 

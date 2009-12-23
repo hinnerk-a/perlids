@@ -1,7 +1,8 @@
 Revision history for PerlIDS
 
-1.0117  2009-05-06
-        PHPIDS release 0.6 (rev. 1277)
+1.0117  2009-12-23
+        Updated filter set and converters to PHPIDS rev. 1371
+        strip_tags() now has the same behavior like PHP's strip_tags()
         Thanks to Johan Nilsson for bug reports:
         - Fixed code sample in documentation
         - Fixed undef warning in preg_replace()'s regex-double-execution

