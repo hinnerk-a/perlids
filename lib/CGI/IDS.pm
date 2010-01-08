@@ -1914,7 +1914,7 @@ sub stripslashes {
 sub strip_tags {
 	(my $string) = @_;
 
-	while ($string =~ s/<[^>]*(?:>|$)//gs) {};
+	while ($string =~ s/<\S[^<>]*(?:>|$)//gs) {};
 
 	return $string;
 }
