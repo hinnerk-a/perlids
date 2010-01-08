@@ -19,7 +19,8 @@ my $builder = Module::Build->new(
         'FindBin'         => 0,
     },
     add_to_cleanup      => [ 'CGI-IDS-*' ],
-    create_makefile_pl => 'traditional',
+    create_makefile_pl  => 'traditional',
+    sign                => 1,
 );
 
 $builder->add_build_element('xml');
