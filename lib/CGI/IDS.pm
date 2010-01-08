@@ -1188,6 +1188,13 @@ sub _convert_from_control_chars {
 	$value = preg_replace(qr/(?:&#(?:65|8)\d{3};?)|(?:&#(?:56|7)3\d{2};?)|(?:&#x(?:fe|20)\w{2};?)|(?:&#x(?:d[c-f])\w{2};?)/i, '',
 			$value);
 
+	$value = str_replace(
+		["\x{ab}", "\x{3008}", "\x{ff1c}", "\x{2039}", "\x{2329}", "\x{27e8}"], '<', $value
+	);
+	$value = str_replace(
+		["\x{bb}", "\x{3009}", "\x{ff1e}", "\x{203a}", "\x{232a}", "\x{27e9}"], '>', $value
+	);
+
 	return $value;
 }
 
