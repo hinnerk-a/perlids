@@ -1,1 +1,7 @@
 ^MYMETA.yml$
+^.git
+^_build
+^blib
+^Build$
+^CGI-IDS
+^MANIFEST\.SKIP$
