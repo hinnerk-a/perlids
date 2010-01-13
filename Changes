@@ -5,7 +5,8 @@ Revision history for PerlIDS
         strip_tags() now has the same behavior like PHP's strip_tags()
         Thanks to Johan Nilsson for bug reports:
         - Fixed code sample in documentation
-        - Fixed undef warning in preg_replace()'s regex-double-execution
+        - preg_replace(): Fixed undef warning in regex-double-execution
+        - preg_replace(): Escape $ if it's not prefix of a substitution variable like $1
 
 1.0116  2009-04-29
         Added twitter account

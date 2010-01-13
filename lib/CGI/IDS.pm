@@ -1729,8 +1729,9 @@ sub preg_replace {
 		$repl =~ s/\\/\\\\/g;
 		$repl =~ s/\"/\\"/g;
 		$repl =~ s/\@/\\@/g;
+		$repl =~ s/\$(?!\d)/\\\$/g; # escape $ if not substitution variable like $1
 		$repl = qq{"$repl"};
-		$return_string =~ s/$patterns/$repl/eeg;
+		$return_string =~ s/$patterns/defined $repl ? $repl : ''/eeg;
 	}
 	return $return_string;
 }
