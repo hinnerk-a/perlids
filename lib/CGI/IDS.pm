@@ -128,16 +128,18 @@ use constant DEBUG_CONVERTERS		=> (1 << 3); # print output of each converter
 use constant DEBUG_SORT_KEYS_NUM	=> (1 << 4); # sort request by keys numerically
 use constant DEBUG_SORT_KEYS_ALPHA	=> (1 << 5); # sort request by keys alphabetically
 use constant DEBUG_WHITELIST		=> (1 << 6); # dumps loaded whitelist hash
+use constant DEBUG_MATCHED_FILTERS	=> (1 << 7); # print IDs of matched filters
 
 #use constant DEBUG_MODE				=>	DEBUG_KEY_VALUES |
 #										DEBUG_IMPACTS |
 #										DEBUG_WHITELIST |
 #										DEBUG_ARRAY_INFO |
 #										DEBUG_CONVERTERS |
+#										DEBUG_MATCHED_FILTERS |
 #										DEBUG_SORT_KEYS_NUM;
 
 # simply comment this line out to switch debugging mode on (also uncomment above declaration)
-use constant DEBUG_MODE				=> 0; 
+use constant DEBUG_MODE				=> 0;
 
 #------------------------- Constants -------------------------------------------
 
@@ -314,7 +316,7 @@ sub detect_attacks {
 
 		if (DEBUG_MODE & DEBUG_KEY_VALUES) {
 			print "\n\n\n******************************************\n".
-				"Key   : $key\nValue : $request_value\n";
+				"Key    : $key\nValue  : $request_value\n";
 		}
 
 		# skip if value is empty or generally whitelisted
@@ -450,9 +452,14 @@ sub detect_attacks {
 				Dumper(\%attack) .
 				"\n\n";
 		}
-		
+
+		if (DEBUG_MODE & DEBUG_MATCHED_FILTERS && @matched_filters) {
+			my $filters_concat = join ", ", @matched_filters;
+			print "Filters: $filters_concat\n";
+		}
+
 		if (DEBUG_MODE & DEBUG_IMPACTS) {
-			print "Impact: $filter_impact\n";
+			print "Impact : $filter_impact\n";
 		}
 		
 	} # end of foreach key
