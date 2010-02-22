@@ -11,10 +11,11 @@ build_requires:
   MIME::Base64: 0
   Test::More: 0
   Time::HiRes: 0
+  XML::Parser: 0
   XML::Simple: 0
 configure_requires:
   Module::Build: 0.36
-generated_by: 'Module::Build version 0.3601'
+generated_by: 'Module::Build version 0.3603'
 license: lgpl3
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -23,7 +24,7 @@ name: CGI-IDS
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0117
+    version: 1.0118
 resources:
-  license: http://opensource.org/licenses/lgpl-3.0.html
-version: 1.0117
+  license: http://www.gnu.org/licenses/lgpl-3.0.txt
+version: 1.0118

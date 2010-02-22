@@ -10,6 +10,7 @@ my $builder = Module::Build->new(
     build_requires => {
         'Test::More'      => 0,
         'JSON::XS'        => 2.2,
+        'XML::Parser'     => 0,
         'XML::Simple'     => 0,
         'HTML::Entities'  => 0,
         'MIME::Base64'    => 0,

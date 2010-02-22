@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1371
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1373
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -916,8 +916,10 @@ my %testForFalseAlerts = (
    19 => 'Highly mobile (Project locations: Europe & Asia), You are a team player',
    20 => '"Philippine Women\'s University (Honours)"',
    21 => ')))) да второй состав в отличной форме, не оставили парням ни единого шанса!!! Я думаю нас jedi, можно в первый переводить ))) ',
-   22 => '9876543210ILRdqZdCkgcieUhNRMFvYk==',
+   22 => 'd3d3LmRlbW90eXdhdG9yeS5wbA==',
    23 => '0x24==',
+   24 => '"Einkäuferin Zutaten + Stoffe"',
+   25 => '"mooie verhalen in de talen: engels"',
 );
 
 #------------------------- Tests -----------------------------------------------

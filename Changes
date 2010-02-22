@@ -1,5 +1,9 @@
 Revision history for PerlIDS
 
+1.0118  2010-02-22
+        Added XML::Parser to build_requires due to cpantesters' FAILs on some systems
+        Fixed base64 warning in testForFalseAlerts
+
 1.0117  2010-02-16
         Updated filter set and converters to PHPIDS rev. 1373
         Improvements on strip_tags()

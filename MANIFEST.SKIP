@@ -1,7 +1,8 @@
-^MYMETA.yml$
 ^.git
 ^_build
 ^blib
 ^Build$
 ^CGI-IDS
 ^MANIFEST\.SKIP$
+^MANIFEST\.bak$
+^MYMETA.yml$
