@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1373
+#   based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1374
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -554,6 +554,7 @@ my %testSQLIList2 = (
 	42  => "1' -1 or+1= '+1 ",
 	43  => "1' -1 - column or '1 ",
 	44  => "1' -1 or '1",
+	45  => " (1)or(1)=(1) ",
 );
 
 my %testSQLIList3 = (
@@ -741,6 +742,7 @@ my %testSQLIList6 = (
 	27 => "1' and 0x1abc like 0x88 or '0",
 	28 => "'-1-0 union select (select `table_name` from `information_schema`.tables limit 1) and '1",
 	29 => "null''null' find_in_set(uname, 'lightos' ) and '1",
+	30 => "(case-1 when mid(load_file(0x61616161),12, 1/ 1)like 0x61 then 1 else 0 end) ",
 );
 
 my %testDTList = (
@@ -756,6 +758,7 @@ my %testDTList = (
 	9   => '&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;',
 	10  => '../../../../../../../../conf/server.xml',
 	11  => '/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd',
+	12  => 'dir/..././..././folder/file.php ',
 );
 
 my %testURIList = (
@@ -1021,19 +1024,19 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),			29,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1120,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1125,		"testConcatenatedXSSList");
 is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			935,		"testConcatenatedXSSList2");
-is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				147,		"testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				148,		"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	87,			"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testXSSList),							750,		"testXSSList");
 is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			526,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),						457,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),						643,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),						585,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),						834,		"testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList),						475,		"testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),						649,		"testSQLIList2");
+is ($ids->detect_attacks(request => \%testSQLIList3),						591,		"testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList4),						852,		"testSQLIList4");
 is ($ids->detect_attacks(request => \%testSQLIList5),						935,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						452,		"testSQLIList6");
-is ($ids->detect_attacks(request => \%testDTList),							121,		"testDTList");
+is ($ids->detect_attacks(request => \%testSQLIList6),						469,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testDTList),							126,		"testDTList");
 is ($ids->detect_attacks(request => \%testURIList),							143,		"testURIList");
 is ($ids->detect_attacks(request => \%testRFEList),							524,		"testRFEList");
 is ($ids->detect_attacks(request => \%testUTF7List),						71,			"testUTF7List");
