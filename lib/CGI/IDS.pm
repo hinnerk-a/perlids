@@ -112,9 +112,9 @@ use HTML::Entities;
 use MIME::Base64;
 use Encode qw(decode);
 use Carp;
-use JSON::XS;
 use Time::HiRes;
 use FindBin qw($Bin);
+use CGI::IDS::Whitelist;
 
 #------------------------- Settings --------------------------------------------
 $XML::Simple::PREFERRED_PARSER	= "XML::Parser";
@@ -166,14 +166,9 @@ my @CONVERTERS = qw/
 	_run_centrifuge
 /;
 
-#------------------------- Globals ---------------------------------------------
-
-# harmless string definition
-my $not_harmless = qr/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/;
-
 #------------------------- Subs ------------------------------------------------
 
-#****f* IDS/new
+#****m* IDS/new
 # NAME
 #   Constructor
 # DESCRIPTION
@@ -232,7 +227,7 @@ sub new {
 	# self member variables
 	my $self = {
 		filters_file		=> $args{filters_file} || $filters_file_default,
-		whitelist_file		=> $args{whitelist_file},
+		whitelist   		=> CGI::IDS::Whitelist->new(whitelist_file => $args{whitelist_file}),
 		scan_keys			=> $args{scan_keys},
 		impact				=> 0,
 		attacks				=> undef, # []
@@ -240,21 +235,22 @@ sub new {
 		filter_disabled		=> { map { $_ => 1} @{$args{disable_filters} || []} },
 	};
 
+	if (DEBUG_MODE & DEBUG_WHITELIST) {
+		use Data::Dumper; print Dumper($self->{whitelist}->{whitelist});
+	}
+
 	# create object
 	bless $self, $package;
 
 	# read & parse filter XML
-	my $num_filters			= $self->_load_filters_from_xml($self->{filters_file});
-	my $num_whitelist		= $self->_load_whitelist_from_xml($self->{whitelist_file});
-
-	if (!$num_filters) {
+	if (!$self->_load_filters_from_xml($self->{filters_file})) {
 		croak "No IDS filter rules loaded!";
 	}
 
 	return $self;
 }
 
-#****f* IDS/detect_attacks
+#****m* IDS/detect_attacks
 # NAME
 #   detect_attacks
 # DESCRIPTION
@@ -312,104 +308,28 @@ sub detect_attacks {
 		my @matched_tags	= ();
 
 		my $request_value = defined $request->{$key} ? $request->{$key} : '';
-		my $contains_encoding = 0;
 
 		if (DEBUG_MODE & DEBUG_KEY_VALUES) {
 			print "\n\n\n******************************************\n".
 				"Key    : $key\nValue  : $request_value\n";
 		}
 
-		# skip if value is empty or generally whitelisted
-		if ( $request_value ne '' &&
-			!(	$self->{whitelist}{$key} && 
-				!defined($self->{whitelist}{$key}->{rule}) && 
-				!defined($self->{whitelist}{$key}->{conditions}) && 
-				!defined($self->{whitelist}{$key}->{encoding}) 
-			)
-		) {
-			# If marked as JSON, try to convert from JSON to reduce false positives
-			if (defined($self->{whitelist}{$key}) &&
-				defined($self->{whitelist}{$key}->{encoding}) && 
-				$self->{whitelist}{$key}->{encoding} eq 'json') {
-				
-				$request_value = _json_to_string($request_value);
-				$contains_encoding = 1;
+		if ($self->{whitelist}->is_suspicious(key => $key, request => $request)) {
+			$request_value = $self->{whitelist}->convert_if_marked_json(key => $key, value => $request_value);
+			my $attacks = $self->_apply_filters($request_value);
+			if ($attacks->{impact}) {
+				$filter_impact			+= $attacks->{impact};
+				$time_ms				+= $attacks->{time_ms};
+				$value_converted		= $attacks->{string_converted};
+				push (@matched_filters,	@{$attacks->{filters}});
+				push (@matched_tags,	@{$attacks->{tags}});
 			}
-
-			# make string utf8
-			utf8::upgrade($request_value);
-
-			# scan only if value is not-harmless
-			if ( $request_value =~ $not_harmless) {
-				my $attacks = {};
-
-				if (!$self->{whitelist}{$key}) {
-					# apply filters to value, not in whitelist
-					push (@{$self->{filtered_keys}}, {key => $key, value => $request_value, reason => 'key'}); # key not whitelisted
-					$attacks = $self->_apply_filters($request_value);
-				}
-				else {
-					# check if all conditions match
-					my $condition_mismatch = 0;
-					foreach my $condition (@{$self->{whitelist}{$key}->{conditions}}) {
-						if (! defined($request->{$condition->{key}}) ||
-							( defined ($condition->{rule}) && $request->{$condition->{key}} !~ $condition->{rule} )
-						) {
-							$condition_mismatch = 1;
-						}
-					}
-
-					# Apply filters if key is not in whitelisted environment conditions
-					# or if the value does not match the whitelist rule if one is set.
-					# Filtering is skipped if no rule is set.
-					if ( $condition_mismatch ||
-						(defined($self->{whitelist}{$key}->{rule}) &&
-						$request_value !~ $self->{whitelist}{$key}->{rule}) ||
-						$contains_encoding
-					) {
-						# apply filters to value, whitelist rules mismatched
-						my $reason = '';
-						if ($condition_mismatch) {
-							$reason = 'cond'; # condition mismatch
-						} 
-						elsif (!$contains_encoding) {
-							$reason = 'rule'; # rule mismatch
-						}
-						else {
-							$reason = 'enc'; # contains encoding
-						}
-						push (@{$self->{filtered_keys}}, {key => $key, value => $request_value, reason => $reason});
-						$attacks = $self->_apply_filters($request_value);
-					}
-					else {
-						# skipped, whitelist rule matched
-						push (@{$self->{non_filtered_keys}}, {key => $key, value => $request_value, reason => 'r&c'}); # rule & conditions matched
-					}
-				}
-
-				if ($attacks->{impact}) {
-					$filter_impact			+= $attacks->{impact};
-					$time_ms				+= $attacks->{time_ms};
-					$value_converted		= $attacks->{string_converted};
-					push (@matched_filters,	@{$attacks->{filters}});
-					push (@matched_tags,	@{$attacks->{tags}});
-				}
-			}
-			else {
-				# skipped, harmless string
-				push (@{$self->{non_filtered_keys}}, {key => $key, value => $request_value, reason => 'harml'}); # harmless
-			}
-		}
-		else {
-			# skipped, empty value or key generally whitelisted
-			my $reason = $request_value ? 'key' : 'empty';
-			push (@{$self->{non_filtered_keys}}, {key => $key, value => $request_value, reason => $reason});				
 		}
 
 		# scan key only if desired
 		if ($self->{scan_keys}) {
-			# scan only if value is not-harmless
-			if ( $key =~ $not_harmless ) {
+			# scan only if value is not harmless
+			if ( !$self->{whitelist}->is_harmless_string($key) ) {
 				# apply filters to key
 				my $attacks				= $self->_apply_filters($key);
 				$filter_impact			+= $attacks->{impact};
@@ -463,6 +383,10 @@ sub detect_attacks {
 		}
 		
 	} # end of foreach key
+	push (@{$self->{filtered_keys}},     @{$self->{whitelist}->suspicious_keys()});
+	push (@{$self->{non_filtered_keys}}, @{$self->{whitelist}->non_suspicious_keys()});
+	# reset filtered_keys and non_filtered_keys
+	$self->{whitelist}->reset();
 
 	if ($self->{impact} > 0) {
 		return $self->{impact};
@@ -472,7 +396,7 @@ sub detect_attacks {
 	}
 }
 
-#****f* IDS/set_scan_keys
+#****m* IDS/set_scan_keys
 # NAME
 #   set_scan_keys
 # DESCRIPTION
@@ -504,7 +428,7 @@ sub set_scan_keys {
 	$self->{scan_keys}	= $args{scan_keys} ? 1 : 0;
 }
 
-#****f* IDS/get_attacks
+#****m* IDS/get_attacks
 # NAME
 #   get_attacks
 # DESCRIPTION
@@ -550,7 +474,7 @@ sub get_attacks {
 	return $self->{attacks};
 }
 
-#****f* IDS/get_rule_description
+#****m* IDS/get_rule_description
 # NAME
 #   get_rule_description
 # DESCRIPTION
@@ -583,7 +507,7 @@ sub get_rule_description {
 	return $self->{rule_descriptions}{$args{rule_id}};
 }
 
-#****if* IDS/_apply_filters
+#****im* IDS/_apply_filters
 # NAME
 #   _apply_filters
 # DESCRIPTION
@@ -637,7 +561,7 @@ sub _apply_filters {
 	return \%attack;
 }
 
-#****if* IDS/_load_filters_from_xml
+#****im* IDS/_load_filters_from_xml
 # NAME
 #   _load_filters_from_xml
 # DESCRIPTION
@@ -693,103 +617,6 @@ sub _load_filters_from_xml {
 		}
 	}
 	return $filtercnt;
-}
-
-#****if* IDS/_load_whitelist_from_xml
-# NAME
-#   _load_whitelist_from_xml
-# DESCRIPTION
-#   loads the parameter whitelist XML file
-# INPUT
-#   whitelistfile   path + name of the XML whitelist file
-# OUTPUT
-#   int             number of loaded rules
-# SYNOPSIS
-#   IDS::_load_whitelist_from_xml('/home/xyz/param_whitelist.xml');
-#****
-
-sub _load_whitelist_from_xml {
-	my ($self, $whitelistfile) = @_;
-	my $whitelistcnt = 0;
-
-	if ($whitelistfile) {
-		# read & parse whitelist XML
-		my $whitelistxml;
-		eval {
-			$whitelistxml = XMLin($whitelistfile,
-				forcearray	=> [ qw(whitelist param conditions condition)],
-				keyattr		=> [],
-			);
-		};
-		if ($@) {
-			croak "Error in _load_whitelist_from_xml while parsing $whitelistfile: $@";
-		}
-
-		# convert XML structure into handy data structure
-		foreach my $whitelistobj (@{$whitelistxml->{param}}) {
-			my @conditionslist = ();
-			foreach my $condition (@{$whitelistobj->{conditions}[0]{condition}}) {
-				if (defined($condition->{rule})) {
-					# copy for error message
-					my $rule = $condition->{rule};
-
-					eval {
-						$condition->{rule} = qr/$condition->{rule}/ms;
-					};
-					if ($@) {
-						croak 'Error in whitelist rule of condition "' . $condition->{key} . '" for param "' . $whitelistobj->{key} . '": ' . $rule . ' Message: ' . $@;
-					}
-				}
-				push(@conditionslist, $condition);
-			}
-			my %whitelisthash = ();
-			if (defined($whitelistobj->{rule})) {
-				eval {
-					$whitelisthash{rule} = qr/$whitelistobj->{rule}/ms;
-				};
-				if ($@) {
-					croak 'Error in whitelist rule for param "' . $whitelistobj->{key} . '": ' . $whitelistobj->{rule} . ' Message: ' . $@;
-				}
-			}
-			if (@conditionslist) {
-				$whitelisthash{conditions} = \@conditionslist;
-			}
-			if ($whitelistobj->{encoding}) {
-				$whitelisthash{encoding} = $whitelistobj->{encoding};
-			}
-			$self->{whitelist}{$whitelistobj->{key}} = \%whitelisthash;
-			$whitelistcnt++;
-		}
-		if (DEBUG_MODE & DEBUG_WHITELIST) {
-			use Data::Dumper; print Dumper($self->{whitelist});
-		}
-	}
-	return $whitelistcnt;
-}
-
-#****if* IDS/_json_to_string
-# NAME
-#   _json_to_string
-# DESCRIPTION
-#   Tries to decode a string from JSON. Uses _datastructure_to_string().
-# INPUT
-#   value   the string to convert
-# OUTPUT
-#   value   converted string if correct JSON, the unchanged input string otherwise
-# SYNOPSIS
-#   IDS::_json_to_string($value);
-#****
-
-sub _json_to_string {
-	my ($value) = @_;
-	my $json_ds;
-	eval {
-		$json_ds = JSON::XS::decode_json($value);
-	};
-	if (!$@) {
-		$value = _datastructure_to_string($json_ds)."\n";
-	}
-	return $value;
 }
 
 #****if* IDS/_run_all_converters
@@ -1566,42 +1393,9 @@ sub _run_centrifuge {
 	return $value;
 }
 
-#****if* IDS/_datastructure_to_string
-# NAME
-#   _datastructure_to_string
-# DESCRIPTION
-#   Walks recursively through array or hash and concatenates keys and values to one single string (\n separated)
-# INPUT
-#   ref     the array/hash to convert
-# OUTPUT
-#   string  converted string
-# SYNOPSIS
-#   IDS::_datastructure_to_string($ref);
-#****
-
-sub _datastructure_to_string {
-	my $in = shift;
-	my $out = '';
-	if (ref $in eq 'HASH') {
-		foreach (keys %$in) {
-			$out .= $_."\n";
-			$out .= _datastructure_to_string($in->{$_});
-		}
-	}
-	elsif (ref $in eq 'ARRAY') {
-		foreach (@$in) {
-			$out = _datastructure_to_string($_) . $out;
-		}
-	}
-	else {
-			$out .= $in."\n";
-	}
-	return $out;
-}
-
 #------------------------- PHP functions ---------------------------------------
 
-#****f* IDS/array_sum
+#****if* IDS/array_sum
 # NAME
 #   array_sum
 # DESCRIPTION
@@ -1626,7 +1420,7 @@ sub array_sum {
 	return $sum;
 }
 
-#****f* IDS/preg_match
+#****if* IDS/preg_match
 # NAME
 #   preg_match
 # DESCRIPTION
@@ -1645,7 +1439,7 @@ sub preg_match {
 	return ($string =~ $pattern);
 }
 
-#****f* IDS/preg_match_all
+#****if* IDS/preg_match_all
 # NAME
 #   preg_match_all
 # DESCRIPTION
@@ -1671,7 +1465,7 @@ sub preg_match_all {
 	return (@$matches = ($string =~ /$pattern/g));
 }
 
-#****f* IDS/preg_replace
+#****if* IDS/preg_replace
 # NAME
 #   preg_replace
 # DESCRIPTION
@@ -1743,7 +1537,7 @@ sub preg_replace {
 	return $return_string;
 }
 
-#****f* IDS/str_replace
+#****if* IDS/str_replace
 # NAME
 #   str_replace
 # DESCRIPTION
@@ -1774,7 +1568,7 @@ sub str_replace {
 	}
 }
 
-#****f* IDS/str_split
+#****if* IDS/str_split
 # NAME
 #   str_split
 # DESCRIPTION
@@ -1797,7 +1591,7 @@ sub str_split {
 	}
 }
 
-#****f* IDS/strlen
+#****if* IDS/strlen
 # NAME
 #   strlen
 # DESCRIPTION
@@ -1815,7 +1609,7 @@ sub strlen {
 	return length($string);
 }
 
-#****f* IDS/urldecode
+#****if* IDS/urldecode
 # NAME
 #   urldecode
 # DESCRIPTION
@@ -1836,7 +1630,7 @@ sub urldecode {
 	return $theURL;
 }
 
-#****f* IDS/urlencode
+#****if* IDS/urlencode
 # NAME
 #   urlencode
 # DESCRIPTION
@@ -1855,7 +1649,7 @@ sub urlencode {
 	return $theURL;
 }
 
-#****f* IDS/implode
+#****if* IDS/implode
 # NAME
 #   implode
 # DESCRIPTION
@@ -1874,7 +1668,7 @@ sub implode {
 	return join($glue, @pieces);
 }
 
-#****f* IDS/explode
+#****if* IDS/explode
 # NAME
 #   explode
 # DESCRIPTION
@@ -1893,7 +1687,7 @@ sub explode {
 	return split(quotemeta($glue), $string);
 }
 
-#****f* IDS/stripslashes
+#****if* IDS/stripslashes
 # NAME
 #   stripslashes
 # DESCRIPTION
@@ -1913,7 +1707,7 @@ sub stripslashes {
 	return $string;
 }
 
-#****f* IDS/strip_tags
+#****if* IDS/strip_tags
 # NAME
 #   strip_tags
 # DESCRIPTION

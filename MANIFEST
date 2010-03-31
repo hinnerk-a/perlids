@@ -5,6 +5,7 @@ examples/ids/param_whitelist.xml
 examples/style.css
 lib/CGI/IDS.pm
 lib/CGI/IDS.xml
+lib/CGI/IDS/Whitelist.pm
 LICENSE
 LICENSE.LESSER
 Makefile.PL

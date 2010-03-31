@@ -32,10 +32,11 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 59;
+use Test::More tests => 60;
 
 # test module loading
 BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
+BEGIN { use_ok('CGI::IDS::Whitelist') }
 BEGIN { use_ok('XML::Simple', qw(:strict)) }
 BEGIN { use_ok('HTML::Entities') }
 BEGIN { use_ok('MIME::Base64') }
