@@ -315,7 +315,7 @@ sub detect_attacks {
 		}
 
 		if ($self->{whitelist}->is_suspicious(key => $key, request => $request)) {
-			$request_value = $self->{whitelist}->convert_if_marked_json(key => $key, value => $request_value);
+			$request_value = $self->{whitelist}->convert_if_marked_encoded(key => $key, value => $request_value);
 			my $attacks = $self->_apply_filters($request_value);
 			if ($attacks->{impact}) {
 				$filter_impact			+= $attacks->{impact};

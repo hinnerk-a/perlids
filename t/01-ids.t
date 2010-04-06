@@ -32,7 +32,7 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 60;
+use Test::More tests => 69;
 
 # test module loading
 BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
@@ -44,7 +44,6 @@ BEGIN { use_ok('Encode', qw(decode)) }
 BEGIN { use_ok('Carp') }
 BEGIN { use_ok('JSON::XS') }
 BEGIN { use_ok('Time::HiRes') }
-BEGIN { use_ok('utf8') }
 BEGIN { use_ok('FindBin', qw($Bin)) }
 
 #------------------------- Test Data -------------------------------------------
@@ -926,7 +925,7 @@ my %testForFalseAlerts = (
    25 => '"mooie verhalen in de talen: engels"',
 );
 
-#------------------------- Tests -----------------------------------------------
+#------------------------- CGI::IDS Tests -----------------------------------------------
 
 # croak tests
 print testmessage("croak tests");
@@ -1048,6 +1047,43 @@ is ($ids->detect_attacks(request => \%testHexCCConverter),					99,	    	"testHex
 is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
 is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
 is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");
+
+#------------------------- CGI::IDS::Whitelist Tests -----------------------------------------------
+print testmessage("Whitelist Processor tests");
+
+eval {
+	my $whitelist_fail = new CGI::IDS::Whitelist(
+		whitelist_file	=> "$Bin/data/missing_param_whitelist.xml",
+	);
+};
+like( $@, qr/_load_whitelist_from_xml.*File does not exist/, 'Croak if whitelist file is missing' );
+
+my $whitelist = new CGI::IDS::Whitelist (
+	whitelist_file	=> "$Bin/data/test_param_whitelist.xml",
+);
+isa_ok ($whitelist, 'CGI::IDS::Whitelist');
+
+
+my %testWhitelist = (
+	login_password	=>	'alert(1)',
+	name			=>	'hinnerk',
+	lastname		=>	'hinnerk alert(2)',
+	action			=>	'login',
+	username		=>	'hinnerk',
+	scr_rec_id		=>	'8763476.946ef987',
+	send			=>  '',
+	uid				=>  'alert(1)',
+);
+ok (!$whitelist->is_suspicious(key => 'login_password', request => \%testWhitelist),	"login_password whitelisted as per rule and conditions");
+ok ( $whitelist->is_suspicious(key => 'lastname', request => \%testWhitelist),			"login_password is suspicious");
+ok (!$whitelist->is_suspicious(key => 'name', request => \%testWhitelist),				"name is not suspicious");
+ok (!$whitelist->is_suspicious(key => 'uid', request => \%testWhitelist),				"uid is generally whitelisted");
+ok (!$whitelist->is_suspicious(key => 'scr_rec_id', request => \%testWhitelist),		"scr_rec_id is whitelisted as per rule");
+
+ok ( $whitelist->is_harmless_string("hinnerk"),											"'hinnerk' is a harmless string");
+ok (!$whitelist->is_harmless_string("hinnerk(1)"),										"'hinnerk(1)' is not a harmless string");
+
+like ($whitelist->convert_if_marked_encoded( key => 'json_value', value => '{"a":"b","c":["123", 111, "456"]}' ), qr/^[a-c1-6\n]+$/, 'param marked as JSON was converted');
 
 sub testmessage {
 	(my $message) = @_;

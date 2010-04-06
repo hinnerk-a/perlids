@@ -160,7 +160,7 @@ sub new {
 #   1 if you should check it with the complete filter set,
 #   0 if harmless or sucessfully whitelisted.
 # SYNOPSIS
-#   $whitelist->is_suspicious( key => 'mykey', $request );
+#   $whitelist->is_suspicious( key => 'mykey', request => $request );
 #****
 
 =head2 is_suspicious()
@@ -175,7 +175,7 @@ sub new {
    1 if you should check it with the complete filter set,
    0 if harmless or sucessfully whitelisted.
  SYNOPSIS
-   $whitelist->is_suspicious( key => 'mykey', $request );
+   $whitelist->is_suspicious( key => 'mykey', request => $request );
 
 =cut
 
@@ -195,7 +195,7 @@ sub is_suspicious {
 		)
 	) {
 		my $request_value_orig = $request_value;
-		$request_value = $self->convert_if_marked_json(key => $key, value => $request_value);
+		$request_value = $self->convert_if_marked_encoded(key => $key, value => $request_value);
 		if ($request_value ne $request_value_orig) {
 			$contains_encoding = 1;
 		}
@@ -264,11 +264,12 @@ sub is_suspicious {
 	return 0;
 }
 
-#****m* IDS/Whitelist/convert_if_marked_json
+#****m* IDS/Whitelist/convert_if_marked_encoded
 # NAME
-#   convert_if_marked_json
+#   convert_if_marked_encoded
 # DESCRIPTION
 #   Tries to JSON-decode and flatten a value to a plain string if the key has been marked as JSON in the whitelist.
+#   Other encodings may follow in future.
 # INPUT
 #   HASHREF
 #     + key
@@ -277,13 +278,14 @@ sub is_suspicious {
 #   The JSON-decoded and flattened 'value' if key is marked JSON. Plain keys and values, newline separated.
 #   Untouched 'value' otherwise.
 # SYNOPSIS
-#   $whitelist->convert_if_marked_json( key => 'data', value = '{"a":"b","c":["123", 111, "456"]}');
+#   $whitelist->convert_if_marked_encoded( key => 'data', value = '{"a":"b","c":["123", 111, "456"]}');
 #****
 
-=head2 convert_if_marked_json()
+=head2 convert_if_marked_encoded()
 
  DESCRIPTION
    Tries to JSON-decode and flatten a value to a plain string if the key has been marked as JSON in the whitelist.
+   Other encodings may follow in future.
  INPUT
    HASHREF
      + key
@@ -292,11 +294,11 @@ sub is_suspicious {
    The JSON-decoded and flattened 'value' if key is marked JSON. Plain keys and values, newline separated.
    Untouched 'value' otherwise.
  SYNOPSIS
-   $whitelist->convert_if_marked_json( key => 'data', value = '{"a":"b","c":["123", 111, "456"]}');
+   $whitelist->convert_if_marked_encoded( key => 'data', value => '{"a":"b","c":["123", 111, "456"]}');
 
 =cut
 
-sub convert_if_marked_json {
+sub convert_if_marked_encoded {
 	my ($self, %args)	= @_;
 	my $key				= $args{key};
 	my $request_value	= $args{value};
@@ -417,9 +419,9 @@ sub reset {
 # INPUT
 #   + string
 # OUTPUT
-#   BOOLEAN
+#   BOOLEAN (pattern match return value)
 # SYNOPSIS
-#   IDS::Whitelist::is_harmless_string( $string );
+#   $whitelist->is_harmless_string( $string );
 #****
 
 =head2 is_harmless_string()
@@ -429,15 +431,15 @@ sub reset {
  INPUT
    + string
  OUTPUT
-   BOOLEAN
+   BOOLEAN (pattern match return value)
  SYNOPSIS
-   IDS::Whitelist::is_harmless_string( $string );
+   $whitelist->is_harmless_string( $string );
 
 =cut
 
 sub is_harmless_string {
-	my $string = @_;
-	return ( $string =~ qr/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/ );
+	my ($self, $string) = @_;
+	return ( $string !~ m/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/ );
 }
 
 #****im* IDS/Whitelist/_load_whitelist_from_xml
@@ -451,7 +453,7 @@ sub is_harmless_string {
 # OUTPUT
 #   int             number of loaded rules
 # SYNOPSIS
-#   IDS::Whitelist::_load_whitelist_from_xml('/home/xyz/param_whitelist.xml');
+#   $self->_load_whitelist_from_xml('/home/xyz/param_whitelist.xml');
 #****
 
 sub _load_whitelist_from_xml {
