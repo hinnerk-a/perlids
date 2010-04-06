@@ -1,6 +1,7 @@
 Revision history for PerlIDS
 
-1.0119  2010-03-29
+1.02    2010-04-06
+        Extracted CGI::IDS::Whitelist for separately using the whitelist check
         Updated filter set and converters to PHPIDS rev. 1374
 
 1.0118  2010-02-22

@@ -24,9 +24,9 @@ name: CGI-IDS
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0119
+    version: 1.02
   CGI::IDS::Whitelist:
     file: lib/CGI/IDS/Whitelist.pm
 resources:
   license: http://www.gnu.org/licenses/lgpl-3.0.txt
-version: 1.0119
+version: 1.02
