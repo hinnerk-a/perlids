@@ -30,4 +30,17 @@
 			</condition>
 		</conditions>
 	</param>
+	<param>
+		<key>cert</key>
+		<conditions>
+			<condition>
+				<key>username</key>
+				<rule><![CDATA[(?:^[a-z]+$)]]></rule>
+			</condition>
+			<condition>
+				<key>action</key>
+				<rule><![CDATA[(?:^logout$)]]></rule>
+			</condition>
+		</conditions>
+	</param>
 </whitelist>

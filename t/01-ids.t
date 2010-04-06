@@ -32,7 +32,7 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 69;
+use Test::More tests => 70;
 
 # test module loading
 BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
@@ -1073,12 +1073,14 @@ my %testWhitelist = (
 	scr_rec_id		=>	'8763476.946ef987',
 	send			=>  '',
 	uid				=>  'alert(1)',
+	cert			=>  'alert(1)',
 );
 ok (!$whitelist->is_suspicious(key => 'login_password', request => \%testWhitelist),	"login_password whitelisted as per rule and conditions");
 ok ( $whitelist->is_suspicious(key => 'lastname', request => \%testWhitelist),			"login_password is suspicious");
 ok (!$whitelist->is_suspicious(key => 'name', request => \%testWhitelist),				"name is not suspicious");
 ok (!$whitelist->is_suspicious(key => 'uid', request => \%testWhitelist),				"uid is generally whitelisted");
 ok (!$whitelist->is_suspicious(key => 'scr_rec_id', request => \%testWhitelist),		"scr_rec_id is whitelisted as per rule");
+ok ( $whitelist->is_suspicious(key => 'cert', request => \%testWhitelist),				"cert is not whitelisted due to failing conditions");
 
 ok ( $whitelist->is_harmless_string("hinnerk"),											"'hinnerk' is a harmless string");
 ok (!$whitelist->is_harmless_string("hinnerk(1)"),										"'hinnerk(1)' is not a harmless string");
