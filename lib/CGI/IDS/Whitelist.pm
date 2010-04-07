@@ -1,6 +1,6 @@
 package CGI::IDS::Whitelist;
 
-our $VERSION = '1.02';
+our $VERSION = '1.021';
 
 #------------------------- Notes -----------------------------------------------
 # This source code is documented in both POD and ROBODoc format.
@@ -12,7 +12,7 @@ our $VERSION = '1.02';
 # NAME
 #   PerlIDS Whitelist (CGI::IDS::Whitelist)
 # DESCRIPTION
-#   
+#   Whitelist Processor for PerlIDS (CGI::IDS)
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE

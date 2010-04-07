@@ -41,19 +41,23 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.02 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1374
+Version 1.021 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1374
 
 =cut
 
-our $VERSION = '1.02';
+our $VERSION = '1.021';
 
 =head1 DESCRIPTION
 
-PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/>. It parses any hashref for possible attacks, so it does not depend on CGI.pm.
+PerlIDS (CGI::IDS) is a website intrusion detection system based on PHPIDS L<http://php-ids.org/> to detect possible attacks in website requests, e.g. Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF), SQL Injections (SQLI) etc.
+
+It parses any hashref for possible attacks, so it does not depend on CGI.pm.
 
 The intrusion detection is based on a set of converters that convert the request according to common techniques that are used to hide attacks. These converted strings are checked for attacks by running a filter set of currently 68 regular expressions and a generic attack detector to find obfuscated attacks. For easily keeping the filter set up-to-date, PerlIDS is compatible to the original XML filter set of PHPIDS, which is frequently updated.
 
 Each matching regular expression has it's own impact value that increases the tested string's total attack impact. Using these total impacts, a threshold can be defined by the calling application to log the suspicious requests to database and send out warnings via e-mail or even SMS on high impacts that indicate critical attack activity. These impacts can be summed per IP address, session or user to identify attackers who are testing the website with small impact attacks over a time.
+
+You can improve the speed and the accurancy (reduce false positives) of the IDS by specifying an L<XML whitelist file|CGI::IDS/Whitelist>. This whitelist check can also be processed separately by using L<CGI::IDS::Whitelist|CGI::IDS::Whitelist> if you want to pre-check the parameters on your application servers before you send only the suspicious requests over to worker servers that do the complete CGI::IDS check.
 
 Follow PerlIDS on twitter: L<https://twitter.com/perlids>
 
@@ -66,6 +70,7 @@ Follow PerlIDS on twitter: L<https://twitter.com/perlids>
 
  # instantiate the IDS object;
  # do not scan keys, values only; don't scan PHP code injection filters (IDs 58,59,60);
+ # whitelist the parameters as per given XML whitelist file;
  # All arguments are optional, 'my $ids = new CGI::IDS();' is also working correctly, 
  # loading the entire shipped filter set and not scanning the keys.
  # See new() for all possible arguments.
@@ -1819,7 +1824,7 @@ Each detection run adds the particular filter impacts to one total impact sum.
 
 =head2 Whitelist
 
-Using a whitelist you can improve the speed an the accurancy of the IDS. A whitelist defines which 
+Using a whitelist you can improve the speed and the accurancy (reduce false positives) of the IDS. A whitelist defines which
 parameters do not need to undergo the expensive scanning (if their values match given rules and given conditions).
 
 =head3 Example XML Code
