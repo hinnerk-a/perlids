@@ -32,7 +32,7 @@ use strict;
 use warnings;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 70;
+use Test::More tests => 78;
 
 # test module loading
 BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
@@ -1071,9 +1071,9 @@ my %testWhitelist = (
 	action			=>	'login',
 	username		=>	'hinnerk',
 	scr_rec_id		=>	'8763476.946ef987',
-	send			=>  '',
-	uid				=>  'alert(1)',
-	cert			=>  'alert(1)',
+	send			=>	'',
+	uid				=>	'alert(1)',
+	cert			=>	'alert(1)',
 );
 ok (!$whitelist->is_suspicious(key => 'login_password', request => \%testWhitelist),	"login_password whitelisted as per rule and conditions");
 ok ( $whitelist->is_suspicious(key => 'lastname', request => \%testWhitelist),			"login_password is suspicious");
@@ -1085,7 +1085,18 @@ ok ( $whitelist->is_suspicious(key => 'cert', request => \%testWhitelist),				"c
 ok ( $whitelist->is_harmless_string("hinnerk"),											"'hinnerk' is a harmless string");
 ok (!$whitelist->is_harmless_string("hinnerk(1)"),										"'hinnerk(1)' is not a harmless string");
 
-like ($whitelist->convert_if_marked_encoded( key => 'json_value', value => '{"a":"b","c":["123", 111, "456"]}' ), qr/^[a-c1-6\n]+$/, 'param marked as JSON was converted');
+ok ( (grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),					"'lastname' is in suspicious_keys list");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),					"'name' is not in suspicious_keys list");
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),				"'lastname' is not in non_suspicious_keys list");
+ok ( (grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),				"'name' is in non_suspicious_keys list");
+
+$whitelist->reset();
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),					"'lastname' is not in suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),					"'name' is not in suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),				"'lastname' is not in non_suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),				"'name' is not in non_suspicious_keys list after reset");
+
+like ($whitelist->convert_if_marked_encoded( key => 'json_value', value => '{"a":"b","c":["123", 111, "456"]}' ), qr/^[a-c1-6\n]+$/, 'param marked as JSON has been converted');
 
 sub testmessage {
 	(my $message) = @_;

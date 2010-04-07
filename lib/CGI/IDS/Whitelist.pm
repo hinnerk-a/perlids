@@ -1,6 +1,6 @@
 package CGI::IDS::Whitelist;
 
-our $VERSION = '1.021';
+our $VERSION = '1.0211';
 
 #------------------------- Notes -----------------------------------------------
 # This source code is documented in both POD and ROBODoc format.
