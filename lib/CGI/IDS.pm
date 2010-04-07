@@ -1977,6 +1977,8 @@ Filtered due to containing (JSON) encoding for this key.
 
 =back
 
+=back
+
 =over 4
 
 =item C<$ids-E<gt>{non_filtered_keys}>
@@ -1998,8 +2000,6 @@ Not filtered because the key has been generally whitelisted.
 =item * I<r&c>: rule & conditions matched
 
 Not filtered due to matching rules and conditions for this key.
-
-=back
 
 =back
 
