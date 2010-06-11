@@ -1,6 +1,6 @@
 package CGI::IDS::Whitelist;
 
-our $VERSION = '1.0211';
+our $VERSION = '1.0212';
 
 #------------------------- Notes -----------------------------------------------
 # This source code is documented in both POD and ROBODoc format.
@@ -590,7 +590,7 @@ L<CGI::IDS>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008-2010 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
+Copyright (C) 2010 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
 
 This file is part of PerlIDS.
 

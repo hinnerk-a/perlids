@@ -10,7 +10,7 @@ package CGI::IDS;
 # NAME
 #   PerlIDS (CGI::IDS)
 # DESCRIPTION
-#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1374
+#   Website Intrusion Detection System based on PHPIDS http://php-ids.org rev. 1409
 # AUTHOR
 #   Hinnerk Altenburg <hinnerk@cpan.org>
 # CREATION DATE
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0211 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1374
+Version 1.0212 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1409
 
 =cut
 
-our $VERSION = '1.0211';
+our $VERSION = '1.0212';
 
 =head1 DESCRIPTION
 
@@ -935,8 +935,9 @@ sub _convert_from_sql_keywords {
 
 	my $pattern = qr/(?:IS\s+null)|(LIKE\s+null)|(?:(?:^|\W)IN[+\s]*\([\s\d"]+[^()]*\))/ims;
 	$value   = preg_replace($pattern, '"=0', $value);
-	$value   = preg_replace(qr/\W+\s+like\s+\W+/, ' 1 like 1 ', $value);
+	$value   = preg_replace(qr/\W+\s*like\s*\W+/ims, '1" OR "1"', $value);
 	$value   = preg_replace(qr/null[,"\s]/ims, ',0', $value);
+	$value   = preg_replace(qr/\d+\./ims, ' 1', $value);
 	$value   = preg_replace(qr/,null/ims, ',0', $value);
 	$value   = preg_replace(qr/(?:between|mod)/ims, 'or', $value);
 	$value   = preg_replace(qr/(?:and\s+\d+\.?\d*)/ims, '', $value);
@@ -978,6 +979,12 @@ sub _convert_entities {
 		$value		.= "\n" . str_replace(';;', ';', $converted);
 	}
 
+	# normalize obfuscated protocol handlers
+	$value = preg_replace(
+		'/(?:j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*)|(d\s*a\s*t\s*a\s*)/ms',
+		'javascript', $value
+	);
+
 	return $value;
 }
 
@@ -1001,8 +1008,8 @@ sub _convert_from_control_chars {
 	my @search	= (
 		chr(0), chr(1), chr(2), chr(3), chr(4), chr(5),
 		chr(6), chr(7), chr(8), chr(11), chr(12), chr(14),
-		chr(15), chr(16), chr(17), chr(18), chr(19),
-		chr(192), chr(193), chr(238), chr(255)
+		chr(15), chr(16), chr(17), chr(18), chr(19), chr(24),
+		chr(25), chr(192), chr(193), chr(238), chr(255)
 	);
 	$value	= str_replace(\@search, '%00', $value);
 
@@ -1294,10 +1301,6 @@ sub _convert_from_proprietary_encodings {
 
 	# normalize ampersand listings
 	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
-
-	# normalize JS backspace linebreaks
-	# PHP to Perl note: [\\] in Perl instead of [\\\] in PHP
-	$value = preg_replace(qr/^\/|\/$|,\/\n|\/,|[\\]+\s{4}/, '', $value);
 
 	return $value;
 }
