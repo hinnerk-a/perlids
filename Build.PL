@@ -22,6 +22,7 @@ my $builder = Module::Build->new(
     add_to_cleanup      => [ 'CGI-IDS-*' ],
     create_makefile_pl  => 'traditional',
     sign                => 1,
+    create_license      => 1,
 );
 
 $builder->add_build_element('xml');

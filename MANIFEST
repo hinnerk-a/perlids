@@ -7,7 +7,6 @@ lib/CGI/IDS.pm
 lib/CGI/IDS.xml
 lib/CGI/IDS/Whitelist.pm
 LICENSE
-LICENSE.LESSER
 Makefile.PL
 MANIFEST
 META.yml
