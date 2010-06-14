@@ -71,7 +71,7 @@ Follow PerlIDS on twitter: L<https://twitter.com/perlids>
  # instantiate the IDS object;
  # do not scan keys, values only; don't scan PHP code injection filters (IDs 58,59,60);
  # whitelist the parameters as per given XML whitelist file;
- # All arguments are optional, 'my $ids = new CGI::IDS();' is also working correctly, 
+ # All arguments are optional, 'my $ids = new CGI::IDS();' is also working correctly,
  # loading the entire shipped filter set and not scanning the keys.
  # See new() for all possible arguments.
  my $ids = new CGI::IDS(
@@ -122,53 +122,53 @@ use FindBin qw($Bin);
 use CGI::IDS::Whitelist;
 
 #------------------------- Settings --------------------------------------------
-$XML::Simple::PREFERRED_PARSER	= "XML::Parser";
+$XML::Simple::PREFERRED_PARSER  = "XML::Parser";
 
 #------------------------- Debugging -------------------------------------------
 # debug modes (binary):
-use constant DEBUG_KEY_VALUES		=> (1 << 0); # print each key value pair
-use constant DEBUG_IMPACTS			=> (1 << 1); # print impact per key value pair
-use constant DEBUG_ARRAY_INFO		=> (1 << 2); # print attack info arrays
-use constant DEBUG_CONVERTERS		=> (1 << 3); # print output of each converter
-use constant DEBUG_SORT_KEYS_NUM	=> (1 << 4); # sort request by keys numerically
-use constant DEBUG_SORT_KEYS_ALPHA	=> (1 << 5); # sort request by keys alphabetically
-use constant DEBUG_WHITELIST		=> (1 << 6); # dumps loaded whitelist hash
-use constant DEBUG_MATCHED_FILTERS	=> (1 << 7); # print IDs of matched filters
+use constant DEBUG_KEY_VALUES       => (1 << 0); # print each key value pair
+use constant DEBUG_IMPACTS          => (1 << 1); # print impact per key value pair
+use constant DEBUG_ARRAY_INFO       => (1 << 2); # print attack info arrays
+use constant DEBUG_CONVERTERS       => (1 << 3); # print output of each converter
+use constant DEBUG_SORT_KEYS_NUM    => (1 << 4); # sort request by keys numerically
+use constant DEBUG_SORT_KEYS_ALPHA  => (1 << 5); # sort request by keys alphabetically
+use constant DEBUG_WHITELIST        => (1 << 6); # dumps loaded whitelist hash
+use constant DEBUG_MATCHED_FILTERS  => (1 << 7); # print IDs of matched filters
 
-#use constant DEBUG_MODE				=>	DEBUG_KEY_VALUES |
-#										DEBUG_IMPACTS |
-#										DEBUG_WHITELIST |
-#										DEBUG_ARRAY_INFO |
-#										DEBUG_CONVERTERS |
-#										DEBUG_MATCHED_FILTERS |
-#										DEBUG_SORT_KEYS_NUM;
+#use constant DEBUG_MODE                =>  DEBUG_KEY_VALUES |
+#                                       DEBUG_IMPACTS |
+#                                       DEBUG_WHITELIST |
+#                                       DEBUG_ARRAY_INFO |
+#                                       DEBUG_CONVERTERS |
+#                                       DEBUG_MATCHED_FILTERS |
+#                                       DEBUG_SORT_KEYS_NUM;
 
 # simply comment this line out to switch debugging mode on (also uncomment above declaration)
-use constant DEBUG_MODE				=> 0;
+use constant DEBUG_MODE             => 0;
 
 #------------------------- Constants -------------------------------------------
 
 # converter functions, processed in this order
 my @CONVERTERS = qw/
-	stripslashes
-	_convert_from_repetition
-	_convert_from_commented
-	_convert_from_whitespace
-	_convert_from_js_charcode
-	_convert_js_regex_modifiers
-	_convert_entities
-	_convert_quotes
-	_convert_from_sql_hex
-	_convert_from_sql_keywords
-	_convert_from_control_chars
-	_convert_from_nested_base64
-	_convert_from_out_of_range_chars
-	_convert_from_xml
-	_convert_from_js_unicode
-	_convert_from_utf7
-	_convert_from_concatenated
-	_convert_from_proprietary_encodings
-	_run_centrifuge
+    stripslashes
+    _convert_from_repetition
+    _convert_from_commented
+    _convert_from_whitespace
+    _convert_from_js_charcode
+    _convert_js_regex_modifiers
+    _convert_entities
+    _convert_quotes
+    _convert_from_sql_hex
+    _convert_from_sql_keywords
+    _convert_from_control_chars
+    _convert_from_nested_base64
+    _convert_from_out_of_range_chars
+    _convert_from_xml
+    _convert_from_js_unicode
+    _convert_from_utf7
+    _convert_from_concatenated
+    _convert_from_proprietary_encodings
+    _run_centrifuge
 /;
 
 #------------------------- Subs ------------------------------------------------
@@ -179,7 +179,7 @@ my @CONVERTERS = qw/
 # DESCRIPTION
 #   Creates an IDS object.
 #   The filter set and whitelist will stay loaded during the lifetime of the object.
-#   You may call detect_attacks() multiple times, the attack array ( get_attacks() ) 
+#   You may call detect_attacks() multiple times, the attack array ( get_attacks() )
 #   will be emptied at the start of each run of detect_attacks().
 # INPUT
 #   HASH
@@ -201,11 +201,11 @@ my @CONVERTERS = qw/
 
 =head2 new()
 
-Constructor. Can optionally take a hash of settings. If I<filters_file> is not given, 
+Constructor. Can optionally take a hash of settings. If I<filters_file> is not given,
 the shipped filter set will be loaded, I<scan_keys> defaults to 0.
 
 The filter set and whitelist will stay loaded during the lifetime of the object.
-You may call C<detect_attacks()> multiple times, the attack array (C<get_attacks()>) 
+You may call C<detect_attacks()> multiple times, the attack array (C<get_attacks()>)
 will be emptied at the start of each run of C<detect_attacks()>.
 
 For example, the following is a valid constructor:
@@ -222,37 +222,37 @@ The Constructor dies (croaks) if no filter rule could be loaded.
 =cut
 
 sub new {
-	my ($package, %args) = @_;
+    my ($package, %args) = @_;
 
-	# defaults
-	$args{scan_keys}			= $args{scan_keys} ? 1 : 0;
-	my $filters_file_default	= __FILE__;
-	$filters_file_default 		=~ s/IDS.pm/IDS.xml/;
+    # defaults
+    $args{scan_keys}            = $args{scan_keys} ? 1 : 0;
+    my $filters_file_default    = __FILE__;
+    $filters_file_default       =~ s/IDS.pm/IDS.xml/;
 
-	# self member variables
-	my $self = {
-		filters_file		=> $args{filters_file} || $filters_file_default,
-		whitelist   		=> CGI::IDS::Whitelist->new(whitelist_file => $args{whitelist_file}),
-		scan_keys			=> $args{scan_keys},
-		impact				=> 0,
-		attacks				=> undef, # []
-		filters				=> [],
-		filter_disabled		=> { map { $_ => 1} @{$args{disable_filters} || []} },
-	};
+    # self member variables
+    my $self = {
+        filters_file        => $args{filters_file} || $filters_file_default,
+        whitelist           => CGI::IDS::Whitelist->new(whitelist_file => $args{whitelist_file}),
+        scan_keys           => $args{scan_keys},
+        impact              => 0,
+        attacks             => undef, # []
+        filters             => [],
+        filter_disabled     => { map { $_ => 1} @{$args{disable_filters} || []} },
+    };
 
-	if (DEBUG_MODE & DEBUG_WHITELIST) {
-		use Data::Dumper; print Dumper($self->{whitelist}->{whitelist});
-	}
+    if (DEBUG_MODE & DEBUG_WHITELIST) {
+        use Data::Dumper; print Dumper($self->{whitelist}->{whitelist});
+    }
 
-	# create object
-	bless $self, $package;
+    # create object
+    bless $self, $package;
 
-	# read & parse filter XML
-	if (!$self->_load_filters_from_xml($self->{filters_file})) {
-		croak "No IDS filter rules loaded!";
-	}
+    # read & parse filter XML
+    if (!$self->_load_filters_from_xml($self->{filters_file})) {
+        croak "No IDS filter rules loaded!";
+    }
 
-	return $self;
+    return $self;
 }
 
 #****m* IDS/detect_attacks
@@ -262,7 +262,7 @@ sub new {
 #   Parses a hashref (e.g. $query->Vars) for detection of possible attacks.
 #   The attack array is emptied at the start of each run.
 # INPUT
-#   +request	hashref to be parsed
+#   +request    hashref to be parsed
 # OUTPUT
 #   Impact if filter matched, 0 otherwise
 # SYNOPSIS
@@ -284,121 +284,121 @@ sub new {
 =cut
 
 sub detect_attacks {
-	my ($self, %args) = @_;
+    my ($self, %args) = @_;
 
-	return 0 unless ($args{request});
-	my $request = $args{request};
+    return 0 unless ($args{request});
+    my $request = $args{request};
 
-	# reset last detection data
-	$self->{impact}				= 0;
-	$self->{attacks}			= [];
-	$self->{filtered_keys}		= [];
-	$self->{non_filtered_keys}	= [];
+    # reset last detection data
+    $self->{impact}             = 0;
+    $self->{attacks}            = [];
+    $self->{filtered_keys}      = [];
+    $self->{non_filtered_keys}  = [];
 
-	my @request_keys =  keys %$request;
-	# sorting for filter debugging only
-	if (DEBUG_MODE & DEBUG_SORT_KEYS_ALPHA) {
-		@request_keys = sort {$a cmp $b} @request_keys;
-	}
-	elsif (DEBUG_MODE & DEBUG_SORT_KEYS_NUM) {
-		@request_keys = sort {$a <=> $b} @request_keys;
-	}
+    my @request_keys =  keys %$request;
+    # sorting for filter debugging only
+    if (DEBUG_MODE & DEBUG_SORT_KEYS_ALPHA) {
+        @request_keys = sort {$a cmp $b} @request_keys;
+    }
+    elsif (DEBUG_MODE & DEBUG_SORT_KEYS_NUM) {
+        @request_keys = sort {$a <=> $b} @request_keys;
+    }
 
-	foreach my $key (@request_keys) {
-		my $filter_impact	= 0;
-		my $key_converted	= '';
-		my $value_converted	= '';
-		my $time_ms			= 0;
-		my @matched_filters	= ();
-		my @matched_tags	= ();
+    foreach my $key (@request_keys) {
+        my $filter_impact   = 0;
+        my $key_converted   = '';
+        my $value_converted = '';
+        my $time_ms         = 0;
+        my @matched_filters = ();
+        my @matched_tags    = ();
 
-		my $request_value = defined $request->{$key} ? $request->{$key} : '';
+        my $request_value = defined $request->{$key} ? $request->{$key} : '';
 
-		if (DEBUG_MODE & DEBUG_KEY_VALUES) {
-			print "\n\n\n******************************************\n".
-				"Key    : $key\nValue  : $request_value\n";
-		}
+        if (DEBUG_MODE & DEBUG_KEY_VALUES) {
+            print "\n\n\n******************************************\n".
+                "Key    : $key\nValue  : $request_value\n";
+        }
 
-		if ($self->{whitelist}->is_suspicious(key => $key, request => $request)) {
-			$request_value = $self->{whitelist}->convert_if_marked_encoded(key => $key, value => $request_value);
-			my $attacks = $self->_apply_filters($request_value);
-			if ($attacks->{impact}) {
-				$filter_impact			+= $attacks->{impact};
-				$time_ms				+= $attacks->{time_ms};
-				$value_converted		= $attacks->{string_converted};
-				push (@matched_filters,	@{$attacks->{filters}});
-				push (@matched_tags,	@{$attacks->{tags}});
-			}
-		}
+        if ($self->{whitelist}->is_suspicious(key => $key, request => $request)) {
+            $request_value = $self->{whitelist}->convert_if_marked_encoded(key => $key, value => $request_value);
+            my $attacks = $self->_apply_filters($request_value);
+            if ($attacks->{impact}) {
+                $filter_impact          += $attacks->{impact};
+                $time_ms                += $attacks->{time_ms};
+                $value_converted        = $attacks->{string_converted};
+                push (@matched_filters, @{$attacks->{filters}});
+                push (@matched_tags,    @{$attacks->{tags}});
+            }
+        }
 
-		# scan key only if desired
-		if ($self->{scan_keys}) {
-			# scan only if value is not harmless
-			if ( !$self->{whitelist}->is_harmless_string($key) ) {
-				# apply filters to key
-				my $attacks				= $self->_apply_filters($key);
-				$filter_impact			+= $attacks->{impact};
-				$time_ms				+= $attacks->{time_ms};
-				$key_converted			= $attacks->{string_converted};
-				push (@matched_filters,	@{$attacks->{filters}});
-				push (@matched_tags,	@{$attacks->{tags}});
-			}
-			else {
-				# skipped, alphanumeric key only
-			}
-		}
+        # scan key only if desired
+        if ($self->{scan_keys}) {
+            # scan only if value is not harmless
+            if ( !$self->{whitelist}->is_harmless_string($key) ) {
+                # apply filters to key
+                my $attacks             = $self->_apply_filters($key);
+                $filter_impact          += $attacks->{impact};
+                $time_ms                += $attacks->{time_ms};
+                $key_converted          = $attacks->{string_converted};
+                push (@matched_filters, @{$attacks->{filters}});
+                push (@matched_tags,    @{$attacks->{tags}});
+            }
+            else {
+                # skipped, alphanumeric key only
+            }
+        }
 
-		# add attack to log
-		my %attack = ();
-		if ($filter_impact) {
-			# make arrays unique and sorted
-			my %seen = ();
-			@matched_filters = sort grep { ! $seen{$_} ++ } @matched_filters;
-			%seen = ();
-			@matched_tags = sort grep { ! $seen{$_} ++ } @matched_tags;
+        # add attack to log
+        my %attack = ();
+        if ($filter_impact) {
+            # make arrays unique and sorted
+            my %seen = ();
+            @matched_filters = sort grep { ! $seen{$_} ++ } @matched_filters;
+            %seen = ();
+            @matched_tags = sort grep { ! $seen{$_} ++ } @matched_tags;
 
-			%attack = (
-				key				=> $key,
-				key_converted	=> $key_converted,
-				value			=> $request_value,
-				value_converted	=> $value_converted,
-				time_ms			=> $time_ms,
-				impact			=> $filter_impact,
-				matched_filters	=> \@matched_filters,
-				matched_tags	=> \@matched_tags,
-			);
-			push (@{$self->{attacks}}, \%attack);
-		}
-		$self->{impact} += $filter_impact;
+            %attack = (
+                key             => $key,
+                key_converted   => $key_converted,
+                value           => $request_value,
+                value_converted => $value_converted,
+                time_ms         => $time_ms,
+                impact          => $filter_impact,
+                matched_filters => \@matched_filters,
+                matched_tags    => \@matched_tags,
+            );
+            push (@{$self->{attacks}}, \%attack);
+        }
+        $self->{impact} += $filter_impact;
 
-		if (DEBUG_MODE & DEBUG_ARRAY_INFO && %attack) {
-			use Data::Dumper;
-			print "------------------------------------------\n".
-				Dumper(\%attack) .
-				"\n\n";
-		}
+        if (DEBUG_MODE & DEBUG_ARRAY_INFO && %attack) {
+            use Data::Dumper;
+            print "------------------------------------------\n".
+                Dumper(\%attack) .
+                "\n\n";
+        }
 
-		if (DEBUG_MODE & DEBUG_MATCHED_FILTERS && @matched_filters) {
-			my $filters_concat = join ", ", @matched_filters;
-			print "Filters: $filters_concat\n";
-		}
+        if (DEBUG_MODE & DEBUG_MATCHED_FILTERS && @matched_filters) {
+            my $filters_concat = join ", ", @matched_filters;
+            print "Filters: $filters_concat\n";
+        }
 
-		if (DEBUG_MODE & DEBUG_IMPACTS) {
-			print "Impact : $filter_impact\n";
-		}
-		
-	} # end of foreach key
-	push (@{$self->{filtered_keys}},     @{$self->{whitelist}->suspicious_keys()});
-	push (@{$self->{non_filtered_keys}}, @{$self->{whitelist}->non_suspicious_keys()});
-	# reset filtered_keys and non_filtered_keys
-	$self->{whitelist}->reset();
+        if (DEBUG_MODE & DEBUG_IMPACTS) {
+            print "Impact : $filter_impact\n";
+        }
 
-	if ($self->{impact} > 0) {
-		return $self->{impact};
-	}
-	else {
-		return 0;
-	}
+    } # end of foreach key
+    push (@{$self->{filtered_keys}},     @{$self->{whitelist}->suspicious_keys()});
+    push (@{$self->{non_filtered_keys}}, @{$self->{whitelist}->non_suspicious_keys()});
+    # reset filtered_keys and non_filtered_keys
+    $self->{whitelist}->reset();
+
+    if ($self->{impact} > 0) {
+        return $self->{impact};
+    }
+    else {
+        return 0;
+    }
 }
 
 #****m* IDS/set_scan_keys
@@ -407,7 +407,7 @@ sub detect_attacks {
 # DESCRIPTION
 #   Sets key scanning option
 # INPUT
-#   +scan_keys	1 to scan keys, 0 to switch off scanning keys, defaults to 0
+#   +scan_keys  1 to scan keys, 0 to switch off scanning keys, defaults to 0
 # OUTPUT
 #   none
 # SYNOPSIS
@@ -419,7 +419,7 @@ sub detect_attacks {
  DESCRIPTION
    Sets key scanning option
  INPUT
-   +scan_keys	1 to scan keys, 0 to switch off scanning keys, defaults to 0
+   +scan_keys   1 to scan keys, 0 to switch off scanning keys, defaults to 0
  OUTPUT
    none
  SYNOPSIS
@@ -428,9 +428,9 @@ sub detect_attacks {
 =cut
 
 sub set_scan_keys {
-	my ($self, %args) = @_;
+    my ($self, %args) = @_;
 
-	$self->{scan_keys}	= $args{scan_keys} ? 1 : 0;
+    $self->{scan_keys}  = $args{scan_keys} ? 1 : 0;
 }
 
 #****m* IDS/get_attacks
@@ -474,9 +474,9 @@ sub set_scan_keys {
 =cut
 
 sub get_attacks {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{attacks};
+    return $self->{attacks};
 }
 
 #****m* IDS/get_rule_description
@@ -508,8 +508,8 @@ sub get_attacks {
 =cut
 
 sub get_rule_description {
-	my ($self, %args) = @_;
-	return $self->{rule_descriptions}{$args{rule_id}};
+    my ($self, %args) = @_;
+    return $self->{rule_descriptions}{$args{rule_id}};
 }
 
 #****im* IDS/_apply_filters
@@ -532,38 +532,38 @@ sub get_rule_description {
 #****
 
 sub _apply_filters {
-	my ($self, $string) = @_;
-	my %attack = (
-		filters			=> [],
-		tags			=> [],
-		impact			=> 0,
-		string_converted => '',
-	);
+    my ($self, $string) = @_;
+    my %attack = (
+        filters         => [],
+        tags            => [],
+        impact          => 0,
+        string_converted => '',
+    );
 
-	# benchmark
-	my $start_time = Time::HiRes::time();
+    # benchmark
+    my $start_time = Time::HiRes::time();
 
-	# run all string converters
-	$attack{string_converted} = _run_all_converters($string);
+    # run all string converters
+    $attack{string_converted} = _run_all_converters($string);
 
-	# apply filters
-	foreach my $filter (@{$self->{filters}}) {
+    # apply filters
+    foreach my $filter (@{$self->{filters}}) {
 
-		# skip disabled filters
-		next if ($self->{filter_disabled}{$filter->{id}});
-		my $string_converted_lc = lc($attack{string_converted});
-		if ($string_converted_lc =~ $filter->{rule}) {
-			$attack{impact} += $filter->{impact};
-			push (@{$attack{filters}}, $filter->{id});
-			push (@{$attack{tags}}, @{$filter->{tags}});
-		}
-	}
+        # skip disabled filters
+        next if ($self->{filter_disabled}{$filter->{id}});
+        my $string_converted_lc = lc($attack{string_converted});
+        if ($string_converted_lc =~ $filter->{rule}) {
+            $attack{impact} += $filter->{impact};
+            push (@{$attack{filters}}, $filter->{id});
+            push (@{$attack{tags}}, @{$filter->{tags}});
+        }
+    }
 
-	# benchmark
-	my $end_time = Time::HiRes::time();
-	$attack{time_ms} = int(($end_time-$start_time)*1000);
+    # benchmark
+    my $end_time = Time::HiRes::time();
+    $attack{time_ms} = int(($end_time-$start_time)*1000);
 
-	return \%attack;
+    return \%attack;
 }
 
 #****im* IDS/_load_filters_from_xml
@@ -580,48 +580,48 @@ sub _apply_filters {
 #****
 
 sub _load_filters_from_xml {
-	my ($self, $filterfile) = @_;
-	my $filtercnt = 0;
+    my ($self, $filterfile) = @_;
+    my $filtercnt = 0;
 
-	if ($filterfile) {
-		# read & parse filter XML
-		my $filterxml;
-		eval {
-			$filterxml = XML::Simple::XMLin($filterfile,
-				forcearray	=> [ qw(rule description tags tag impact filter filters)],
-				keyattr		=> [],
-			);
-		};
-		if ($@) {
-			croak "Error in _load_filters_from_xml while parsing $filterfile: $@";
-		}
+    if ($filterfile) {
+        # read & parse filter XML
+        my $filterxml;
+        eval {
+            $filterxml = XML::Simple::XMLin($filterfile,
+                forcearray  => [ qw(rule description tags tag impact filter filters)],
+                keyattr     => [],
+            );
+        };
+        if ($@) {
+            croak "Error in _load_filters_from_xml while parsing $filterfile: $@";
+        }
 
-		# convert XML structure into handy data structure
-		foreach my $filterobj (@{$filterxml->{filter}}) {
-			my @taglist = ();
-			foreach my $tag (@{$filterobj->{tags}[0]->{tag}}) {
-				push(@taglist, $tag);
-			}
+        # convert XML structure into handy data structure
+        foreach my $filterobj (@{$filterxml->{filter}}) {
+            my @taglist = ();
+            foreach my $tag (@{$filterobj->{tags}[0]->{tag}}) {
+                push(@taglist, $tag);
+            }
 
-			my $rule = '';
-			eval {
-				$rule = qr/$filterobj->{rule}[0]/ms;
-			};
-			if ($@) {
-				croak 'Error in filter rule #' . $filterobj->{id} . ': ' . $filterobj->{rule}[0] . ' Message: ' . $@;
-			}
-			my %filterhash = (
-				rule		=> $rule,
-				impact		=> $filterobj->{impact}[0],
-				id			=> $filterobj->{id},
-				tags		=> \@taglist,
-			);
-			push (@{$self->{filters}}, \%filterhash);
-			$self->{rule_descriptions}{$filterobj->{id}} = $filterobj->{description}[0];
-			$filtercnt++
-		}
-	}
-	return $filtercnt;
+            my $rule = '';
+            eval {
+                $rule = qr/$filterobj->{rule}[0]/ms;
+            };
+            if ($@) {
+                croak 'Error in filter rule #' . $filterobj->{id} . ': ' . $filterobj->{rule}[0] . ' Message: ' . $@;
+            }
+            my %filterhash = (
+                rule        => $rule,
+                impact      => $filterobj->{impact}[0],
+                id          => $filterobj->{id},
+                tags        => \@taglist,
+            );
+            push (@{$self->{filters}}, \%filterhash);
+            $self->{rule_descriptions}{$filterobj->{id}} = $filterobj->{description}[0];
+            $filtercnt++
+        }
+    }
+    return $filtercnt;
 }
 
 #****if* IDS/_run_all_converters
@@ -638,19 +638,19 @@ sub _load_filters_from_xml {
 #****
 
 sub _run_all_converters {
-	my ($value) = @_;
-	if (DEBUG_MODE & DEBUG_CONVERTERS) {
-		print "------------------------------------------\n\n";
-	}
+    my ($value) = @_;
+    if (DEBUG_MODE & DEBUG_CONVERTERS) {
+        print "------------------------------------------\n\n";
+    }
 
-	foreach my $converter (@CONVERTERS) {
-		no strict 'refs';
-		$value = $converter->($value);
-		if (DEBUG_MODE & DEBUG_CONVERTERS) {
-			print "$converter output:\n$value\n\n";
-		}
-	}
-	return $value;
+    foreach my $converter (@CONVERTERS) {
+        no strict 'refs';
+        $value = $converter->($value);
+        if (DEBUG_MODE & DEBUG_CONVERTERS) {
+            print "$converter output:\n$value\n\n";
+        }
+    }
+    return $value;
 }
 
 #****if* IDS/_convert_from_repetition
@@ -668,15 +668,15 @@ sub _run_all_converters {
 #****
 
 sub _convert_from_repetition {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# remove obvios repetition patterns
-	$value = preg_replace(
-		qr/(?:(.{2,})\1{32,})|(?:[+=|\-@\s]{128,})/,
-		'x',
-		$value
-	);
-	return $value;
+    # remove obvios repetition patterns
+    $value = preg_replace(
+        qr/(?:(.{2,})\1{32,})|(?:[+=|\-@\s]{128,})/,
+        'x',
+        $value
+    );
+    return $value;
 }
 
 #****if* IDS/_convert_from_commented
@@ -693,26 +693,26 @@ sub _convert_from_repetition {
 #****
 
 sub _convert_from_commented {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# check for existing comments
-	if (preg_match(qr/(?:\<!-|-->|\/\*|\*\/|\/\/\W*\w+\s*$)|(?:--[^-]*-)/ms, $value)) { #/
+    # check for existing comments
+    if (preg_match(qr/(?:\<!-|-->|\/\*|\*\/|\/\/\W*\w+\s*$)|(?:--[^-]*-)/ms, $value)) { #/
 
-		my @pattern = (
-			qr/(?:(?:<!)(?:(?:--(?:[^-]*(?:-[^-]+)*)--\s*)*)(?:>))/ms,
-			qr/(?:(?:\/\*\/*[^\/\*]*)+\*\/)/ms,
-			qr/(?:--[^-]*-)/ms,
-		);
+        my @pattern = (
+            qr/(?:(?:<!)(?:(?:--(?:[^-]*(?:-[^-]+)*)--\s*)*)(?:>))/ms,
+            qr/(?:(?:\/\*\/*[^\/\*]*)+\*\/)/ms,
+            qr/(?:--[^-]*-)/ms,
+        );
 
-		my $converted = preg_replace(\@pattern, ';', $value);
-		$value    .= "\n" . $converted;
-	}
+        my $converted = preg_replace(\@pattern, ';', $value);
+        $value    .= "\n" . $converted;
+    }
 
-	# make sure inline comments are detected and converted correctly
-	$value = preg_replace(qr/(<\w+)\/+(\w+=?)/m, '$1/$2', $value);
-	$value = preg_replace(qr/[^\\:]\/\/(.*)$/m, '/**/$1', $value);
+    # make sure inline comments are detected and converted correctly
+    $value = preg_replace(qr/(<\w+)\/+(\w+=?)/m, '$1/$2', $value);
+    $value = preg_replace(qr/[^\\:]\/\/(.*)$/m, '/**/$1', $value);
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_whitespace
@@ -729,17 +729,17 @@ sub _convert_from_commented {
 #****
 
 sub _convert_from_whitespace {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# check for inline linebreaks
-	my @search = ('\r', '\n', '\f', '\t', '\v');
-	$value  = str_replace(\@search, ';', $value);
+    # check for inline linebreaks
+    my @search = ('\r', '\n', '\f', '\t', '\v');
+    $value  = str_replace(\@search, ';', $value);
 
-	# replace replacement characters regular spaces
-	$value = str_replace('�', ' ', $value);
+    # replace replacement characters regular spaces
+    $value = str_replace('�', ' ', $value);
 
-	# convert real linebreaks (\013 in Perl instead of \v in PHP et al.)
-	return preg_replace(qr/(?:\n|\r|\013)/m, '  ', $value);
+    # convert real linebreaks (\013 in Perl instead of \v in PHP et al.)
+    return preg_replace(qr/(?:\n|\r|\013)/m, '  ', $value);
 }
 
 #****if* IDS/_convert_from_js_charcode
@@ -756,84 +756,84 @@ sub _convert_from_whitespace {
 #****
 
 sub _convert_from_js_charcode {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my @matches = ();
+    my @matches = ();
 
-	# check if value matches typical charCode pattern
-	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-	if (preg_match_all(qr/(?:[\d+-=\/\* ]+(?:\s?,\s?[\d+-=\/\* ]+)){4,}/ms,
-		$value, \@matches)) {
-		my $converted	= '';
-		my $string		= implode(',', $matches[0]);
-		$string			= preg_replace(qr/\s/, '', $string);
-		$string			= preg_replace(qr/\w+=/, '', $string);
-		my @charcode	= explode(',', $string);
+    # check if value matches typical charCode pattern
+    # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+    if (preg_match_all(qr/(?:[\d+-=\/\* ]+(?:\s?,\s?[\d+-=\/\* ]+)){4,}/ms,
+        $value, \@matches)) {
+        my $converted   = '';
+        my $string      = implode(',', $matches[0]);
+        $string         = preg_replace(qr/\s/, '', $string);
+        $string         = preg_replace(qr/\w+=/, '', $string);
+        my @charcode    = explode(',', $string);
 
-		foreach my $char (@charcode) {
-			$char = preg_replace(qr/\W0/s, '', $char);
+        foreach my $char (@charcode) {
+            $char = preg_replace(qr/\W0/s, '', $char);
 
-			my @matches = ();
-			# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-			if (preg_match_all(qr/(\d*[+-\/\* ]\d+)/, $char, \@matches)) {
-				my @match = split(qr/(\W?\d+)/,
-									(implode('', $matches[0])),
-									# null,
-									# PREG_SPLIT_DELIM_CAPTURE
-									);
-									# 3rd argument null, 4th argument PREG_SPLIT_DELIM_CAPTURE is default in Perl and not there
-				my $test = implode('', $matches[0]);
+            my @matches = ();
+            # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+            if (preg_match_all(qr/(\d*[+-\/\* ]\d+)/, $char, \@matches)) {
+                my @match = split(qr/(\W?\d+)/,
+                                    (implode('', $matches[0])),
+                                    # null,
+                                    # PREG_SPLIT_DELIM_CAPTURE
+                                    );
+                                    # 3rd argument null, 4th argument PREG_SPLIT_DELIM_CAPTURE is default in Perl and not there
+                my $test = implode('', $matches[0]);
 
-				if (array_sum(@match) >= 20 && array_sum(@match) <= 127) {
-					$converted .= chr(array_sum(@match));
-				}
+                if (array_sum(@match) >= 20 && array_sum(@match) <= 127) {
+                    $converted .= chr(array_sum(@match));
+                }
 
-			}
-			elsif ($char && $char >= 20 && $char <= 127) {
-				$converted .= chr($char);
-			}
-		}
+            }
+            elsif ($char && $char >= 20 && $char <= 127) {
+                $converted .= chr($char);
+            }
+        }
 
-		$value .= "\n" . $converted;
-	}
+        $value .= "\n" . $converted;
+    }
 
-	# check for octal charcode pattern
-	# PHP to Perl note: \\ in Perl instead of \\\ in PHP
-	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-	if (preg_match_all(qr/((?:(?:[\\]+\d+\s*){8,}))/ms, $value, \@matches)) {
-		my $converted = '';
-		my @charcode  = explode('\\', preg_replace(qr/\s/, '', implode(',',
-			$matches[0])));
+    # check for octal charcode pattern
+    # PHP to Perl note: \\ in Perl instead of \\\ in PHP
+    # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+    if (preg_match_all(qr/((?:(?:[\\]+\d+\s*){8,}))/ms, $value, \@matches)) {
+        my $converted = '';
+        my @charcode  = explode('\\', preg_replace(qr/\s/, '', implode(',',
+            $matches[0])));
 
-		foreach my $char (@charcode) {
-			if ($char) {
-				if (oct($char) >= 20 && oct($char) <= 127) {
-					$converted .= chr(oct($char));
-				}
-			}
-		}
-		$value .= "\n" . $converted;
-	}
+        foreach my $char (@charcode) {
+            if ($char) {
+                if (oct($char) >= 20 && oct($char) <= 127) {
+                    $converted .= chr(oct($char));
+                }
+            }
+        }
+        $value .= "\n" . $converted;
+    }
 
-	# check for hexadecimal charcode pattern
-	# PHP to Perl note: \\ in Perl instead of \\\ in PHP
-	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-	if (preg_match_all(qr/((?:(?:[\\]+\w+[ \t]*){8,}))/ms, $value, \@matches)) {
-		my $converted = '';
-		my @charcode  = explode('\\', preg_replace(qr/[ux]/, '', implode(',',
-			$matches[0])));
+    # check for hexadecimal charcode pattern
+    # PHP to Perl note: \\ in Perl instead of \\\ in PHP
+    # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+    if (preg_match_all(qr/((?:(?:[\\]+\w+[ \t]*){8,}))/ms, $value, \@matches)) {
+        my $converted = '';
+        my @charcode  = explode('\\', preg_replace(qr/[ux]/, '', implode(',',
+            $matches[0])));
 
-		foreach my $char (@charcode) {
-			if ($char) {
-				if (hex($char) >= 20 && hex($char) <= 127) {
-					$converted .= chr(hex($char));
-				}
-			}
-		}
-		$value .= "\n" . $converted;
-	}
+        foreach my $char (@charcode) {
+            if ($char) {
+                if (hex($char) >= 20 && hex($char) <= 127) {
+                    $converted .= chr(hex($char));
+                }
+            }
+        }
+        $value .= "\n" . $converted;
+    }
 
-	return $value;
+    return $value;
 
 }
 
@@ -851,10 +851,10 @@ sub _convert_from_js_charcode {
 #****
 
 sub _convert_js_regex_modifiers {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	$value = preg_replace(qr/\/[gim]+/, '/', $value);
-	return $value;
+    $value = preg_replace(qr/\/[gim]+/, '/', $value);
+    return $value;
 }
 
 #****if* IDS/_convert_quotes
@@ -871,15 +871,15 @@ sub _convert_js_regex_modifiers {
 #****
 
 sub _convert_quotes {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# normalize different quotes to "
-	my @pattern	= ('\'', '`', '´', '’', '‘');
-	$value		= str_replace(\@pattern, '"', $value);
+    # normalize different quotes to "
+    my @pattern = ('\'', '`', '´', '’', '‘');
+    $value      = str_replace(\@pattern, '"', $value);
 
-	# make sure harmless quoted strings don't generate false alerts
-	$value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);
-	return $value;
+    # make sure harmless quoted strings don't generate false alerts
+    $value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);
+    return $value;
 }
 
 #****if* IDS/_convert_from_sql_hex
@@ -896,25 +896,25 @@ sub _convert_quotes {
 #****
 
 sub _convert_from_sql_hex {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my @matches = ();
-	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-	if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d]*)+)/im, $value, \@matches)) {
-		foreach my $match ($matches[0]) {
-			my $converted = '';
-			foreach my $hex_index (str_split($match, 2)) {
-				if(preg_match(qr/[a-f\d]{2,3}/i, $hex_index)) {
-					$converted .= chr(hex($hex_index));
-				}
-			}
-			$value = str_replace($match, $converted, $value);
-		}
-	}
-	# take care of hex encoded ctrl chars
-	$value = preg_replace('/0x\d+/m', 1, $value);
+    my @matches = ();
+    # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+    if(preg_match_all(qr/((?:0x[a-f\d]{2,}[a-f\d]*)+)/im, $value, \@matches)) {
+        foreach my $match ($matches[0]) {
+            my $converted = '';
+            foreach my $hex_index (str_split($match, 2)) {
+                if(preg_match(qr/[a-f\d]{2,3}/i, $hex_index)) {
+                    $converted .= chr(hex($hex_index));
+                }
+            }
+            $value = str_replace($match, $converted, $value);
+        }
+    }
+    # take care of hex encoded ctrl chars
+    $value = preg_replace('/0x\d+/m', 1, $value);
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_sql_keywords
@@ -931,26 +931,26 @@ sub _convert_from_sql_hex {
 #****
 
 sub _convert_from_sql_keywords {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my $pattern = qr/(?:IS\s+null)|(LIKE\s+null)|(?:(?:^|\W)IN[+\s]*\([\s\d"]+[^()]*\))/ims;
-	$value   = preg_replace($pattern, '"=0', $value);
-	$value   = preg_replace(qr/\W+\s*like\s*\W+/ims, '1" OR "1"', $value);
-	$value   = preg_replace(qr/null[,"\s]/ims, ',0', $value);
-	$value   = preg_replace(qr/\d+\./ims, ' 1', $value);
-	$value   = preg_replace(qr/,null/ims, ',0', $value);
-	$value   = preg_replace(qr/(?:between|mod)/ims, 'or', $value);
-	$value   = preg_replace(qr/(?:and\s+\d+\.?\d*)/ims, '', $value);
-	$value   = preg_replace(qr/(?:\s+and\s+)/ims, ' or ', $value);
-	# \\N instead of PHP's \\\N
-	$pattern	= qr/[^\w,\(]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|FIND_IN_SET|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
-	$value		= preg_replace($pattern, 0, $value);
-	$pattern	= qr/(?:NOT\s+BETWEEN)|(?:IS\s+NOT)|(?:NOT\s+IN)|(?:XOR|\WDIV\W|\WNOT\W|<>|RLIKE(?:\s+BINARY)?)|(?:REGEXP\s+BINARY)|(?:SOUNDS\s+LIKE)/ims;
-	$value		= preg_replace($pattern, '!', $value);
-	$value		= preg_replace(qr/"\s+\d/, '"', $value);
-	$value		= preg_replace(qr/\/(?:\d+|null)/, '', $value);
+    my $pattern = qr/(?:IS\s+null)|(LIKE\s+null)|(?:(?:^|\W)IN[+\s]*\([\s\d"]+[^()]*\))/ims;
+    $value   = preg_replace($pattern, '"=0', $value);
+    $value   = preg_replace(qr/\W+\s*like\s*\W+/ims, '1" OR "1"', $value);
+    $value   = preg_replace(qr/null[,"\s]/ims, ',0', $value);
+    $value   = preg_replace(qr/\d+\./ims, ' 1', $value);
+    $value   = preg_replace(qr/,null/ims, ',0', $value);
+    $value   = preg_replace(qr/(?:between|mod)/ims, 'or', $value);
+    $value   = preg_replace(qr/(?:and\s+\d+\.?\d*)/ims, '', $value);
+    $value   = preg_replace(qr/(?:\s+and\s+)/ims, ' or ', $value);
+    # \\N instead of PHP's \\\N
+    $pattern    = qr/[^\w,\(]NULL|\\N|TRUE|FALSE|UTC_TIME|LOCALTIME(?:STAMP)?|CURRENT_\w+|BINARY|(?:(?:ASCII|SOUNDEX|FIND_IN_SET|MD5|R?LIKE)[+\s]*\([^()]+\))|(?:-+\d)/ims;
+    $value      = preg_replace($pattern, 0, $value);
+    $pattern    = qr/(?:NOT\s+BETWEEN)|(?:IS\s+NOT)|(?:NOT\s+IN)|(?:XOR|\WDIV\W|\WNOT\W|<>|RLIKE(?:\s+BINARY)?)|(?:REGEXP\s+BINARY)|(?:SOUNDS\s+LIKE)/ims;
+    $value      = preg_replace($pattern, '!', $value);
+    $value      = preg_replace(qr/"\s+\d/, '"', $value);
+    $value      = preg_replace(qr/\/(?:\d+|null)/, '', $value);
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_entities
@@ -967,25 +967,25 @@ sub _convert_from_sql_keywords {
 #****
 
 sub _convert_entities {
-	my ($value) = @_;
-	my $converted = '';
+    my ($value) = @_;
+    my $converted = '';
 
-	# deal with double encoded payload 
-	$value = preg_replace(qr/&amp;/, '&', $value);
+    # deal with double encoded payload
+    $value = preg_replace(qr/&amp;/, '&', $value);
 
-	if (preg_match(qr/&#x?[\w]+/ms, $value)) {
-		$converted	= preg_replace(qr/(&#x?[\w]{2}\d?);?/ms, '$1;', $value);
-		$converted	= HTML::Entities::decode_entities($converted);
-		$value		.= "\n" . str_replace(';;', ';', $converted);
-	}
+    if (preg_match(qr/&#x?[\w]+/ms, $value)) {
+        $converted  = preg_replace(qr/(&#x?[\w]{2}\d?);?/ms, '$1;', $value);
+        $converted  = HTML::Entities::decode_entities($converted);
+        $value      .= "\n" . str_replace(';;', ';', $converted);
+    }
 
-	# normalize obfuscated protocol handlers
-	$value = preg_replace(
-		'/(?:j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*)|(d\s*a\s*t\s*a\s*)/ms',
-		'javascript', $value
-	);
+    # normalize obfuscated protocol handlers
+    $value = preg_replace(
+        '/(?:j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*)|(d\s*a\s*t\s*a\s*)/ms',
+        'javascript', $value
+    );
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_control_chars
@@ -1002,46 +1002,46 @@ sub _convert_entities {
 #****
 
 sub _convert_from_control_chars {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# critical ctrl values
-	my @search	= (
-		chr(0), chr(1), chr(2), chr(3), chr(4), chr(5),
-		chr(6), chr(7), chr(8), chr(11), chr(12), chr(14),
-		chr(15), chr(16), chr(17), chr(18), chr(19), chr(24),
-		chr(25), chr(192), chr(193), chr(238), chr(255)
-	);
-	$value	= str_replace(\@search, '%00', $value);
+    # critical ctrl values
+    my @search  = (
+        chr(0), chr(1), chr(2), chr(3), chr(4), chr(5),
+        chr(6), chr(7), chr(8), chr(11), chr(12), chr(14),
+        chr(15), chr(16), chr(17), chr(18), chr(19), chr(24),
+        chr(25), chr(192), chr(193), chr(238), chr(255)
+    );
+    $value  = str_replace(\@search, '%00', $value);
 
-	# take care for malicious unicode characters
-	$value = urldecode(preg_replace(qr/(?:%E(?:2|3)%8(?:0|1)%(?:A|8|9)\w|%EF%BB%BF|%EF%BF%BD)|(?:&#(?:65|8)\d{3};?)/i, '',
-			urlencode($value)));
+    # take care for malicious unicode characters
+    $value = urldecode(preg_replace(qr/(?:%E(?:2|3)%8(?:0|1)%(?:A|8|9)\w|%EF%BB%BF|%EF%BF%BD)|(?:&#(?:65|8)\d{3};?)/i, '',
+            urlencode($value)));
 
-	$value = urldecode(
-	    preg_replace(qr/(?:%F0%80%BE)/i, '>', urlencode($value)));
-	$value = urldecode(
-	    preg_replace(qr/(?:%F0%80%BC)/i, '<', urlencode($value)));
-	$value = urldecode(
-	    preg_replace(qr/(?:%F0%80%A2)/i, '"', urlencode($value)));
-	$value = urldecode(
-	    preg_replace(qr/(?:%F0%80%A7)/i, '\'', urlencode($value)));
+    $value = urldecode(
+        preg_replace(qr/(?:%F0%80%BE)/i, '>', urlencode($value)));
+    $value = urldecode(
+        preg_replace(qr/(?:%F0%80%BC)/i, '<', urlencode($value)));
+    $value = urldecode(
+        preg_replace(qr/(?:%F0%80%A2)/i, '"', urlencode($value)));
+    $value = urldecode(
+        preg_replace(qr/(?:%F0%80%A7)/i, '\'', urlencode($value)));
 
-	$value = preg_replace(qr/(?:%ff1c)/, '<', $value);
-	$value = preg_replace(
-		qr/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i, '', $value
-	);
+    $value = preg_replace(qr/(?:%ff1c)/, '<', $value);
+    $value = preg_replace(
+        qr/(?:&[#x]*(200|820|200|820|zwn?j|lrm|rlm)\w?;?)/i, '', $value
+    );
 
-	$value = preg_replace(qr/(?:&#(?:65|8)\d{3};?)|(?:&#(?:56|7)3\d{2};?)|(?:&#x(?:fe|20)\w{2};?)|(?:&#x(?:d[c-f])\w{2};?)/i, '',
-			$value);
+    $value = preg_replace(qr/(?:&#(?:65|8)\d{3};?)|(?:&#(?:56|7)3\d{2};?)|(?:&#x(?:fe|20)\w{2};?)|(?:&#x(?:d[c-f])\w{2};?)/i, '',
+            $value);
 
-	$value = str_replace(
-		["\x{ab}", "\x{3008}", "\x{ff1c}", "\x{2039}", "\x{2329}", "\x{27e8}"], '<', $value
-	);
-	$value = str_replace(
-		["\x{bb}", "\x{3009}", "\x{ff1e}", "\x{203a}", "\x{232a}", "\x{27e9}"], '>', $value
-	);
+    $value = str_replace(
+        ["\x{ab}", "\x{3008}", "\x{ff1c}", "\x{2039}", "\x{2329}", "\x{27e8}"], '<', $value
+    );
+    $value = str_replace(
+        ["\x{bb}", "\x{3009}", "\x{ff1e}", "\x{203a}", "\x{232a}", "\x{27e9}"], '>', $value
+    );
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_nested_base64
@@ -1058,31 +1058,31 @@ sub _convert_from_control_chars {
 #****
 
 sub _convert_from_nested_base64 {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my @matches = ();
-	preg_match_all(qr/(?:^|[,&?])\s*([a-z0-9]{30,}=*)(?:\W|$)/im, #)/
-		$value,
-		\@matches,
-	);
-	# PHP to Perl note: PHP's $matches[1] is Perl's default ($matches[0] is the entire RegEx match)
-	foreach my $item (@matches) {
-		if ($item && !preg_match(qr/[a-f0-9]{32}/i, $item)) {
+    my @matches = ();
+    preg_match_all(qr/(?:^|[,&?])\s*([a-z0-9]{30,}=*)(?:\W|$)/im, #)/
+        $value,
+        \@matches,
+    );
+    # PHP to Perl note: PHP's $matches[1] is Perl's default ($matches[0] is the entire RegEx match)
+    foreach my $item (@matches) {
+        if ($item && !preg_match(qr/[a-f0-9]{32}/i, $item)) {
 
-			# fill up the string with zero bytes if too short for base64 blocks
-			my $item_original = $item;
-			if (my $missing_bytes = length($item) % 4) {
-				for (1..$missing_bytes) {
-					$item .= "=";
-				}
-			}
+            # fill up the string with zero bytes if too short for base64 blocks
+            my $item_original = $item;
+            if (my $missing_bytes = length($item) % 4) {
+                for (1..$missing_bytes) {
+                    $item .= "=";
+                }
+            }
 
-			my $base64_item = MIME::Base64::decode_base64($item);
-			$value = str_replace($item_original, $base64_item, $value);
-		}
-	}
+            my $base64_item = MIME::Base64::decode_base64($item);
+            $value = str_replace($item_original, $base64_item, $value);
+        }
+    }
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_out_of_range_chars
@@ -1099,16 +1099,16 @@ sub _convert_from_nested_base64 {
 #****
 
 sub _convert_from_out_of_range_chars {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my @values = str_split($value);
-	foreach my $item (@values) {
-		if (ord($item) >= 127) {
-			$value = str_replace($item, ' ', $value);
-		}
-	}
+    my @values = str_split($value);
+    foreach my $item (@values) {
+        if (ord($item) >= 127) {
+            $value = str_replace($item, ' ', $value);
+        }
+    }
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_xml
@@ -1125,14 +1125,14 @@ sub _convert_from_out_of_range_chars {
 #****
 
 sub _convert_from_xml {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my $converted = strip_tags($value);
+    my $converted = strip_tags($value);
 
-	if ($converted && ($converted ne $value)) {
-		return $value . "\n" . $converted;
-	}
-	return $value;
+    if ($converted && ($converted ne $value)) {
+        return $value . "\n" . $converted;
+    }
+    return $value;
 }
 
 #****if* IDS/_convert_from_js_unicode
@@ -1149,21 +1149,21 @@ sub _convert_from_xml {
 #****
 
 sub _convert_from_js_unicode {
-	my ($value) = @_;
-	my @matches = ();
+    my ($value) = @_;
+    my @matches = ();
 
-	# \\u instead of PHP's \\\u
-	# PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
-	preg_match_all(qr/(\\u[0-9a-f]{4})/ims, $value, \@matches);
+    # \\u instead of PHP's \\\u
+    # PHP to Perl note: additional parenthesis around RegEx for getting PHP's $matches[0]
+    preg_match_all(qr/(\\u[0-9a-f]{4})/ims, $value, \@matches);
 
-	if ($matches[0]) {
-		foreach my $match ($matches[0]) {
-			my $chr = chr(hex(substr($match, 2, 4)));
-			$value = str_replace($match, $chr, $value);
-		}
-		$value .= "\n".'\u0001';
-	}
-	return $value;
+    if ($matches[0]) {
+        foreach my $match ($matches[0]) {
+            my $chr = chr(hex(substr($match, 2, 4)));
+            $value = str_replace($match, $chr, $value);
+        }
+        $value .= "\n".'\u0001';
+    }
+    return $value;
 }
 
 #****if* IDS/_convert_from_utf7
@@ -1180,13 +1180,13 @@ sub _convert_from_js_unicode {
 #****
 
 sub _convert_from_utf7 {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	if (preg_match(qr/\+A\w+-/m, $value)) {
-		$value .= "\n" . decode("UTF-7", $value);
-	}
+    if (preg_match(qr/\+A\w+-/m, $value)) {
+        $value .= "\n" . decode("UTF-7", $value);
+    }
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_convert_from_concatenated
@@ -1203,54 +1203,54 @@ sub _convert_from_utf7 {
 #****
 
 sub _convert_from_concatenated {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# normalize remaining backslashes
-	# Perl's \\ should be equivalent to PHP's \\\
-	if ($value ne preg_replace(qr/(?:(\w)\\)/, '$1', $value)) {
-		$value .= preg_replace(qr/(?:(\w)\\)/, '$1', $value);
-	}
+    # normalize remaining backslashes
+    # Perl's \\ should be equivalent to PHP's \\\
+    if ($value ne preg_replace(qr/(?:(\w)\\)/, '$1', $value)) {
+        $value .= preg_replace(qr/(?:(\w)\\)/, '$1', $value);
+    }
 
-	my $compare = stripslashes($value);
+    my $compare = stripslashes($value);
 
-	my @pattern = (
-		qr/(?:<\/\w+>\+<\w+>)/s,
-		qr/(?:":\d+[^"[]+")/s,
-		qr/(?:"?"\+\w+\+")/s,
-		qr/(?:"\s*;[^"]+")|(?:";[^"]+:\s*")/s,
-		qr/(?:"\s*(?:;|\+).{8,18}:\s*")/s,
-		qr/(?:";\w+=)|(?:!""&&")|(?:~)/s,
-		qr/(?:"?"\+""?\+?"?)|(?:;\w+=")|(?:"[|&]{2,})/s,
-		qr/(?:"\s*\W+")/s,
-		qr/(?:";\w\s*\+=\s*\w?\s*")/s,
-		qr/(?:"[|&;]+\s*[^|&\n]*[|&]+\s*"?)/s,
-		qr/(?:";\s*\w+\W+\w*\s*[|&]*")/s,
-		qr/(?:"\s*"\s*\.)/s,
-		qr/(?:\s*new\s+\w+\s*[+",])/,
-		qr/(?:(?:^|\s+)(?:do|else)\s+)/, 
-		qr/(?:[{(]\s*new\s+\w+\s*[)}])/,
-		qr/(?:(this|self)\.)/,
-		qr/(?:undefined)/,
-		qr/(?:in\s+)/,
-	);
+    my @pattern = (
+        qr/(?:<\/\w+>\+<\w+>)/s,
+        qr/(?:":\d+[^"[]+")/s,
+        qr/(?:"?"\+\w+\+")/s,
+        qr/(?:"\s*;[^"]+")|(?:";[^"]+:\s*")/s,
+        qr/(?:"\s*(?:;|\+).{8,18}:\s*")/s,
+        qr/(?:";\w+=)|(?:!""&&")|(?:~)/s,
+        qr/(?:"?"\+""?\+?"?)|(?:;\w+=")|(?:"[|&]{2,})/s,
+        qr/(?:"\s*\W+")/s,
+        qr/(?:";\w\s*\+=\s*\w?\s*")/s,
+        qr/(?:"[|&;]+\s*[^|&\n]*[|&]+\s*"?)/s,
+        qr/(?:";\s*\w+\W+\w*\s*[|&]*")/s,
+        qr/(?:"\s*"\s*\.)/s,
+        qr/(?:\s*new\s+\w+\s*[+",])/,
+        qr/(?:(?:^|\s+)(?:do|else)\s+)/,
+        qr/(?:[{(]\s*new\s+\w+\s*[)}])/,
+        qr/(?:(this|self)\.)/,
+        qr/(?:undefined)/,
+        qr/(?:in\s+)/,
+    );
 
-	# strip out concatenations
-	my $converted = preg_replace(\@pattern, '', $compare);
+    # strip out concatenations
+    my $converted = preg_replace(\@pattern, '', $compare);
 
-	# strip object traversal
-	$converted = preg_replace(qr/\w(\.\w\()/, '$1', $converted);
-	
-	# normalize obfuscated method calls
-	$converted = preg_replace(qr/\)\s*\+/, ')', $converted);
+    # strip object traversal
+    $converted = preg_replace(qr/\w(\.\w\()/, '$1', $converted);
 
-	# convert JS special numbers
-	$converted = preg_replace(qr/(?:\(*[.\d]e[+-]*[^a-z\W]+\)*)|(?:NaN|Infinity)\W/ims, 1, $converted);
+    # normalize obfuscated method calls
+    $converted = preg_replace(qr/\)\s*\+/, ')', $converted);
 
-	if ($converted && ($compare ne $converted)) {
-		$value .= "\n" . $converted;
-	}
+    # convert JS special numbers
+    $converted = preg_replace(qr/(?:\(*[.\d]e[+-]*[^a-z\W]+\)*)|(?:NaN|Infinity)\W/ims, 1, $converted);
 
-	return $value;
+    if ($converted && ($compare ne $converted)) {
+        $value .= "\n" . $converted;
+    }
+
+    return $value;
 }
 
 #****if* IDS/_convert_from_proprietary_encodings
@@ -1267,42 +1267,42 @@ sub _convert_from_concatenated {
 #****
 
 sub _convert_from_proprietary_encodings {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	# Xajax error reportings
-	$value = preg_replace(qr/<!\[CDATA\[(\W+)\]\]>/im, '$1', $value);
+    # Xajax error reportings
+    $value = preg_replace(qr/<!\[CDATA\[(\W+)\]\]>/im, '$1', $value);
 
-	# strip false alert triggering apostrophes
-	$value = preg_replace(qr/(\w)\"(s)/m, '$1$2', $value);
+    # strip false alert triggering apostrophes
+    $value = preg_replace(qr/(\w)\"(s)/m, '$1$2', $value);
 
-	# strip quotes within typical search patterns
-	$value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);
+    # strip quotes within typical search patterns
+    $value = preg_replace(qr/^"([^"=\\!><~]+)"$/, '$1', $value);
 
-	# OpenID login tokens
-	$value = preg_replace(qr/{[\w-]{8,9}\}(?:\{[\w=]{8}\}){2}/, '', $value);
+    # OpenID login tokens
+    $value = preg_replace(qr/{[\w-]{8,9}\}(?:\{[\w=]{8}\}){2}/, '', $value);
 
-	# convert Content to null to avoid false alerts
-	$value = preg_replace(qr/Content|\Wdo\s/, '', $value);
+    # convert Content to null to avoid false alerts
+    $value = preg_replace(qr/Content|\Wdo\s/, '', $value);
 
-	# strip emoticons
-	$value = preg_replace(qr/(?:\s[:;]-[)\/PD]+)|(?:\s;[)PD]+)|(?:\s:[)PD]+)|-\.-|\^\^/m, '', $value);
+    # strip emoticons
+    $value = preg_replace(qr/(?:\s[:;]-[)\/PD]+)|(?:\s;[)PD]+)|(?:\s:[)PD]+)|-\.-|\^\^/m, '', $value);
 
-	# normalize separation char repetition
-	$value = preg_replace(qr/([.+~=*_\-;])\1{2,}/m, '$1', $value);
+    # normalize separation char repetition
+    $value = preg_replace(qr/([.+~=*_\-;])\1{2,}/m, '$1', $value);
 
-	# normalize multiple single quotes
-	$value = preg_replace(qr/"{2,}/m, '"', $value);
+    # normalize multiple single quotes
+    $value = preg_replace(qr/"{2,}/m, '"', $value);
 
-	# normalize quoted numerical values and asterisks
-	$value = preg_replace(qr/"(\d+)"/m, '$1', $value);
+    # normalize quoted numerical values and asterisks
+    $value = preg_replace(qr/"(\d+)"/m, '$1', $value);
 
-	# normalize pipe separated request parameters
-	$value = preg_replace(qr/\|(\w+=\w+)/m, '&$1', $value);
+    # normalize pipe separated request parameters
+    $value = preg_replace(qr/\|(\w+=\w+)/m, '&$1', $value);
 
-	# normalize ampersand listings
-	$value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
+    # normalize ampersand listings
+    $value = preg_replace(qr/(\w\s)&\s(\w)/, '$1$2', $value);
 
-	return $value;
+    return $value;
 }
 
 #****if* IDS/_run_centrifuge
@@ -1319,86 +1319,86 @@ sub _convert_from_proprietary_encodings {
 #****
 
 sub _run_centrifuge {
-	my ($value) = @_;
+    my ($value) = @_;
 
-	my $threshold = 3.49;
+    my $threshold = 3.49;
 
-	if (strlen($value) > 25) {
-		# strip padding
-		my $tmp_value = preg_replace(qr/\s{4}|==$/m, '', $value);
-		$tmp_value = preg_replace(
-			qr/\s{4}|[\p{L}\d\+\-=,.%()]{8,}/m,
-			'aaa',
-			$tmp_value
-		);
-		
-		# Check for the attack char ratio
-		$tmp_value = preg_replace(qr/([*.!?+-])\1{1,}/m, '$1', $tmp_value);
-		$tmp_value = preg_replace(qr/"[\p{L}\d\s]+"/m, '', $tmp_value);
+    if (strlen($value) > 25) {
+        # strip padding
+        my $tmp_value = preg_replace(qr/\s{4}|==$/m, '', $value);
+        $tmp_value = preg_replace(
+            qr/\s{4}|[\p{L}\d\+\-=,.%()]{8,}/m,
+            'aaa',
+            $tmp_value
+        );
 
-		my $stripped_length = strlen(
-			preg_replace(qr/[\d\s\p{L}\.:,%&\/><\-)!]+/m,
-			'',
-			$tmp_value)
-		);
-		my $overall_length  = strlen(
-			preg_replace(
-				qr/([\d\s\p{L}:,\.]{3,})+/m,
-				'aaa',
-				preg_replace(
-					qr/\s{2,}/ms,
-					'',
-					$tmp_value
-				)
-			)
-		);
+        # Check for the attack char ratio
+        $tmp_value = preg_replace(qr/([*.!?+-])\1{1,}/m, '$1', $tmp_value);
+        $tmp_value = preg_replace(qr/"[\p{L}\d\s]+"/m, '', $tmp_value);
 
-		if ($stripped_length != 0 &&
-			$overall_length/$stripped_length <= $threshold
-		) {
-			$value .= "\n".'$[!!!]';
-		}
-	}
+        my $stripped_length = strlen(
+            preg_replace(qr/[\d\s\p{L}\.:,%&\/><\-)!]+/m,
+            '',
+            $tmp_value)
+        );
+        my $overall_length  = strlen(
+            preg_replace(
+                qr/([\d\s\p{L}:,\.]{3,})+/m,
+                'aaa',
+                preg_replace(
+                    qr/\s{2,}/ms,
+                    '',
+                    $tmp_value
+                )
+            )
+        );
 
-	if (strlen($value) > 40) {
-		# Replace all non-special chars
-		my $converted =  preg_replace(qr/[\w\s\p{L},.:!]/, '', $value);
-
-		# Split string into an array, unify and sort
-		my @array = str_split($converted);
-		my %seen = ();
-		my @unique = grep { ! $seen{$_} ++ } @array;
-		@unique = sort @unique;
-
-		# Normalize certain tokens
-		my %schemes = (
-			'~' => '+',
-			'^' => '+',
-			'|' => '+',
-			'*' => '+',
-			'%' => '+',
-			'&' => '+',
-			'/' => '+',
-		);
-
-		$converted	= implode('', @unique);
-		$converted	= str_replace([keys %schemes], [values %schemes], $converted);
-		$converted	= preg_replace(qr/[+-]\s*\d+/, '+', $converted);
-		$converted	= preg_replace(qr/[()[\]{}]/, '(', $converted);
-		$converted	= preg_replace(qr/[!?:=]/, ':', $converted);
-		$converted	= preg_replace(qr/[^:(+]/, '', stripslashes($converted)); #/
-
-		# Sort again and implode
-		@array		= str_split($converted);
-		@array		= sort @array;
-		$converted	= implode('', @array);
-
-		if (preg_match(qr/(?:\({2,}\+{2,}:{2,})|(?:\({2,}\+{2,}:+)|(?:\({3,}\++:{2,})/, $converted)) {
-			return $value . "\n" . $converted;
-		}
+        if ($stripped_length != 0 &&
+            $overall_length/$stripped_length <= $threshold
+        ) {
+            $value .= "\n".'$[!!!]';
+        }
     }
 
-	return $value;
+    if (strlen($value) > 40) {
+        # Replace all non-special chars
+        my $converted =  preg_replace(qr/[\w\s\p{L},.:!]/, '', $value);
+
+        # Split string into an array, unify and sort
+        my @array = str_split($converted);
+        my %seen = ();
+        my @unique = grep { ! $seen{$_} ++ } @array;
+        @unique = sort @unique;
+
+        # Normalize certain tokens
+        my %schemes = (
+            '~' => '+',
+            '^' => '+',
+            '|' => '+',
+            '*' => '+',
+            '%' => '+',
+            '&' => '+',
+            '/' => '+',
+        );
+
+        $converted  = implode('', @unique);
+        $converted  = str_replace([keys %schemes], [values %schemes], $converted);
+        $converted  = preg_replace(qr/[+-]\s*\d+/, '+', $converted);
+        $converted  = preg_replace(qr/[()[\]{}]/, '(', $converted);
+        $converted  = preg_replace(qr/[!?:=]/, ':', $converted);
+        $converted  = preg_replace(qr/[^:(+]/, '', stripslashes($converted)); #/
+
+        # Sort again and implode
+        @array      = str_split($converted);
+        @array      = sort @array;
+        $converted  = implode('', @array);
+
+        if (preg_match(qr/(?:\({2,}\+{2,}:{2,})|(?:\({2,}\+{2,}:+)|(?:\({3,}\++:{2,})/, $converted)) {
+            return $value . "\n" . $converted;
+        }
+    }
+
+    return $value;
 }
 
 #------------------------- PHP functions ---------------------------------------
@@ -1417,15 +1417,15 @@ sub _run_centrifuge {
 #****
 
 sub array_sum {
-	(my @array) = @_;
+    (my @array) = @_;
 
-	my $sum = 0;
-	foreach my $value (@array) {
-		if ($value) {
-			$sum += $value;
-		}
-	}
-	return $sum;
+    my $sum = 0;
+    foreach my $value (@array) {
+        if ($value) {
+            $sum += $value;
+        }
+    }
+    return $sum;
 }
 
 #****if* IDS/preg_match
@@ -1443,8 +1443,8 @@ sub array_sum {
 #****
 
 sub preg_match {
-	(my $pattern, my $string) = @_;
-	return ($string =~ $pattern);
+    (my $pattern, my $string) = @_;
+    return ($string =~ $pattern);
 }
 
 #****if* IDS/preg_match_all
@@ -1469,8 +1469,8 @@ sub preg_match {
 #****
 
 sub preg_match_all {
-	(my $pattern, my $string, my $matches) = @_;
-	return (@$matches = ($string =~ /$pattern/g));
+    (my $pattern, my $string, my $matches) = @_;
+    return (@$matches = ($string =~ /$pattern/g));
 }
 
 #****if* IDS/preg_replace
@@ -1491,58 +1491,58 @@ sub preg_match_all {
 #****
 
 sub preg_replace {
-	(my $patterns, my $replacements, my $strings) = @_;
+    (my $patterns, my $replacements, my $strings) = @_;
 
-	# check input
-	if (!defined($strings) || !$strings || 
-		!defined($patterns) || !$patterns ) {
-		return '';
-	}
+    # check input
+    if (!defined($strings) || !$strings ||
+        !defined($patterns) || !$patterns ) {
+        return '';
+    }
 
-	my $return_string = '';
-	if (ref($strings) ne 'ARRAY') {
-		$return_string = $strings;
-	}
+    my $return_string = '';
+    if (ref($strings) ne 'ARRAY') {
+        $return_string = $strings;
+    }
 
-	if (ref($strings) eq 'ARRAY') {
-		my @replaced_strings = map {
-			preg_replace($patterns, $replacements, $_);
-		} @$strings;
-		return \@replaced_strings;
-	}
-	elsif (ref($patterns) eq 'ARRAY') {
-		my $pattern_no = 0;
-		foreach my $pattern (@$patterns) {
-			if (ref($replacements) eq 'ARRAY') {
-				$return_string = preg_replace($pattern, @$replacements[$pattern_no++], $return_string);
-			}
-			else {
-				$return_string = preg_replace($pattern, $replacements, $return_string);
-			}
-		}
-	}
-	else {
-		my $repl = '';
+    if (ref($strings) eq 'ARRAY') {
+        my @replaced_strings = map {
+            preg_replace($patterns, $replacements, $_);
+        } @$strings;
+        return \@replaced_strings;
+    }
+    elsif (ref($patterns) eq 'ARRAY') {
+        my $pattern_no = 0;
+        foreach my $pattern (@$patterns) {
+            if (ref($replacements) eq 'ARRAY') {
+                $return_string = preg_replace($pattern, @$replacements[$pattern_no++], $return_string);
+            }
+            else {
+                $return_string = preg_replace($pattern, $replacements, $return_string);
+            }
+        }
+    }
+    else {
+        my $repl = '';
 
-		if (ref($replacements) eq 'ARRAY') {
-			$repl = @$replacements[0];
-		}
-		else {
-			if (!defined($replacements)) {
-				$repl = '';
-			}
-			else {
-				$repl = $replacements;
-			}
-		}
-		$repl =~ s/\\/\\\\/g;
-		$repl =~ s/\"/\\"/g;
-		$repl =~ s/\@/\\@/g;
-		$repl =~ s/\$(?!\d)/\\\$/g; # escape $ if not substitution variable like $1
-		$repl = qq{"$repl"};
-		$return_string =~ s/$patterns/defined $repl ? $repl : ''/eeg;
-	}
-	return $return_string;
+        if (ref($replacements) eq 'ARRAY') {
+            $repl = @$replacements[0];
+        }
+        else {
+            if (!defined($replacements)) {
+                $repl = '';
+            }
+            else {
+                $repl = $replacements;
+            }
+        }
+        $repl =~ s/\\/\\\\/g;
+        $repl =~ s/\"/\\"/g;
+        $repl =~ s/\@/\\@/g;
+        $repl =~ s/\$(?!\d)/\\\$/g; # escape $ if not substitution variable like $1
+        $repl = qq{"$repl"};
+        $return_string =~ s/$patterns/defined $repl ? $repl : ''/eeg;
+    }
+    return $return_string;
 }
 
 #****if* IDS/str_replace
@@ -1558,22 +1558,22 @@ sub preg_replace {
 #   string       the string(s) with all replacements done
 # SYNOPSIS
 #   IDS::str_replace(\@patterns, $replacement, $string);
-#   IDS::str_replace('bad\tword', 'censored', $string); # replaces 'bad\tword' but not 'bad	word' or "bad\tword"
+#   IDS::str_replace('bad\tword', 'censored', $string); # replaces 'bad\tword' but not 'bad word' or "bad\tword"
 #   IDS::str_replace(['badword', 'badword2', 'badword3'], ['censored1', 'censored2', 'censored3'], $string);
 #****
 
 sub str_replace {
-	(my $patterns, my $replacements, my $strings) = @_;
+    (my $patterns, my $replacements, my $strings) = @_;
 
-	my @escapedpatterns = ();
+    my @escapedpatterns = ();
 
-	if (ref($patterns) eq 'ARRAY') {
-		@escapedpatterns = map {quotemeta($_)} @$patterns;
-		return preg_replace(\@escapedpatterns, $replacements, $strings);
-	}
-	else {
-		return preg_replace(quotemeta($patterns), $replacements, $strings);
-	}
+    if (ref($patterns) eq 'ARRAY') {
+        @escapedpatterns = map {quotemeta($_)} @$patterns;
+        return preg_replace(\@escapedpatterns, $replacements, $strings);
+    }
+    else {
+        return preg_replace(quotemeta($patterns), $replacements, $strings);
+    }
 }
 
 #****if* IDS/str_split
@@ -1590,13 +1590,13 @@ sub str_replace {
 #****
 
 sub str_split {
-	(my $string, my $limit) = @_;
-	if (defined($limit)) {
-		return ($string =~ /(.{1,$limit})/g);
-	}
-	else { 
-		return split(//, $string);
-	}
+    (my $string, my $limit) = @_;
+    if (defined($limit)) {
+        return ($string =~ /(.{1,$limit})/g);
+    }
+    else {
+        return split(//, $string);
+    }
 }
 
 #****if* IDS/strlen
@@ -1613,8 +1613,8 @@ sub str_split {
 #****
 
 sub strlen {
-	(my $string) = @_;
-	return length($string);
+    (my $string) = @_;
+    return length($string);
 }
 
 #****if* IDS/urldecode
@@ -1631,11 +1631,11 @@ sub strlen {
 #****
 
 sub urldecode {
-	(my $theURL) = @_;
-	$theURL =~ tr/+/ /;
-	$theURL =~ s/%([a-fA-F0-9]{2,2})/chr(hex($1))/eg;
-	$theURL =~ s/<!–(.|\n)*–>//g;
-	return $theURL;
+    (my $theURL) = @_;
+    $theURL =~ tr/+/ /;
+    $theURL =~ s/%([a-fA-F0-9]{2,2})/chr(hex($1))/eg;
+    $theURL =~ s/<!–(.|\n)*–>//g;
+    return $theURL;
 }
 
 #****if* IDS/urlencode
@@ -1652,9 +1652,9 @@ sub urldecode {
 #****
 
 sub urlencode {
-	(my $theURL) = @_;
-	$theURL =~ s/([\W])/sprintf("%%%02X",ord($1))/eg;
-	return $theURL;
+    (my $theURL) = @_;
+    $theURL =~ s/([\W])/sprintf("%%%02X",ord($1))/eg;
+    return $theURL;
 }
 
 #****if* IDS/implode
@@ -1672,8 +1672,8 @@ sub urlencode {
 #****
 
 sub implode {
-	(my $glue, my @pieces) = @_;
-	return join($glue, @pieces);
+    (my $glue, my @pieces) = @_;
+    return join($glue, @pieces);
 }
 
 #****if* IDS/explode
@@ -1691,8 +1691,8 @@ sub implode {
 #****
 
 sub explode {
-	(my $glue, my $string) = @_;
-	return split(quotemeta($glue), $string);
+    (my $glue, my $string) = @_;
+    return split(quotemeta($glue), $string);
 }
 
 #****if* IDS/stripslashes
@@ -1709,10 +1709,10 @@ sub explode {
 #****
 
 sub stripslashes {
-	(my $string) = @_;
-	# $string =~ s/(?:\\(\'|\"|\\|\0|N))/$1/g;
-	$string =~ s/\\([^\\])/$1/g;
-	return $string;
+    (my $string) = @_;
+    # $string =~ s/(?:\\(\'|\"|\\|\0|N))/$1/g;
+    $string =~ s/\\([^\\])/$1/g;
+    return $string;
 }
 
 #****if* IDS/strip_tags
@@ -1729,11 +1729,11 @@ sub stripslashes {
 #****
 
 sub strip_tags {
-	(my $string) = @_;
+    (my $string) = @_;
 
-	while ($string =~ s/<\S[^<>]*(?:>|$)//gs) {};
+    while ($string =~ s/<\S[^<>]*(?:>|$)//gs) {};
 
-	return $string;
+    return $string;
 }
 
 1;
@@ -1900,7 +1900,7 @@ Case-sensitive; mode modifiers I<m> and I<s> in use.
 
 =item * encoding
 
-Use value I<json> if the parameter contains JSON encoded data. IDS will test the decoded data, 
+Use value I<json> if the parameter contains JSON encoded data. IDS will test the decoded data,
 otherwise a false positive would occur due to the 'suspicious' JSON encoding characters.
 
 =item * conditions

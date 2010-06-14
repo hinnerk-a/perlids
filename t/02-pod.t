@@ -40,11 +40,11 @@ my $min_tp = 1.22;
 eval "use Test::Pod $min_tp";
 
 if ($@) {
-	plan skip_all => "Test::Pod $min_tp required for testing POD";
+    plan skip_all => "Test::Pod $min_tp required for testing POD";
 }
 else {
-	plan tests => 3;
-	pod_file_ok( "$Bin/../lib/CGI/IDS.pm", "lib/CGI/IDS.pm is a valid POD file" );
-	pod_file_ok( "$Bin/../lib/CGI/IDS/Whitelist.pm", "lib/CGI/IDS.pm is a valid POD file" );
-	pod_file_ok( "$Bin/../examples/demo.pl", "examples/demo.pl is a valid POD file" );
+    plan tests => 3;
+    pod_file_ok( "$Bin/../lib/CGI/IDS.pm", "lib/CGI/IDS.pm is a valid POD file" );
+    pod_file_ok( "$Bin/../lib/CGI/IDS/Whitelist.pm", "lib/CGI/IDS.pm is a valid POD file" );
+    pod_file_ok( "$Bin/../examples/demo.pl", "examples/demo.pl is a valid POD file" );
 }

@@ -90,8 +90,8 @@ use JSON::XS;
 # DESCRIPTION
 #   Creates a Whitelist object.
 #   The whitelist will stay loaded during the lifetime of the object.
-#   You may call is_suspicious() multiple times, the collecting debug 
-#   arrays suspicious_keys() and non_suspicious_keys() will only be 
+#   You may call is_suspicious() multiple times, the collecting debug
+#   arrays suspicious_keys() and non_suspicious_keys() will only be
 #   emptied by an explizit reset() call.
 # INPUT
 #   HASH
@@ -110,12 +110,12 @@ use JSON::XS;
 
 =head2 new()
 
-Constructor. Can optionally take the path to a whitelist file. 
+Constructor. Can optionally take the path to a whitelist file.
 If I<whitelist_file> is not given, just a basic string check will be performed.
 
 The whitelist will stay loaded during the lifetime of the object.
 You may call C<is_suspicious()> multiple times, the collecting debug
-arrays C<suspicious_keys()> and C<non_suspicious_keys()> will only be 
+arrays C<suspicious_keys()> and C<non_suspicious_keys()> will only be
 emptied by an explizit C<reset()> call.
 
 For example, the following are valid constructors:
@@ -131,22 +131,22 @@ The Constructor dies (croaks) if a whitelist parsing error occurs.
 =cut
 
 sub new {
-	my ($package, %args) = @_;
+    my ($package, %args) = @_;
 
-	# self member variables
-	my $self = {
-		whitelist_file		=> $args{whitelist_file},
-		suspicious_keys		=> [],
-		non_suspicious_keys	=> [],
-	};
+    # self member variables
+    my $self = {
+        whitelist_file      => $args{whitelist_file},
+        suspicious_keys     => [],
+        non_suspicious_keys => [],
+    };
 
-	# create object
-	bless $self, $package;
+    # create object
+    bless $self, $package;
 
-	# read & parse XML
-	$self->_load_whitelist_from_xml($self->{whitelist_file});
+    # read & parse XML
+    $self->_load_whitelist_from_xml($self->{whitelist_file});
 
-	return $self;
+    return $self;
 }
 
 #****m* IDS/Whitelist/is_suspicious
@@ -182,88 +182,88 @@ sub new {
 =cut
 
 sub is_suspicious {
-	my ($self, %args)		= @_;
-	my $key					= $args{key};
-	my $request				= $args{request};
-	my $request_value		= $args{request}->{$key};
-	my $contains_encoding	= 0;
+    my ($self, %args)       = @_;
+    my $key                 = $args{key};
+    my $request             = $args{request};
+    my $request_value       = $args{request}->{$key};
+    my $contains_encoding   = 0;
 
-	# skip if value is empty or generally whitelisted
-	if ( $request_value ne '' &&
-		!(	$self->{whitelist}{$key} && 
-			!defined($self->{whitelist}{$key}->{rule}) && 
-			!defined($self->{whitelist}{$key}->{conditions}) && 
-			!defined($self->{whitelist}{$key}->{encoding}) 
-		)
-	) {
-		my $request_value_orig = $request_value;
-		$request_value = $self->convert_if_marked_encoded(key => $key, value => $request_value);
-		if ($request_value ne $request_value_orig) {
-			$contains_encoding = 1;
-		}
+    # skip if value is empty or generally whitelisted
+    if ( $request_value ne '' &&
+        !(  $self->{whitelist}{$key} &&
+            !defined($self->{whitelist}{$key}->{rule}) &&
+            !defined($self->{whitelist}{$key}->{conditions}) &&
+            !defined($self->{whitelist}{$key}->{encoding})
+        )
+    ) {
+        my $request_value_orig = $request_value;
+        $request_value = $self->convert_if_marked_encoded(key => $key, value => $request_value);
+        if ($request_value ne $request_value_orig) {
+            $contains_encoding = 1;
+        }
 
-		# make string utf8
-		utf8::upgrade($request_value);
-	
-		# scan only if value is not harmless
-		if ( !$self->is_harmless_string($request_value) ) {
-			my $attacks = {};
+        # make string utf8
+        utf8::upgrade($request_value);
 
-			if (!$self->{whitelist}{$key}) {
-				# apply filters to value, not in whitelist
-				push (@{$self->{suspicious_keys}}, {key => $key, value => $request_value, reason => 'key'}); # key not whitelisted
-				return 1;
-			}
-			else {
-				# check if all conditions match
-				my $condition_mismatch = 0;
-				foreach my $condition (@{$self->{whitelist}{$key}->{conditions}}) {
-					if (! defined($request->{$condition->{key}}) ||
-						( defined ($condition->{rule}) && $request->{$condition->{key}} !~ $condition->{rule} )
-					) {
-						$condition_mismatch = 1;
-					}
-				}
-	
-				# Apply filters if key is not in whitelisted environment conditions
-				# or if the value does not match the whitelist rule if one is set.
-				# Filtering is skipped if no rule is set.
-				if ( $condition_mismatch ||
-					(defined($self->{whitelist}{$key}->{rule}) &&
-					$request_value !~ $self->{whitelist}{$key}->{rule}) ||
-					$contains_encoding
-				) {
-					# apply filters to value, whitelist rules mismatched
-					my $reason = '';
-					if ($condition_mismatch) {
-						$reason = 'cond'; # condition mismatch
-					} 
-					elsif (!$contains_encoding) {
-						$reason = 'rule'; # rule mismatch
-					}
-					else {
-						$reason = 'enc'; # contains encoding
-					}
-					push (@{$self->{suspicious_keys}}, {key => $key, value => $request_value, reason => $reason});
-					return 1;
-				}
-				else {
-					# skipped, whitelist rule matched
-					push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => 'r&c'}); # rule & conditions matched
-				}
-			}
-		}
-		else {
-			# skipped, harmless string
-			push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => 'harml'}); # harmless
-		}
-	}
-	else {
-		# skipped, empty value or key generally whitelisted
-		my $reason = $request_value ? 'key' : 'empty';
-		push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => $reason});
-	}
-	return 0;
+        # scan only if value is not harmless
+        if ( !$self->is_harmless_string($request_value) ) {
+            my $attacks = {};
+
+            if (!$self->{whitelist}{$key}) {
+                # apply filters to value, not in whitelist
+                push (@{$self->{suspicious_keys}}, {key => $key, value => $request_value, reason => 'key'}); # key not whitelisted
+                return 1;
+            }
+            else {
+                # check if all conditions match
+                my $condition_mismatch = 0;
+                foreach my $condition (@{$self->{whitelist}{$key}->{conditions}}) {
+                    if (! defined($request->{$condition->{key}}) ||
+                        ( defined ($condition->{rule}) && $request->{$condition->{key}} !~ $condition->{rule} )
+                    ) {
+                        $condition_mismatch = 1;
+                    }
+                }
+
+                # Apply filters if key is not in whitelisted environment conditions
+                # or if the value does not match the whitelist rule if one is set.
+                # Filtering is skipped if no rule is set.
+                if ( $condition_mismatch ||
+                    (defined($self->{whitelist}{$key}->{rule}) &&
+                    $request_value !~ $self->{whitelist}{$key}->{rule}) ||
+                    $contains_encoding
+                ) {
+                    # apply filters to value, whitelist rules mismatched
+                    my $reason = '';
+                    if ($condition_mismatch) {
+                        $reason = 'cond'; # condition mismatch
+                    }
+                    elsif (!$contains_encoding) {
+                        $reason = 'rule'; # rule mismatch
+                    }
+                    else {
+                        $reason = 'enc'; # contains encoding
+                    }
+                    push (@{$self->{suspicious_keys}}, {key => $key, value => $request_value, reason => $reason});
+                    return 1;
+                }
+                else {
+                    # skipped, whitelist rule matched
+                    push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => 'r&c'}); # rule & conditions matched
+                }
+            }
+        }
+        else {
+            # skipped, harmless string
+            push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => 'harml'}); # harmless
+        }
+    }
+    else {
+        # skipped, empty value or key generally whitelisted
+        my $reason = $request_value ? 'key' : 'empty';
+        push (@{$self->{non_suspicious_keys}}, {key => $key, value => $request_value, reason => $reason});
+    }
+    return 0;
 }
 
 #****m* IDS/Whitelist/convert_if_marked_encoded
@@ -301,18 +301,18 @@ sub is_suspicious {
 =cut
 
 sub convert_if_marked_encoded {
-	my ($self, %args)	= @_;
-	my $key				= $args{key};
-	my $request_value	= $args{value};
+    my ($self, %args)   = @_;
+    my $key             = $args{key};
+    my $request_value   = $args{value};
 
-	# If marked as JSON, try to convert from JSON to reduce false positives
-	if (defined($self->{whitelist}{$key}) &&
-		defined($self->{whitelist}{$key}->{encoding}) && 
-		$self->{whitelist}{$key}->{encoding} eq 'json') {
-	
-		$request_value = _json_to_string($request_value);
-	}
-	return $request_value;
+    # If marked as JSON, try to convert from JSON to reduce false positives
+    if (defined($self->{whitelist}{$key}) &&
+        defined($self->{whitelist}{$key}->{encoding}) &&
+        $self->{whitelist}{$key}->{encoding} eq 'json') {
+
+        $request_value = _json_to_string($request_value);
+    }
+    return $request_value;
 }
 
 #****m* IDS/Whitelist/suspicious_keys
@@ -344,8 +344,8 @@ sub convert_if_marked_encoded {
 =cut
 
 sub suspicious_keys {
-	my ($self) = @_;
-	return $self->{suspicious_keys};
+    my ($self) = @_;
+    return $self->{suspicious_keys};
 }
 
 #****m* IDS/Whitelist/non_suspicious_keys
@@ -377,8 +377,8 @@ sub suspicious_keys {
 =cut
 
 sub non_suspicious_keys {
-	my ($self) = @_;
-	return $self->{non_suspicious_keys};
+    my ($self) = @_;
+    return $self->{non_suspicious_keys};
 }
 
 #****m* IDS/Whitelist/reset
@@ -408,9 +408,9 @@ sub non_suspicious_keys {
 =cut
 
 sub reset {
-	my ($self) = @_;
-	$self->{suspicious_keys}     = [];
-	$self->{non_suspicious_keys} = [];
+    my ($self) = @_;
+    $self->{suspicious_keys}     = [];
+    $self->{non_suspicious_keys} = [];
 }
 
 #****f* IDS/Whitelist/is_harmless_string
@@ -440,8 +440,8 @@ sub reset {
 =cut
 
 sub is_harmless_string {
-	my ($self, $string) = @_;
-	return ( $string !~ m/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/ );
+    my ($self, $string) = @_;
+    return ( $string !~ m/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/ );
 }
 
 #****im* IDS/Whitelist/_load_whitelist_from_xml
@@ -459,59 +459,59 @@ sub is_harmless_string {
 #****
 
 sub _load_whitelist_from_xml {
-	my ($self, $whitelistfile) = @_;
-	my $whitelistcnt = 0;
+    my ($self, $whitelistfile) = @_;
+    my $whitelistcnt = 0;
 
-	if ($whitelistfile) {
-		# read & parse whitelist XML
-		my $whitelistxml;
-		eval {
-			$whitelistxml = XMLin($whitelistfile,
-				forcearray	=> [ qw(whitelist param conditions condition)],
-				keyattr		=> [],
-			);
-		};
-		if ($@) {
-			croak "Error in _load_whitelist_from_xml while parsing $whitelistfile: $@";
-		}
+    if ($whitelistfile) {
+        # read & parse whitelist XML
+        my $whitelistxml;
+        eval {
+            $whitelistxml = XMLin($whitelistfile,
+                forcearray  => [ qw(whitelist param conditions condition)],
+                keyattr     => [],
+            );
+        };
+        if ($@) {
+            croak "Error in _load_whitelist_from_xml while parsing $whitelistfile: $@";
+        }
 
-		# convert XML structure into handy data structure
-		foreach my $whitelistobj (@{$whitelistxml->{param}}) {
-			my @conditionslist = ();
-			foreach my $condition (@{$whitelistobj->{conditions}[0]{condition}}) {
-				if (defined($condition->{rule})) {
-					# copy for error message
-					my $rule = $condition->{rule};
+        # convert XML structure into handy data structure
+        foreach my $whitelistobj (@{$whitelistxml->{param}}) {
+            my @conditionslist = ();
+            foreach my $condition (@{$whitelistobj->{conditions}[0]{condition}}) {
+                if (defined($condition->{rule})) {
+                    # copy for error message
+                    my $rule = $condition->{rule};
 
-					eval {
-						$condition->{rule} = qr/$condition->{rule}/ms;
-					};
-					if ($@) {
-						croak 'Error in whitelist rule of condition "' . $condition->{key} . '" for param "' . $whitelistobj->{key} . '": ' . $rule . ' Message: ' . $@;
-					}
-				}
-				push(@conditionslist, $condition);
-			}
-			my %whitelisthash = ();
-			if (defined($whitelistobj->{rule})) {
-				eval {
-					$whitelisthash{rule} = qr/$whitelistobj->{rule}/ms;
-				};
-				if ($@) {
-					croak 'Error in whitelist rule for param "' . $whitelistobj->{key} . '": ' . $whitelistobj->{rule} . ' Message: ' . $@;
-				}
-			}
-			if (@conditionslist) {
-				$whitelisthash{conditions} = \@conditionslist;
-			}
-			if ($whitelistobj->{encoding}) {
-				$whitelisthash{encoding} = $whitelistobj->{encoding};
-			}
-			$self->{whitelist}{$whitelistobj->{key}} = \%whitelisthash;
-			$whitelistcnt++;
-		}
-	}
-	return $whitelistcnt;
+                    eval {
+                        $condition->{rule} = qr/$condition->{rule}/ms;
+                    };
+                    if ($@) {
+                        croak 'Error in whitelist rule of condition "' . $condition->{key} . '" for param "' . $whitelistobj->{key} . '": ' . $rule . ' Message: ' . $@;
+                    }
+                }
+                push(@conditionslist, $condition);
+            }
+            my %whitelisthash = ();
+            if (defined($whitelistobj->{rule})) {
+                eval {
+                    $whitelisthash{rule} = qr/$whitelistobj->{rule}/ms;
+                };
+                if ($@) {
+                    croak 'Error in whitelist rule for param "' . $whitelistobj->{key} . '": ' . $whitelistobj->{rule} . ' Message: ' . $@;
+                }
+            }
+            if (@conditionslist) {
+                $whitelisthash{conditions} = \@conditionslist;
+            }
+            if ($whitelistobj->{encoding}) {
+                $whitelisthash{encoding} = $whitelistobj->{encoding};
+            }
+            $self->{whitelist}{$whitelistobj->{key}} = \%whitelisthash;
+            $whitelistcnt++;
+        }
+    }
+    return $whitelistcnt;
 }
 
 #****if* IDS/Whitelist/_json_to_string
@@ -528,15 +528,15 @@ sub _load_whitelist_from_xml {
 #****
 
 sub _json_to_string {
-	my ($value) = @_;
-	my $json_ds;
-	eval {
-		$json_ds = JSON::XS::decode_json($value);
-	};
-	if (!$@) {
-		$value = _datastructure_to_string($json_ds)."\n";
-	}
-	return $value;
+    my ($value) = @_;
+    my $json_ds;
+    eval {
+        $json_ds = JSON::XS::decode_json($value);
+    };
+    if (!$@) {
+        $value = _datastructure_to_string($json_ds)."\n";
+    }
+    return $value;
 }
 
 #****if* IDS/Whitelist/_datastructure_to_string
@@ -553,23 +553,23 @@ sub _json_to_string {
 #****
 
 sub _datastructure_to_string {
-	my $in = shift;
-	my $out = '';
-	if (ref $in eq 'HASH') {
-		foreach (keys %$in) {
-			$out .= $_."\n";
-			$out .= _datastructure_to_string($in->{$_});
-		}
-	}
-	elsif (ref $in eq 'ARRAY') {
-		foreach (@$in) {
-			$out = _datastructure_to_string($_) . $out;
-		}
-	}
-	else {
-			$out .= $in."\n";
-	}
-	return $out;
+    my $in = shift;
+    my $out = '';
+    if (ref $in eq 'HASH') {
+        foreach (keys %$in) {
+            $out .= $_."\n";
+            $out .= _datastructure_to_string($in->{$_});
+        }
+    }
+    elsif (ref $in eq 'ARRAY') {
+        foreach (@$in) {
+            $out = _datastructure_to_string($_) . $out;
+        }
+    }
+    else {
+            $out .= $in."\n";
+    }
+    return $out;
 }
 
 1;
