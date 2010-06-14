@@ -1,19 +1,19 @@
 #!/usr/bin/perl
 
 # Copyright (C) 2008-2010 Hinnerk Altenburg
-# 
+#
 # This file is part of PerlIDS.
-# 
+#
 # PerlIDS is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # PerlIDS is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with PerlIDS.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,7 +23,7 @@ PerlIDS (CGI::IDS) - example application
 
 =head1 DESCRIPTION
 
-This example application provides a textarea that will be parsed by the IDS and the scan 
+This example application provides a textarea that will be parsed by the IDS and the scan
 result will be shown if any attack has been detected.
 
 Two log files are created by the application:
@@ -100,9 +100,9 @@ print   $query->header,
 
 eval {
     # Check request for possible attacks (for check_request() see sub below)
-    $impact = check_request( 
+    $impact = check_request(
                 request         => scalar $query->Vars,
-                # filter_file       => './ids/default_filter.xml', 
+                # filter_file       => './ids/default_filter.xml',
                 whitelist_file  => './ids/param_whitelist.xml',
                 filter_log      => './ids/filtered_keys.log',
                 attack_log      => './ids/attacks.log'
@@ -127,11 +127,11 @@ eval {
 
         if ($query->param()) {
             my $attacks = $ids->get_attacks();
-            foreach my $attack (@$attacks) {                    
+            foreach my $attack (@$attacks) {
                 print $query->start_table({-class => 'negative'});
                 print '<tr><td class="title">' .
-                    join ( "</td></tr>\n<tr><td class=\"title\">", 
-                    (   
+                    join ( "</td></tr>\n<tr><td class=\"title\">",
+                    (
                         'IMPACT: </td><td>'.            $attack->{impact},
                         'TIME: </td><td>'.              $attack->{time_ms} . 'ms',
                         'FILTERS MATCHED: </td><td>'.   join("<br />", map {"#$_: " . $ids->get_rule_description(rule_id => $_)} @{$attack->{matched_filters}}),
@@ -178,9 +178,9 @@ print $query->end_html;
 # OUTPUT
 #   INT impact or UNDEF if no request or filter_file present
 # EXAMPLE
-#   check_request( 
+#   check_request(
 #     request        => $query->Vars,
-#     filter_file    => '../res/default_filter.xml', 
+#     filter_file    => '../res/default_filter.xml',
 #     whitelist_file => '../res/test_param_whitelist.xml',
 #     attack_log     => '../res/attacks.log',
 #     filter_log     => '../res/filtered_keys.log',
@@ -205,7 +205,7 @@ sub check_request {
     # check request
     my $impact = $ids->detect_attacks( request => $request );
 
-    # log filtered keys for whitelist tuning 
+    # log filtered keys for whitelist tuning
     # (add rules for keys to the whilelist if the filters are applied to the keys' standard values)
     if ($args{filter_log} && @{$ids->{filtered_keys}}) {
 
@@ -250,8 +250,8 @@ sub check_request {
                 print LOG scalar localtime() . "\n";
                 print LOG "Attack details:\n\t";
 
-                foreach my $attack (@$attacks) {                    
-                    print LOG join ( "\n\t", 
+                foreach my $attack (@$attacks) {
+                    print LOG join ( "\n\t",
                         (   'TIME: '.               $attack->{time_ms} . 'ms',
                             'KEY: '.                $attack->{key},
                             'KEY CONV: '.           $attack->{key_converted},
@@ -271,6 +271,6 @@ sub check_request {
             warn "Can't open ".$args{attack_log}.": $!";
         }
     }
-    
+
     return $impact;
 }
