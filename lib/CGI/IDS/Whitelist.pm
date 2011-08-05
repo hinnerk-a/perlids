@@ -225,14 +225,24 @@ sub is_suspicious {
                     }
                 }
 
+                # check if whitelist rule matches if exists
+                my $whitelist_failed = 0;
+                eval {
+                    if ( defined($self->{whitelist}{$key}->{rule}) &&
+                         $request_value !~ $self->{whitelist}{$key}->{rule} ) {
+                            $whitelist_failed = 1;
+                    }
+                };
+                if ($@) {
+                    carp "Error testing request value against whitelist regular expression: $@";
+                    $whitelist_failed = 1;
+                }
+
+
                 # Apply filters if key is not in whitelisted environment conditions
                 # or if the value does not match the whitelist rule if one is set.
                 # Filtering is skipped if no rule is set.
-                if ( $condition_mismatch ||
-                    (defined($self->{whitelist}{$key}->{rule}) &&
-                    $request_value !~ $self->{whitelist}{$key}->{rule}) ||
-                    $contains_encoding
-                ) {
+                if ( $condition_mismatch || $whitelist_failed || $contains_encoding ) {
                     # apply filters to value, whitelist rules mismatched
                     my $reason = '';
                     if ($condition_mismatch) {
