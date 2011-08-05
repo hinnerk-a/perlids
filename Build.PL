@@ -7,6 +7,9 @@ my $builder = Module::Build->new(
     license             => 'lgpl3',
     dist_author         => 'Hinnerk Altenburg <hinnerk@cpan.org>',
     dist_version_from   => 'lib/CGI/IDS.pm',
+    configure_requires => {
+        'Module::Build'   => 0,
+    },
     build_requires => {
         'Test::More'      => 0,
         'JSON::XS'        => 2.2,
@@ -21,7 +24,6 @@ my $builder = Module::Build->new(
     },
     add_to_cleanup      => [ 'CGI-IDS-*' ],
     create_makefile_pl  => 'traditional',
-    sign                => 1,
     create_license      => 1,
 );
 

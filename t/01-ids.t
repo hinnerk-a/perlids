@@ -9,7 +9,7 @@
 # CREATION DATE
 #   2008-07-01
 # COPYRIGHT
-#   Copyright (C) 2008-2010 Hinnerk Altenburg
+#   Copyright (C) 2008-2011 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -1035,7 +1035,7 @@ $ids->set_scan_keys(scan_keys => 1);
 $ids->set_scan_keys();
 is ($ids->detect_attacks(request => \%testScanKeys),                        16,         "testScanKeys set from 1 to default (off)");
 
-# test whitelist
+# test whitelist
 print testmessage("test whitelist");
 is ($ids->detect_attacks(request => \%testWhitelistScan),                   8,          "testWhitelistScan");
 is ($ids->detect_attacks(request => \%testWhitelistScan2),                  8,          "testWhitelistScan2");

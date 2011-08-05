@@ -16,7 +16,7 @@ package CGI::IDS;
 # CREATION DATE
 #   2008-06-03
 # COPYRIGHT
-#   Copyright (C) 2008-2010 Hinnerk Altenburg
+#   Copyright (C) 2008-2011 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0212 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1409
+Version 1.0213 - based on and tested against the filter tests of PHPIDS http://php-ids.org rev. 1409
 
 =cut
 
-our $VERSION = '1.0212';
+our $VERSION = '1.0213';
 
 =head1 DESCRIPTION
 
@@ -2067,7 +2067,7 @@ L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008-2010 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
+Copyright (C) 2008-2011 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
 
 This file is part of PerlIDS.
 

@@ -1,5 +1,9 @@
 Revision history for PerlIDS
 
+1.0213  2011-08-05
+        Catching 'Malformed UTF-8 character (fatal)' error
+        Some code cleanup
+
 1.0212  2010-06-11
         Updated filter set and converters to PHPIDS 0.6.4 (rev. 1409)
 

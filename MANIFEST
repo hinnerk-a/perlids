@@ -10,6 +10,7 @@ LICENSE
 Makefile.PL
 MANIFEST
 META.yml
+META.json
 README
 t/01-ids.t
 t/02-pod.t

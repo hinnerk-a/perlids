@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2008-2010 Hinnerk Altenburg
+# Copyright (C) 2008-2011 Hinnerk Altenburg
 #
 # This file is part of PerlIDS.
 #
@@ -52,7 +52,7 @@ L<http://php-ids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008-2010 Hinnerk Altenburg
+Copyright (C) 2008-2011 Hinnerk Altenburg
 
 This file is part of PerlIDS.
 
@@ -137,7 +137,7 @@ eval {
                         'FILTERS MATCHED: </td><td>'.   join("<br />", map {"#$_: " . $ids->get_rule_description(rule_id => $_)} @{$attack->{matched_filters}}),
                         'TAGS MATCHED: </td><td>'.      join(",", @{$attack->{matched_tags}}),
                         # 'KEY: </td><td>'.             $query->escapeHTML($query->escapeHTML($attack->{key})),
-                        # 'KEY CONV: </td><td>'.            $query->escapeHTML($query->escapeHTML($attack->{key_converted})),
+                        # 'KEY CONV: </td><td>'.        $query->escapeHTML($query->escapeHTML($attack->{key_converted})),
                         'VALUE: </td><td>'.             $query->pre($query->escapeHTML($attack->{value})),
                         'VALUE CONVERTED: </td><td>'.   $query->pre($query->escapeHTML($attack->{value_converted})),
                     ) ) .
@@ -262,7 +262,7 @@ sub check_request {
                             'TAGS MATCHED: '.       join(",", @{$attack->{matched_tags}}),
                             'REQUEST: '.            Dumper({$query->Vars}),
                         )
-                        );
+                    );
                 }
 
             close(LOG);
