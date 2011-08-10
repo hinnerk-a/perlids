@@ -48,7 +48,7 @@ Hinnerk Altenburg, C<< <hinnerk at cpan.org> >>
 
 =head1 SEE ALSO
 
-L<http://php-ids.org/>
+L<https://phpids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
