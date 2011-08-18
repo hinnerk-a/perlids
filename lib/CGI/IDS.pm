@@ -543,6 +543,9 @@ sub _apply_filters {
     # benchmark
     my $start_time = Time::HiRes::time();
 
+    # make UTF-8 and sanitize from malformated UTF-8, if necessary
+    $string = $self->{whitelist}->make_utf_8($string);
+
     # run all string converters
     $attack{string_converted} = _run_all_converters($string);
 
@@ -1635,6 +1638,7 @@ sub urldecode {
     $theURL =~ tr/+/ /;
     $theURL =~ s/%([a-fA-F0-9]{2,2})/chr(hex($1))/eg;
     $theURL =~ s/<!–(.|\n)*–>//g;
+    utf8::decode($theURL);
     return $theURL;
 }
 
@@ -1654,6 +1658,7 @@ sub urldecode {
 sub urlencode {
     (my $theURL) = @_;
     $theURL =~ s/([\W])/sprintf("%%%02X",ord($1))/eg;
+    utf8::encode($theURL);
     return $theURL;
 }
 

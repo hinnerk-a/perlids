@@ -81,6 +81,7 @@ use warnings;
 use XML::Simple qw(:strict);
 use Carp;
 use JSON::XS;
+use Encode;
 
 #------------------------- Subs ------------------------------------------------
 
@@ -202,8 +203,7 @@ sub is_suspicious {
             $contains_encoding = 1;
         }
 
-        # make string utf8
-        utf8::upgrade($request_value);
+        $request_value = $self->make_utf_8($request_value);
 
         # scan only if value is not harmless
         if ( !$self->is_harmless_string($request_value) ) {
@@ -225,24 +225,14 @@ sub is_suspicious {
                     }
                 }
 
-                # check if whitelist rule matches if exists
-                my $whitelist_failed = 0;
-                eval {
-                    if ( defined($self->{whitelist}{$key}->{rule}) &&
-                         $request_value !~ $self->{whitelist}{$key}->{rule} ) {
-                            $whitelist_failed = 1;
-                    }
-                };
-                if ($@) {
-                    carp "Error testing request value against whitelist regular expression: $@";
-                    $whitelist_failed = 1;
-                }
-
-
                 # Apply filters if key is not in whitelisted environment conditions
                 # or if the value does not match the whitelist rule if one is set.
                 # Filtering is skipped if no rule is set.
-                if ( $condition_mismatch || $whitelist_failed || $contains_encoding ) {
+                if ( $condition_mismatch ||
+                    (defined($self->{whitelist}{$key}->{rule}) &&
+                    $request_value !~ $self->{whitelist}{$key}->{rule}) ||
+                    $contains_encoding
+                ) {
                     # apply filters to value, whitelist rules mismatched
                     my $reason = '';
                     if ($condition_mismatch) {
@@ -451,7 +441,57 @@ sub reset {
 
 sub is_harmless_string {
     my ($self, $string) = @_;
+
+    $string = $self->make_utf_8($string);
+
     return ( $string !~ m/[^\w\s\/@!?\.]+|(?:\.\/)|(?:@@\w+)/ );
+}
+
+#****f* IDS/Whitelist/make_utf_8
+# NAME
+#   make_utf_8
+# DESCRIPTION
+#   Encodes string to UTF-8 and strips malformed UTF-8 characters
+# INPUT
+#   + string
+# OUTPUT
+#   UTF-8 string
+# SYNOPSIS
+#   $whitelist->make_utf_8( $string );
+#****
+
+=head2 make_utf_8()
+
+ DESCRIPTION
+   Encodes string to UTF-8 and strips malformed UTF-8 characters
+ INPUT
+   + string
+ OUTPUT
+   UTF-8 string
+ SYNOPSIS
+   $whitelist->make_utf_8( $string );
+
+=cut
+
+sub make_utf_8 {
+    my ($self, $string) = @_;
+
+    # make string UTF-8
+    my $utf8_encoded = '';
+    eval {
+        $utf8_encoded = Encode::encode('UTF-8', $string, Encode::FB_CROAK);
+    };
+    if ($@) {
+        # sanitize malformed UTF-8
+        $utf8_encoded = '';
+        my @chars = split(//, $string);
+        foreach my $char (@chars) {
+            my $utf_8_char = eval { Encode::encode('UTF-8', $char, Encode::FB_CROAK) }
+                or next;
+            $utf8_encoded .= $utf_8_char;
+        }
+    }
+    return $utf8_encoded;
 }
 
 #****im* IDS/Whitelist/_load_whitelist_from_xml

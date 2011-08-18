@@ -30,9 +30,10 @@
 #------------------------- Pragmas ---------------------------------------------
 use strict;
 use warnings;
+use utf8;
 
 #------------------------- Libs ------------------------------------------------
-use Test::More tests => 78;
+use Test::More tests => 79;
 
 # test module loading
 BEGIN { use_ok('CGI::IDS') } # diag( "Testing CGI::IDS $CGI::IDS::VERSION, Perl $], $^X" );
@@ -120,6 +121,24 @@ my %testWhitelistSkip3 = (
     send            =>  'hjjkh98798',
     uid             =>  'alert(2)', # skip uid everytime
 );
+
+my %testMalformedUTF8 = ();
+{
+    my $utf8 = ''; $utf8 .= chr 1<<$_ for 0..63;
+    my $malformed_utf8 = '';
+    {
+        no warnings "utf8";
+        $malformed_utf8 = reverse $utf8;
+        %testMalformedUTF8 = (
+            0 => " DROP TABLE; \x{7FFFFFFF} alert(0); DROP TABLE;",
+            1 => "\x{80} alert(1);",
+            2 => "\x{bf} alert(2);",
+            3 => "\x{ff} alert(3);",
+            4 => "\x{002F} alert(4);",
+            5 => " DROP TABLE; " . $malformed_utf8 . "alert(5); OR 1=1;",
+        );
+    }
+}
 
 #------------------------- PHPIDS test data ------------------------------------
 my %testAttributeBreakerList = (
@@ -369,7 +388,7 @@ my %testXMLPredicateXSSList = (
         1 => 'y=<a>alert</a>;content[y](123)',
         2 => "s1=<s>evalalerta(1)a</s>; s2=<s></s>+''; s3=s1+s2; e1=/s1/?s3[0]:s1; e2=/s1/?s3[1]:s1; e3=/s1/?s3[2]:s1; e4=/s1/?s3[3]:s1; e=/s1/?.0[e1+e2+e3+e4]:s1; a1=/s1/?s3[4]:s1; a2=/s1/?s3[5]:s1; a3=/s1/?s3[6]:s1; a4=/s1/?s3[7]:s1; a5=/s1/?s3[8]:s1; a6=/s1/?s3[10]:s1; a7=/s1/?s3[11]:s1; a8=/s1/?s3[12]:s1; a=a1+a2+a3+a4+a5+a6+a7+a8;e(a)",
         3 => "location=<text>javascr{new Array}ipt:aler{new Array}t(1)</text>",
-        4 => "µ=<µ ł='le' µ='a' ø='rt'></µ>,top[µ.@µ+µ.@ł+µ.@ø](1)",
+        4 => "µ=<µ ł='le' µ='a' ø='rt'></µ>,top[µ.\@µ+µ.\@ł+µ.\@ø](1)",
 );
 
 my %testConditionalCompilationXSSList = (
@@ -1046,6 +1065,9 @@ is ($ids->detect_attacks(request => \%testWhitelistSkip),                   0,  
 is ($ids->detect_attacks(request => \%testWhitelistSkip2),                  8,          "testWhitelistSkip2");
 is ($ids->detect_attacks(request => \%testWhitelistSkip3),                  8,          "testWhitelistSkip3");
 
+# test UTF-8 handling
+is ($ids->detect_attacks(request => \%testMalformedUTF8),                   70,          "testMalformedUTF8");
+
 # test converters and filters
 print testmessage("test converters and filters");
 is ($ids->detect_attacks(request => \%testAttributeBreakerList),            29,         "testAttributeBreakerList");
@@ -1054,7 +1076,7 @@ is ($ids->detect_attacks(request => \%testConcatenatedXSSList),             1126
 is ($ids->detect_attacks(request => \%testConcatenatedXSSList2),            1047,       "testConcatenatedXSSList2");
 is ($ids->detect_attacks(request => \%testXMLPredicateXSSList),             148,        "testXMLPredicateXSSList");
 is ($ids->detect_attacks(request => \%testConditionalCompilationXSSList),   87,         "testXMLPredicateXSSList");
-is ($ids->detect_attacks(request => \%testXSSList),                         784,        "testXSSList");
+is ($ids->detect_attacks(request => \%testXSSList),                         779,        "testXSSList");
 is ($ids->detect_attacks(request => \%testSelfContainedXSSList),            530,        "testSelfContainedXSSList");
 is ($ids->detect_attacks(request => \%testSQLIList),                        464,        "testSQLIList");
 is ($ids->detect_attacks(request => \%testSQLIList2),                       634,        "testSQLIList2");
