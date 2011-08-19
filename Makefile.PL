@@ -12,11 +12,11 @@ WriteMakefile
                            'XML::Simple' => 0,
                            'Time::HiRes' => 0,
                            'JSON::XS' => '2.2',
+                           'Encode' => '2.05',
                            'Carp' => 0,
                            'Test::More' => 0,
                            'MIME::Base64' => 0,
                            'HTML::Entities' => 0,
-                           'Encode::Unicode' => '2.05',
                            'XML::Parser' => 0
                          }
         )

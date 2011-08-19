@@ -3,6 +3,7 @@ Changes
 examples/demo.pl
 examples/ids/param_whitelist.xml
 examples/style.css
+INSTALL
 lib/CGI/IDS.pm
 lib/CGI/IDS.xml
 lib/CGI/IDS/Whitelist.pm

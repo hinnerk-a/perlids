@@ -4,7 +4,7 @@ author:
   - 'Hinnerk Altenburg <hinnerk@cpan.org>'
 build_requires:
   Carp: 0
-  Encode::Unicode: 2.05
+  Encode: 2.05
   FindBin: 0
   HTML::Entities: 0
   JSON::XS: 2.2
@@ -14,7 +14,7 @@ build_requires:
   XML::Parser: 0
   XML::Simple: 0
 configure_requires:
-  Module::Build: 0
+  Module::Build: 0.36
 dynamic_config: 1
 generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110930'
 license: open_source
@@ -25,10 +25,10 @@ name: CGI-IDS
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0213
+    version: 1.0214
   CGI::IDS::Whitelist:
     file: lib/CGI/IDS/Whitelist.pm
-    version: 1.0213
+    version: 1.0214
 resources:
   license: http://www.gnu.org/licenses/lgpl-3.0.txt
-version: 1.0213
+version: 1.0214

@@ -17,7 +17,7 @@
       "build" : {
          "requires" : {
             "Carp" : 0,
-            "Encode::Unicode" : "2.05",
+            "Encode" : "2.05",
             "FindBin" : 0,
             "HTML::Entities" : 0,
             "JSON::XS" : "2.2",
@@ -30,18 +30,18 @@
       },
       "configure" : {
          "requires" : {
-            "Module::Build" : 0
+            "Module::Build" : "0.36"
          }
       }
    },
    "provides" : {
       "CGI::IDS" : {
          "file" : "lib/CGI/IDS.pm",
-         "version" : "1.0213"
+         "version" : "1.0214"
       },
       "CGI::IDS::Whitelist" : {
          "file" : "lib/CGI/IDS/Whitelist.pm",
-         "version" : "1.0213"
+         "version" : "1.0214"
       }
    },
    "release_status" : "stable",
@@ -50,5 +50,5 @@
          "http://www.gnu.org/licenses/lgpl-3.0.txt"
       ]
    },
-   "version" : "1.0213"
+   "version" : "1.0214"
 }

@@ -7,8 +7,9 @@ my $builder = Module::Build->new(
     license             => 'lgpl3',
     dist_author         => 'Hinnerk Altenburg <hinnerk@cpan.org>',
     dist_version_from   => 'lib/CGI/IDS.pm',
+    dist_abstract       => 'PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)',
     configure_requires => {
-        'Module::Build'   => 0,
+        'Module::Build'   => 0.36,
     },
     build_requires => {
         'Test::More'      => 0,
@@ -17,7 +18,7 @@ my $builder = Module::Build->new(
         'XML::Simple'     => 0,
         'HTML::Entities'  => 0,
         'MIME::Base64'    => 0,
-        'Encode::Unicode' => 2.05,
+        'Encode'          => 2.05,
         'Carp'            => 0,
         'Time::HiRes'     => 0,
         'FindBin'         => 0,
@@ -25,6 +26,7 @@ my $builder = Module::Build->new(
     add_to_cleanup      => [ 'CGI-IDS-*' ],
     create_makefile_pl  => 'traditional',
     create_license      => 1,
+    create_readme       => 1,
 );
 
 $builder->add_build_element('xml');
