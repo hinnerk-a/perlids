@@ -4,7 +4,7 @@
       "Hinnerk Altenburg <hinnerk@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110930",
+   "generated_by" : "Module::Build version 0.3901, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "open_source"
    ],
@@ -16,16 +16,16 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Carp" : 0,
+            "Carp" : "0",
             "Encode" : "2.05",
-            "FindBin" : 0,
-            "HTML::Entities" : 0,
+            "FindBin" : "0",
+            "HTML::Entities" : "0",
             "JSON::XS" : "2.2",
-            "MIME::Base64" : 0,
-            "Test::More" : 0,
-            "Time::HiRes" : 0,
-            "XML::Parser" : 0,
-            "XML::Simple" : 0
+            "MIME::Base64" : "0",
+            "Test::More" : "0",
+            "Time::HiRes" : "0",
+            "XML::Parser" : "0",
+            "XML::Simple" : "0"
          }
       },
       "configure" : {
@@ -37,11 +37,11 @@
    "provides" : {
       "CGI::IDS" : {
          "file" : "lib/CGI/IDS.pm",
-         "version" : "1.0214"
+         "version" : "1.0215"
       },
       "CGI::IDS::Whitelist" : {
          "file" : "lib/CGI/IDS/Whitelist.pm",
-         "version" : "1.0214"
+         "version" : "1.0215"
       }
    },
    "release_status" : "stable",
@@ -50,5 +50,5 @@
          "http://www.gnu.org/licenses/lgpl-3.0.txt"
       ]
    },
-   "version" : "1.0214"
+   "version" : "1.0215"
 }

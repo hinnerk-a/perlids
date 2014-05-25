@@ -16,7 +16,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.36
 dynamic_config: 1
-generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110930'
+generated_by: 'Module::Build version 0.3901, CPAN::Meta::Converter version 2.120921'
 license: open_source
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,10 +25,10 @@ name: CGI-IDS
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0214
+    version: 1.0215
   CGI::IDS::Whitelist:
     file: lib/CGI/IDS/Whitelist.pm
-    version: 1.0214
+    version: 1.0215
 resources:
   license: http://www.gnu.org/licenses/lgpl-3.0.txt
-version: 1.0214
+version: 1.0215

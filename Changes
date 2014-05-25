@@ -1,5 +1,8 @@
 Revision history for PerlIDS
 
+1.0215  2014-05-25
+        Publishing repository on GitHub
+
 1.0214  2011-08-19
         Sanitizing 'Malformed UTF-8 character (fatal)' with the new CGI::IDS::Whitelist::make_utf_8()
         Updated new URL to PHPIDS

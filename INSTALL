@@ -2,7 +2,7 @@ PerlIDS (CGI::IDS)
 
 Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
-Version 1.0214 - based on and tested against the filter tests of
+Version 1.0215 - based on and tested against the filter tests of
 PHPIDS https://phpids.org rev. 1409
 
 INSTALLATION
@@ -22,6 +22,9 @@ perldoc command.
     perldoc CGI::IDS
 
 You can also look for information at:
+
+    GitHub
+        https://github.com/hinnerk-a/perlids
 
     RT, CPAN's request tracker
         http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-IDS

@@ -3,12 +3,12 @@ NAME
     SQLI, LFI etc.)
 
 VERSION
-    Version 1.0214 - based on and tested against the filter tests of PHPIDS
+    Version 1.0215 - based on and tested against the filter tests of PHPIDS
     https://phpids.org rev. 1409
 
 DESCRIPTION
     PerlIDS (CGI::IDS) is a website intrusion detection system based on
-    PHPIDS <https://phpids.org/> to detect possible attacks in website
+    PHPIDS https://phpids.org/ to detect possible attacks in website
     requests, e.g. Cross-Site Scripting (XSS), Cross-Site Request Forgery
     (CSRF), SQL Injections (SQLI) etc.
 
@@ -39,7 +39,7 @@ DESCRIPTION
     only the suspicious requests over to worker servers that do the complete
     CGI::IDS check.
 
-    Follow PerlIDS on twitter: <https://twitter.com/perlids>
+    Follow PerlIDS on twitter: https://twitter.com/perlids
 
 SYNOPSIS
      use CGI;
@@ -91,9 +91,9 @@ METHODS
     defaults to 0.
 
     The filter set and whitelist will stay loaded during the lifetime of the
-    object. You may call "detect_attacks()" multiple times, the attack array
-    ("get_attacks()") will be emptied at the start of each run of
-    "detect_attacks()".
+    object. You may call `detect_attacks()' multiple times, the attack array
+    (`get_attacks()') will be emptied at the start of each run of
+    `detect_attacks()'.
 
     For example, the following is a valid constructor:
 
@@ -160,10 +160,10 @@ XML INPUT FILES
     This module is compatible with the PHPIDS filter set. Please find the
     latest (frequently updated) filter file from the PHPIDS Subversion
     repository at
-    <https://dev.itratos.de/projects/php-ids/repository/raw/trunk/lib/IDS/de
-    fault_filter.xml>.
+    https://dev.itratos.de/projects/php-ids/repository/raw/trunk/lib/IDS/def
+    ault_filter.xml.
 
-   Example XML Code
+    Example XML Code
      <filters>
          <filter>
              <id>1</id>
@@ -187,39 +187,31 @@ XML INPUT FILES
          </filter>
      </filters>
 
-   Used XML Tags
-    *   filters
-
+    Used XML Tags
+    * filters
         The root tag.
 
-        *   filter
-
+        * filter
             Filter item.
 
-            *   id
-
+            * id
                 Filter ID for referring in log files etc.
 
-            *   rule
-
+            * rule
                 The regular expression for detection of malicious code.
                 Case-insensitive; mode modifiers *i*, *m* and *s* in use.
 
-            *   description
-
+            * description
                 Description of what the filter finds.
 
-            *   tags
-
+            * tags
                 Set of tags that describe the kind of attack.
 
-                *   tag
-
+                * tag
                     Currently used values are *xss*, *csrf*, *sqli*, *dt*,
                     *id*, *lfi*, *rfe*, *spam*, *dos*.
 
-            *   impact
-
+            * impact
                 Value of impact, defines the weight of the attack. Each
                 detection run adds the particular filter impacts to one
                 total impact sum.
@@ -230,7 +222,7 @@ XML INPUT FILES
     need to undergo the expensive scanning (if their values match given
     rules and given conditions).
 
-   Example XML Code
+    Example XML Code
      <whitelist>
          <param>
              <key>scr_id</key>
@@ -271,35 +263,29 @@ XML INPUT FILES
          </param>
      </whitelist>
 
-   Used XML Tags
-    *   whitelist
-
+    Used XML Tags
+    * whitelist
         The root tag.
 
-        *   param
-
+        * param
             Parameter item. Defines the query parameter to be whitelisted.
 
-            *   key
-
+            * key
                 Parameter key.
 
-            *   rule
-
+            * rule
                 Regular expression to match. If the parameter value matches
                 this rule or the rule tag is not present, the IDS will not
                 run its filters on it. Case-sensitive; mode modifiers *m*
                 and *s* in use.
 
-            *   encoding
-
+            * encoding
                 Use value *json* if the parameter contains JSON encoded
                 data. IDS will test the decoded data, otherwise a false
                 positive would occur due to the 'suspicious' JSON encoding
                 characters.
 
-            *   conditions
-
+            * conditions
                 Set of conditions to be fulfilled. This is the parameter
                 environment in which the whitelisted parameter has to live
                 in. The parameter will only be skipped if all conditions
@@ -310,21 +296,18 @@ XML INPUT FILES
                 parameter *send* is present and parameter *username*
                 contains only small letters.
 
-                *   condition
-
+                * condition
                     A condition to be fulfilled.
 
-                    *   key
-
+                    * key
                         Parameter key.
 
-                    *   rule
-
-                        Regular expression to match. Missing "<rule>" means
+                    * rule
+                        Regular expression to match. Missing `<rule>' means
                         *key has to be present no matter what content (can
                         even be empty)*.
 
-   Helper methods for building and improving whitelists
+    Helper methods for building and improving whitelists
      # check request
      my $impact = $ids->detect_attacks( request => $request);
 
@@ -338,49 +321,39 @@ XML INPUT FILES
          print LOG "\t".$entry->{reason}."\t".$entry->{key}.' => '.$entry->{value}."\n";
      }
 
-    "$entry->{reason}" returns following reasons for skipping and
+    `$entry->{reason}' returns following reasons for skipping and
     non-skipping a value:
 
-    "$ids->{filtered_keys}"
-
-        *   *key*: key not whitelisted
-
+    `$ids->{filtered_keys}'
+        * *key*: key not whitelisted
             Filtered due to missing rule set for this key.
 
-        *   *cond*: condition mismatch
-
+        * *cond*: condition mismatch
             Filtered due to mismatching conditions for this key.
 
-        *   *rule*: rule mismatch
-
+        * *rule*: rule mismatch
             Filtered due to mismatching rule for this key.
 
-        *   *enc*: value contains encoding
-
+        * *enc*: value contains encoding
             Filtered due to containing (JSON) encoding for this key.
 
-    "$ids->{non_filtered_keys}"
-
-        *   *empty*: empty value
-
+    `$ids->{non_filtered_keys}'
+        * *empty*: empty value
             Not filtered due to empty value for this key.
 
-        *   *harml*: harmless value
-
+        * *harml*: harmless value
             Not filtered due to harmless value string for this key.
 
-        *   *key*: key generally whitelisted
-
+        * *key*: key generally whitelisted
             Not filtered because the key has been generally whitelisted.
 
-        *   *r&c*: rule & conditions matched
-
+        * *r&c*: rule & conditions matched
             Not filtered due to matching rules and conditions for this key.
 
 BUGS
-    Please report any bugs or feature requests to "bug-cgi-ids at
-    rt.cpan.org", or through the web interface at
-    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CGI-IDS>. I will be
+    Please report any bugs or feature requests to `bug-cgi-ids at
+    rt.cpan.org', or through the web interface at
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CGI-IDS. I will be
     notified, and then you'll automatically be notified of progress on your
     bug as I make changes.
 
@@ -391,40 +364,34 @@ SUPPORT
 
     You can also look for information at:
 
-    *   RT: CPAN's request tracker
+    * RT: CPAN's request tracker
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-IDS
 
-        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-IDS>
+    * AnnoCPAN: Annotated CPAN documentation
+        http://annocpan.org/dist/CGI-IDS
 
-    *   AnnoCPAN: Annotated CPAN documentation
+    * CPAN Ratings
+        http://cpanratings.perl.org/d/CGI-IDS
 
-        <http://annocpan.org/dist/CGI-IDS>
-
-    *   CPAN Ratings
-
-        <http://cpanratings.perl.org/d/CGI-IDS>
-
-    *   Search CPAN
-
-        <http://search.cpan.org/dist/CGI-IDS>
+    * Search CPAN
+        http://search.cpan.org/dist/CGI-IDS
 
 CREDITS
     Thanks to:
 
-    *   Mario Heiderich (<https://phpids.org/>)
-
-    *   Christian Matthies (<https://phpids.org/>)
-
-    *   Ingo Bax (<http://www.epublica.de/>)
+    * Mario Heiderich (https://phpids.org/)
+    * Christian Matthies (https://phpids.org/)
+    * Ingo Bax (http://www.epublica.de/)
 
 AUTHOR
-    Hinnerk Altenburg, "<hinnerk at cpan.org>"
+    Hinnerk Altenburg, `<hinnerk at cpan.org>'
 
 SEE ALSO
-    <https://phpids.org/>
+    https://phpids.org/
 
 COPYRIGHT & LICENSE
     Copyright (C) 2008-2011 Hinnerk Altenburg
-    (<http://www.hinnerk-altenburg.de/>)
+    (http://www.hinnerk-altenburg.de/)
 
     This file is part of PerlIDS.
 
