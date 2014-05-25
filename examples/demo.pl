@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Copyright (C) 2008-2011 Hinnerk Altenburg
+# Copyright (C) 2008-2014 Hinnerk Altenburg
 #
 # This file is part of PerlIDS.
 #

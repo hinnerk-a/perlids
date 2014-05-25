@@ -5,4 +5,5 @@
 ^CGI-IDS
 ^MANIFEST\.SKIP$
 ^MANIFEST\.bak$
-^MYMETA.yml$
+^MYMETA\.yml$
+^MYMETA\.json$

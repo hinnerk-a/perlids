@@ -3,7 +3,7 @@ NAME
     SQLI, LFI etc.)
 
 VERSION
-    Version 1.0215 - based on and tested against the filter tests of PHPIDS
+    Version 1.0216 - based on and tested against the filter tests of PHPIDS
     https://phpids.org rev. 1409
 
 DESCRIPTION
@@ -39,7 +39,11 @@ DESCRIPTION
     only the suspicious requests over to worker servers that do the complete
     CGI::IDS check.
 
-    Follow PerlIDS on twitter: https://twitter.com/perlids
+    Download and install via CPAN:
+    http://search.cpan.org/dist/CGI-IDS/lib/CGI/IDS.pm
+
+    Report issues and contribute to PerlIDS on GitHub:
+    https://github.com/hinnerk-a/perlids
 
 SYNOPSIS
      use CGI;
@@ -382,7 +386,9 @@ CREDITS
     * Mario Heiderich (https://phpids.org/)
     * Christian Matthies (https://phpids.org/)
     * Ingo Bax (http://www.epublica.de/)
-
+    * epublica GmbH (http://www.epublica.de/)
+    * XING AG (https://www.xing.com/) for making this work possible and
+    running PerlIDS under heavy load for a long time.
 AUTHOR
     Hinnerk Altenburg, `<hinnerk at cpan.org>'
 
@@ -390,7 +396,7 @@ SEE ALSO
     https://phpids.org/
 
 COPYRIGHT & LICENSE
-    Copyright (C) 2008-2011 Hinnerk Altenburg
+    Copyright (C) 2008-2014 Hinnerk Altenburg
     (http://www.hinnerk-altenburg.de/)
 
     This file is part of PerlIDS.

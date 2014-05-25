@@ -16,7 +16,7 @@ package CGI::IDS;
 # CREATION DATE
 #   2008-06-03
 # COPYRIGHT
-#   Copyright (C) 2008-2011 Hinnerk Altenburg
+#   Copyright (C) 2008-2014 Hinnerk Altenburg
 #
 #   This file is part of PerlIDS.
 #
@@ -41,11 +41,11 @@ CGI::IDS - PerlIDS - Perl Website Intrusion Detection System (XSS, CSRF, SQLI, L
 
 =head1 VERSION
 
-Version 1.0215 - based on and tested against the filter tests of PHPIDS https://phpids.org rev. 1409
+Version 1.0216 - based on and tested against the filter tests of PHPIDS https://phpids.org rev. 1409
 
 =cut
 
-our $VERSION = '1.0215';
+our $VERSION = '1.0216';
 
 =head1 DESCRIPTION
 
@@ -59,7 +59,9 @@ Each matching regular expression has it's own impact value that increases the te
 
 You can improve the speed and the accurancy (reduce false positives) of the IDS by specifying an L<XML whitelist file|CGI::IDS/Whitelist>. This whitelist check can also be processed separately by using L<CGI::IDS::Whitelist|CGI::IDS::Whitelist> if you want to pre-check the parameters on your application servers before you send only the suspicious requests over to worker servers that do the complete CGI::IDS check.
 
-Follow PerlIDS on twitter: L<https://twitter.com/perlids>
+Download and install via CPAN: L<http://search.cpan.org/dist/CGI-IDS/lib/CGI/IDS.pm>
+
+Report issues and contribute to PerlIDS on GitHub: L<https://github.com/hinnerk-a/perlids>
 
 =head1 SYNOPSIS
 
@@ -2060,6 +2062,11 @@ Thanks to:
 
 =item * Ingo Bax (L<http://www.epublica.de/>)
 
+=item * epublica GmbH (L<http://www.epublica.de/>)
+
+=item * XING AG (L<https://www.xing.com/>) for making this work possible and running PerlIDS under heavy load for a long time.
+
+
 =back
 
 =head1 AUTHOR
@@ -2072,7 +2079,7 @@ L<https://phpids.org/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (C) 2008-2011 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
+Copyright (C) 2008-2014 Hinnerk Altenburg (L<http://www.hinnerk-altenburg.de/>)
 
 This file is part of PerlIDS.
 
