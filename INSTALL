@@ -2,7 +2,7 @@ PerlIDS (CGI::IDS)
 
 Perl Website Intrusion Detection System (XSS, CSRF, SQLI, LFI etc.)
 
-Version 1.0215 - based on and tested against the filter tests of
+Version 1.0216 - based on and tested against the filter tests of
 PHPIDS https://phpids.org rev. 1409
 
 INSTALLATION
@@ -41,7 +41,7 @@ You can also look for information at:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2008-2011 Hinnerk Altenburg
+Copyright (C) 2008-2014 Hinnerk Altenburg
 
 PerlIDS is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by

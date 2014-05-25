@@ -37,11 +37,11 @@
    "provides" : {
       "CGI::IDS" : {
          "file" : "lib/CGI/IDS.pm",
-         "version" : "1.0215"
+         "version" : "1.0216"
       },
       "CGI::IDS::Whitelist" : {
          "file" : "lib/CGI/IDS/Whitelist.pm",
-         "version" : "1.0215"
+         "version" : "1.0216"
       }
    },
    "release_status" : "stable",
@@ -50,5 +50,5 @@
          "http://www.gnu.org/licenses/lgpl-3.0.txt"
       ]
    },
-   "version" : "1.0215"
+   "version" : "1.0216"
 }
