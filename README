@@ -3,7 +3,7 @@ NAME
     SQLI, LFI etc.)
 
 VERSION
-    Version 1.0216 - based on and tested against the filter tests of PHPIDS
+    Version 1.0217 - based on and tested against the filter tests of PHPIDS
     https://phpids.org rev. 1409
 
 DESCRIPTION
@@ -367,6 +367,9 @@ SUPPORT
         perldoc CGI::IDS
 
     You can also look for information at:
+
+    * GitHub
+        https://github.com/hinnerk-a/perlids
 
     * RT: CPAN's request tracker
         http://rt.cpan.org/NoAuth/Bugs.html?Dist=CGI-IDS

@@ -25,10 +25,10 @@ name: CGI-IDS
 provides:
   CGI::IDS:
     file: lib/CGI/IDS.pm
-    version: 1.0216
+    version: 1.0217
   CGI::IDS::Whitelist:
     file: lib/CGI/IDS/Whitelist.pm
-    version: 1.0216
+    version: 1.0217
 resources:
   license: http://www.gnu.org/licenses/lgpl-3.0.txt
-version: 1.0216
+version: 1.0217

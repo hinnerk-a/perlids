@@ -1,5 +1,8 @@
 Revision history for PerlIDS
 
+1.0217  2014-05-27
+        Fix failing test
+
 1.0216  2014-05-25
         Update docs
 
